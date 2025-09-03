@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package hello;
+
+// Definimos un servicio con una sola función
+service HelloService {
+  rpc SayHello (HelloRequest) returns (HelloResponse);
+}
+
+// Mensajes que viajan
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string message = 1;
+}
