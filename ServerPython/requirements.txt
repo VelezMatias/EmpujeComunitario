@@ -3,4 +3,3 @@ grpcio-tools
 SQLAlchemy
 bcrypt
 python-dotenv
-

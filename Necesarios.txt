@@ -1,0 +1,16 @@
+Server Python
+
+grpcio
+grpcio-tools
+SQLAlchemy
+bcrypt
+python-dotenv
+
+
+
+Cliente Spring
+
+1. instalar maven y agregarlo al path de variables de entorno
+https://maven.apache.org/download.cgi
+2. descargar protobuf protoc-32.0-win64.zip  y agregarlo a variables de entorno
+https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-win64.zip

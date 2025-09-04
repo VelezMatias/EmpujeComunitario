@@ -2,12 +2,14 @@ syntax = "proto3";
 
 package hello;
 
-// Definimos un servicio con una sola función
+
+option java_package = "com.empuje.grpc.hello";
+option java_multiple_files = true;
+
 service HelloService {
   rpc SayHello (HelloRequest) returns (HelloResponse);
 }
 
-// Mensajes que viajan
 message HelloRequest {
   string name = 1;
 }
