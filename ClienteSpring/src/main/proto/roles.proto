@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package roles;
+
+option java_package = "com.empuje.grpc.roles";
+option java_multiple_files = true;
+
+message Role {
+  int64 id = 1;
+  string nombre = 2; // PRESIDENTE / VOCAL / COORDINADOR / VOLUNTARIO
+}
+
+message ListRolesRequest {}
+message ListRolesResponse {
+  repeated Role roles = 1;
+}
+
+service RolesService {
+  rpc ListRoles (ListRolesRequest) returns (ListRolesResponse);
+}

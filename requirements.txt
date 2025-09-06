@@ -4,3 +4,7 @@ SQLAlchemy
 bcrypt
 python-dotenv
 
+grpcio==1.64.0
+grpcio-tools==1.64.0
+pymysql==1.1.1
+python-dotenv==1.0.1

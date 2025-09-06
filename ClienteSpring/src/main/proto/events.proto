@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package events;
+
+option java_package = "com.empuje.grpc.events";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+import "users.proto"; // para devolver datos del creador si lo necesitás (opcional)
+
+// Refleja tabla eventos.
+message Event {
+  int64 id = 1;
+  string nombre = 2;                 // varchar(100)
+  string descripcion = 3;            // text
+  google.protobuf.Timestamp fecha_hora = 4;
+  int64 creador_id = 5;
+}
+
+// Crear evento
+message CreateEventRequest {
+  string nombre = 1;
+  string descripcion = 2;
+  google.protobuf.Timestamp fecha_hora = 3;
+  int64 creador_id = 4;
+}
+message CreateEventResponse { Event event = 1; }
+
+// Obtener por id
+message GetEventRequest { int64 id = 1; }
+message GetEventResponse { Event event = 1; }
+
+// Listar (ej. próximos o por creador)
+message ListEventsRequest {
+  bool only_upcoming = 1; // si true: fecha_hora >= now()
+  int64 creador_id = 2;   // 0 = sin filtro
+}
+message ListEventsResponse {
+  repeated Event events = 1;
+}
+
+// Participantes (tabla evento_participantes)
+message Participant {
+  int64 evento_id = 1;
+  int64 usuario_id = 2;
+}
+
+message AddParticipantRequest {
+  int64 evento_id = 1;
+  int64 usuario_id = 2;
+}
+message AddParticipantResponse {
+  Participant participant = 1;
+}
+
+message ListParticipantsRequest { int64 evento_id = 1; }
+message ListParticipantsResponse {
+  repeated Participant participants = 1;
+}
+
+service EventsService {
+  rpc CreateEvent (CreateEventRequest) returns (CreateEventResponse);
+  rpc GetEvent (GetEventRequest) returns (GetEventResponse);
+  rpc ListEvents (ListEventsRequest) returns (ListEventsResponse);
+  rpc AddParticipant (AddParticipantRequest) returns (AddParticipantResponse);
+  rpc ListParticipants (ListParticipantsRequest) returns (ListParticipantsResponse);
+}
