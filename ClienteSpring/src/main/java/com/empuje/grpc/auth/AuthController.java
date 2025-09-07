@@ -32,8 +32,6 @@ public class AuthController {
             @RequestParam String password,
             HttpSession session, Model model) {
         try {
-            // En tu proto el campo es username_or_email -> setter se llama
-            // setUsernameOrEmail
             LoginRequest req = LoginRequest.newBuilder()
                     .setUsernameOrEmail(identifier)
                     .setPassword(password)
@@ -47,7 +45,7 @@ public class AuthController {
             }
 
             session.setAttribute("userId", resp.getUserId());
-            session.setAttribute("username", identifier); // o cargar username real si lo expone tu LoginResponse
+            session.setAttribute("username", identifier);
             session.setAttribute("rol", resp.getRol().name());
             return "redirect:/home";
 
@@ -57,8 +55,19 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/logout")
+    public String logout(jakarta.servlet.http.HttpSession session) {
+        session.invalidate();
+        return "redirect:/"; // más robusto que /home
+    }
+
     @GetMapping("/register")
-    public String registerForm() {
+    public String registerForm(HttpSession session) {
+        // Solo PRESIDENTE puede registrar
+        if (session.getAttribute("rol") == null ||
+                !"PRESIDENTE".equals(session.getAttribute("rol").toString())) {
+            return "redirect:/home";
+        }
         return "register";
     }
 
@@ -68,16 +77,44 @@ public class AuthController {
             @RequestParam String apellido,
             @RequestParam String email,
             @RequestParam(required = false) String telefono,
-            Model model) {
-        if (!StringUtils.hasText(username) || !StringUtils.hasText(email)) {
-            model.addAttribute("error", "Usuario y email son obligatorios");
+            @RequestParam String rol, // <--- NUEVO: viene del form
+            Model model,
+            HttpSession session) {
+        // Bloqueo por rol
+        if (session.getAttribute("rol") == null ||
+                !"PRESIDENTE".equals(session.getAttribute("rol").toString())) {
+            return "redirect:/home";
+        }
+
+        if (!StringUtils.hasText(username) || !StringUtils.hasText(email) ||
+                !StringUtils.hasText(nombre) || !StringUtils.hasText(apellido)) {
+            model.addAttribute("error", "Usuario, nombre, apellido y email son obligatorios");
             return "register";
         }
 
         try {
-            CreateUserRequest req = CreateUserRequest.newBuilder()
+            int actorId = 0;
+            Object uid = session.getAttribute("userId");
+            if (uid instanceof Integer)
+                actorId = (Integer) uid;
+            else if (uid instanceof String) {
+                try {
+                    actorId = Integer.parseInt((String) uid);
+                } catch (Exception ignored) {
+                }
+            }
+
+            // Parsear el enum Role desde el string del form
+            Role rolEnum;
+            try {
+                rolEnum = Role.valueOf(rol);
+            } catch (IllegalArgumentException ex) {
+                rolEnum = Role.VOLUNTARIO; // fallback seguro
+            }
+
+            var req = CreateUserRequest.newBuilder()
                     .setAuth(AuthContext.newBuilder()
-                            .setActorId(1) // simular PRESIDENTE para probar; luego atalo a sesión/admin real
+                            .setActorId(actorId)
                             .setActorRole(Role.PRESIDENTE)
                             .build())
                     .setUsername(username)
@@ -85,7 +122,7 @@ public class AuthController {
                     .setApellido(apellido)
                     .setTelefono(telefono == null ? "" : telefono)
                     .setEmail(email)
-                    .setRol(Role.VOLUNTARIO)
+                    .setRol(rolEnum) // <--- usar el rol elegido
                     .build();
 
             var resp = users.createUser(req);
@@ -102,11 +139,5 @@ public class AuthController {
             model.addAttribute("error", "Error al registrar: " + e.getStatus().getDescription());
             return "register";
         }
-    }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/home";
     }
 }

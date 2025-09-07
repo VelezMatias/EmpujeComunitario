@@ -1,4 +1,6 @@
-<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <th:block th:replace="fragments/base :: header('Login')" />
 <h2>Login</h2>
 <form method="post" action="/auth/login">
   <label>Usuario o Email</label>
@@ -8,4 +10,5 @@
   <button type="submit">Entrar</button>
 </form>
 <p th:if="${error}" th:text="${error}" style="color:red"></p>
-</body></html>
+</body><th:block th:replace="fragments/base :: footer" />
+</html>

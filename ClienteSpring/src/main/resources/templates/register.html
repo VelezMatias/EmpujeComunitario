@@ -1,14 +1,55 @@
-<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body>
-<h2>Registro</h2>
-<form method="post" action="/auth/register">
-  <label>Usuario</label><input name="username"/>
-  <label>Nombre</label><input name="nombre"/>
-  <label>Apellido</label><input name="apellido"/>
-  <label>Email</label><input name="email" type="email"/>
-  <label>Teléfono</label><input name="telefono"/>
-  <button type="submit">Crear cuenta</button>
+!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <th:block th:replace="fragments/base :: header('Registrar')" />
+<head><title>Registrar usuario</title></head>
+<body>
+<h1>Registrar usuario</h1>
+
+<!-- Mensajes -->
+<div th:if="${error}" style="color:red;" th:text="${error}"></div>
+<div th:if="${ok}" style="color:green;" th:text="${ok}"></div>
+
+<!-- Si NO sos PRESIDENTE, mostramos aviso y nada más -->
+<div th:if="${session.rol} != 'PRESIDENTE'">
+  <p>No tenés permisos para registrar usuarios.</p>
+  <p><a th:href="@{/home}">Volver</a></p>
+</div>
+
+<!-- Si sos PRESIDENTE, mostramos el formulario -->
+<form th:if="${session.rol} == 'PRESIDENTE'" th:action="@{/auth/register}" method="post">
+  <label>Usuario*:
+    <input name="username" required>
+  </label><br>
+
+  <label>Nombre*:
+    <input name="nombre" required>
+  </label><br>
+
+  <label>Apellido*:
+    <input name="apellido" required>
+  </label><br>
+
+  <label>Email*:
+    <input type="email" name="email" required>
+  </label><br>
+
+  <label>Teléfono:
+    <input name="telefono">
+  </label><br>
+
+  <!-- NUEVO: selector de rol -->
+  <label>Rol:
+    <select name="rol">
+      <option value="PRESIDENTE">PRESIDENTE</option>
+      <option value="VOCAL">VOCAL</option>
+      <option value="COORDINADOR">COORDINADOR</option>
+      <option value="VOLUNTARIO" selected>VOLUNTARIO</option>
+    </select>
+  </label><br><br>
+
+  <button type="submit">Crear usuario</button>
+  <a th:href="@{/home}">Cancelar</a>
 </form>
-<p th:if="${ok}" th:text="${ok}" style="color:green"></p>
-<p th:if="${error}" th:text="${error}" style="color:red"></p>
-<p><i>No pedimos contraseña: se genera aleatoria y se envía por email.</i></p>
-</body></html>
+</body>
+  <th:block th:replace="fragments/base :: footer" />
+</html>
