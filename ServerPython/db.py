@@ -14,7 +14,6 @@ MYSQL_DB   = os.getenv("MYSQL_DB", "empujecomunitario")
 MYSQL_USER = os.getenv("MYSQL_USER", "root")   # poner usuario de la DB
 MYSQL_PASS = os.getenv("MYSQL_PASSWORD", "12345")   # Poner contraseña de la BD
 
-# Pool de conexiones para reutilizar y no abrir/cerrar todo el tiempo
 cnx_pool = pooling.MySQLConnectionPool(
     pool_name="ec_pool",
     pool_size=5,
@@ -23,7 +22,7 @@ cnx_pool = pooling.MySQLConnectionPool(
     database=MYSQL_DB,
     user=MYSQL_USER,
     password=MYSQL_PASS,
-    auth_plugin="mysql_native_password"  # común en Windows/WAMP/XAMPP
+    auth_plugin="mysql_native_password"  
 )
 
 def get_connection():

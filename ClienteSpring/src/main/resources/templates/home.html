@@ -1,0 +1,12 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body>
+<h1>Empuje Comunitario</h1>
+<p th:text="${mensaje}">Bienvenido</p>
+<p>
+  <a href="/auth/login">Ingresar</a> |
+  <a href="/auth/register">Registrarse</a> |
+  <a href="/auth/logout">Salir</a>
+</p>
+<div th:if="${usuario}">
+  <p>Sesión: <b th:text="${usuario}"></b> (rol: <span th:text="${rol}"></span>)</p>
+</div>
+</body></html>

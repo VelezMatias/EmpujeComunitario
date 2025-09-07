@@ -1,0 +1,14 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body>
+<h2>Registro</h2>
+<form method="post" action="/auth/register">
+  <label>Usuario</label><input name="username"/>
+  <label>Nombre</label><input name="nombre"/>
+  <label>Apellido</label><input name="apellido"/>
+  <label>Email</label><input name="email" type="email"/>
+  <label>Teléfono</label><input name="telefono"/>
+  <button type="submit">Crear cuenta</button>
+</form>
+<p th:if="${ok}" th:text="${ok}" style="color:green"></p>
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+<p><i>No pedimos contraseña: se genera aleatoria y se envía por email.</i></p>
+</body></html>

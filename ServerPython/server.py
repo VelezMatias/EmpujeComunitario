@@ -1,16 +1,25 @@
 import os
 import grpc
 from concurrent import futures
+from dotenv import load_dotenv
+load_dotenv()
 
-import users_pb2_grpc
-from services.users_service import UsersService
+import ong_pb2_grpc
+from app.services.user_service import UserServiceServicer
+from app.db import get_conn  # para testear conexión
 
 def serve():
+    # Test rápido de conexión a MySQL
+    try:
+        conn = get_conn()
+        conn.close()
+    except Exception as e:
+        print(f"[DB][ERROR] No se pudo conectar a MySQL: {e}")
+
     port = os.getenv("GRPC_PORT", "50051")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    # ¡OJO al nombre!: add_UsersServiceServicer_to_server
-    users_pb2_grpc.add_UsersServiceServicer_to_server(UsersService(), server)
+    ong_pb2_grpc.add_UserServiceServicer_to_server(UserServiceServicer(), server)
 
     server.add_insecure_port(f"[::]:{port}")
     print(f"[gRPC][Python] Escuchando en 0.0.0.0:{port} ...")

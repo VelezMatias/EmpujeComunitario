@@ -1,78 +1,85 @@
-from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
-from app.db import Base
-import enum
+"""
+DAO sin ORM para esquema MySQL con tablas:
+  - usuarios, roles, eventos, donaciones, evento_participantes, categorias
+De momento implementamos usuarios/roles (login/registro).
+"""
 
-class RoleEnum(str, enum.Enum):
-    PRESIDENTE = "PRESIDENTE"
-    VOCAL = "VOCAL"
-    COORDINADOR = "COORDINADOR"
-    VOLUNTARIO = "VOLUNTARIO"
+from typing import Optional, List, Dict
+from app.db import fetch_one, fetch_all, execute
 
-class CategoryEnum(str, enum.Enum):
-    ROPA = "ROPA"
-    ALIMENTOS = "ALIMENTOS"
-    JUGUETES = "JUGUETES"
-    UTILES_ESCOLARES = "UTILES_ESCOLARES"
+# ========== USUARIOS ==========
 
-def utcnow():
-    return datetime.now(timezone.utc)
+def usuario_por_username(username: str) -> Optional[Dict]:
+    sql = "SELECT * FROM usuarios WHERE username = %s LIMIT 1"
+    return fetch_one(sql, (username,))
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True, nullable=False, index=True)
-    nombre = Column(String, nullable=False)
-    apellido = Column(String, nullable=False)
-    telefono = Column(String)
-    email = Column(String, unique=True, nullable=False, index=True)
-    rol = Column(Enum(RoleEnum), nullable=False)
-    activo = Column(Boolean, default=True)
-    password_hash = Column(String, nullable=False)
+def usuario_por_email(email: str) -> Optional[Dict]:
+    sql = "SELECT * FROM usuarios WHERE email = %s LIMIT 1"
+    return fetch_one(sql, (email,))
 
-    # relaciones
-    events = relationship("EventMember", back_populates="user", cascade="all, delete-orphan")
+def usuario_por_identifier(identifier: str) -> Optional[Dict]:
+    # username o email
+    sql = """
+      SELECT * FROM usuarios
+      WHERE username = %s OR email = %s
+      LIMIT 1
+    """
+    return fetch_one(sql, (identifier, identifier))
 
-class DonationItem(Base):
-    __tablename__ = "donations"
-    id = Column(Integer, primary_key=True)
-    categoria = Column(Enum(CategoryEnum), nullable=False)
-    descripcion = Column(String, nullable=False)
-    cantidad = Column(Integer, nullable=False, default=0)
-    eliminado = Column(Boolean, default=False)
+def crear_usuario(*, username: str, nombre: str, apellido: str, telefono: str,
+                  email: str, password_hash: str, rol_id: int, activo: int = 1) -> int:
+    sql = """
+      INSERT INTO usuarios (username, nombre, apellido, telefono, password, email, activo, rol_id)
+      VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    _, last_id = execute(sql, (username, nombre, apellido, telefono, password_hash, email, activo, rol_id))
+    return last_id
 
-    created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
-    updated_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+def actualizar_usuario(*, id_usuario: int, nombre: Optional[str], apellido: Optional[str],
+                       telefono: Optional[str], email: Optional[str],
+                       rol_id: Optional[int], activo: Optional[int]) -> int:
+    campos = []
+    params = []
+    if nombre is not None:
+        campos.append("nombre=%s"); params.append(nombre)
+    if apellido is not None:
+        campos.append("apellido=%s"); params.append(apellido)
+    if telefono is not None:
+        campos.append("telefono=%s"); params.append(telefono)
+    if email is not None:
+        campos.append("email=%s"); params.append(email)
+    if rol_id is not None:
+        campos.append("rol_id=%s"); params.append(rol_id)
+    if activo is not None:
+        campos.append("activo=%s"); params.append(activo)
+    if not campos:
+        return 0
+    params.append(id_usuario)
+    sql = f"UPDATE usuarios SET {', '.join(campos)} WHERE id = %s"
+    rowcount, _ = execute(sql, tuple(params))
+    return rowcount
 
-class Event(Base):
-    __tablename__ = "events"
-    id = Column(Integer, primary_key=True)
-    nombre = Column(String, nullable=False)
-    descripcion = Column(String, nullable=False)
-    fecha_hora = Column(DateTime(timezone=True), nullable=False)
+def desactivar_usuario(id_usuario: int) -> int:
+    sql = "UPDATE usuarios SET activo = 0 WHERE id = %s"
+    rowcount, _ = execute(sql, (id_usuario,))
+    return rowcount
 
-    miembros = relationship("EventMember", back_populates="event", cascade="all, delete-orphan")
-    distribuciones = relationship("EventDonationDistribution", back_populates="event", cascade="all, delete-orphan")
+def listar_usuarios() -> List[Dict]:
+    # Si tu tabla roles usa 'id' como PK (recomendado):
+    sql = """
+      SELECT u.id, u.username, u.nombre, u.apellido, u.telefono,
+             u.email, u.rol_id, u.activo, r.nombre AS rol_nombre
+      FROM usuarios u
+      LEFT JOIN roles r ON r.id = u.rol_id
+      ORDER BY u.id ASC
+    """
+    # Si en tu BD 'roles' usa 'id_rol' como PK, cambia ON r.id = u.rol_id -> ON r.id_rol = u.rol_id
+    return fetch_all(sql)
 
-class EventMember(Base):
-    __tablename__ = "event_members"
-    event_id = Column(Integer, ForeignKey("events.id"), primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    event = relationship("Event", back_populates="miembros")
-    user = relationship("User", back_populates="events")
+# ========== ROLES ==========
 
-    __table_args__ = (
-        UniqueConstraint('event_id', 'user_id', name='uq_event_user'),
-    )
-
-class EventDonationDistribution(Base):
-    __tablename__ = "event_dists"
-    id = Column(Integer, primary_key=True)
-    event_id = Column(Integer, ForeignKey("events.id"), nullable=False)
-    donation_item_id = Column(Integer, ForeignKey("donations.id"), nullable=False)
-    cantidad = Column(Integer, nullable=False)
-
-    event = relationship("Event", back_populates="distribuciones")
+def rol_existe(rol_id: int) -> bool:
+    # Si roles.id es la PK:
+    sql = "SELECT 1 AS ok FROM roles WHERE id = %s"
+    # Si fuera id_rol, cambia a: "SELECT 1 AS ok FROM roles WHERE id_rol = %s"
+    return fetch_one(sql, (rol_id,)) is not None

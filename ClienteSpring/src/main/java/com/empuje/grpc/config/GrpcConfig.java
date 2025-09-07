@@ -2,31 +2,25 @@ package com.empuje.grpc.config;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import ong.UserServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.empuje.grpc.users.UsersServiceGrpc;
-
 @Configuration
 public class GrpcConfig {
 
-    @Value("${grpc.server.host}")
-    private String grpcHost;
-
-    @Value("${grpc.server.port}")
-    private int grpcPort;
-
-    @Bean(destroyMethod = "shutdownNow")
-    public ManagedChannel managedChannel() {
-        return ManagedChannelBuilder
-                .forAddress(grpcHost, grpcPort)
+    @Bean
+    public ManagedChannel grpcChannel(
+            @Value("${grpc.host:localhost}") String host,
+            @Value("${grpc.port:50051}") int port) {
+        return ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext()
                 .build();
     }
 
     @Bean
-    public UsersServiceGrpc.UsersServiceBlockingStub usersBlockingStub(ManagedChannel channel) {
-        return UsersServiceGrpc.newBlockingStub(channel);
+    public UserServiceGrpc.UserServiceBlockingStub userStub(ManagedChannel ch) {
+        return UserServiceGrpc.newBlockingStub(ch);
     }
 }
