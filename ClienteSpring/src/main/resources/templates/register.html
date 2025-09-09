@@ -1,55 +1,195 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
   <th:block th:replace="fragments/base :: header('Registrar')" />
-<head><title>Registrar usuario</title></head>
-<body>
-<h1>Registrar usuario</h1>
 
-<!-- Mensajes -->
-<div th:if="${error}" style="color:red;" th:text="${error}"></div>
-<div th:if="${ok}" style="color:green;" th:text="${ok}"></div>
+  <style>
+    :root {
+      --grad-start:#000000;
+      --grad-end:#333333;
+      --accent:#0099cc;
+      --accent-hover:#007399;
+      --text:#ffffff;
+      --text-soft:#d4d4d4;
+      --panel-bg:rgba(255,255,255,0.10);
+      --panel-border:#2a2a2a;
+      --radius:14px;
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+  background:#2f2f2f; /* Fondo gris plano como home (sin degradé) */
+      color:var(--text);
+      font-size:16px;
+      line-height:1.45;
+      -webkit-font-smoothing:antialiased;
+    }
+    .register-main {
+      min-height:calc(100vh - 120px);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:60px 0 70px;
+    }
+    .register-panel {
+      width:520px;
+      background:var(--panel-bg);
+      border:2px solid var(--panel-border);
+      border-radius:var(--radius);
+      padding:34px 34px 40px;
+      box-shadow:0 4px 12px -4px rgba(0,0,0,0.55);
+    }
+    .register-panel h1 {
+      margin:0 0 18px;
+      font-size:26px;
+      font-weight:600;
+      letter-spacing:.4px;
+      color:#fff;
+      text-align:center;
+    }
+    .messages { margin:0 0 14px; }
+    .msg-error,
+    .msg-ok {
+      font-size:14px;
+      font-weight:600;
+      margin:6px 0;
+      padding:8px 12px;
+      border-radius:8px;
+    }
+    .msg-error { background:#3a0e0e; color:#ff7373; border:1px solid #612323; }
+    .msg-ok { background:#0e3a21; color:#4dffa3; border:1px solid #1c6a3b; }
 
-<!-- Si NO sos PRESIDENTE, mostramos aviso y nada más -->
-<div th:if="${session.rol} != 'PRESIDENTE'">
-  <p>No tenés permisos para registrar usuarios.</p>
-  <p><a th:href="@{/home}">Volver</a></p>
-</div>
+    .notice {
+      font-size:14px;
+      color:var(--text-soft);
+      margin:0 0 16px;
+      line-height:1.4;
+    }
+    a.inline-link {
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+    }
+    a.inline-link:hover { color:var(--accent-hover); }
 
-<!-- Si sos PRESIDENTE, mostramos el formulario -->
-<form th:if="${session.rol} == 'PRESIDENTE'" th:action="@{/auth/register}" method="post">
-  <label>Usuario*:
-    <input name="username" required>
-  </label><br>
+    form {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin:0;
+    }
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    label {
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:.35px;
+      color:var(--text-soft);
+    }
+    input, select {
+      background:#0d0d0d;
+      border:1px solid #1f1f1f;
+      padding:10px 12px;
+      border-radius:8px;
+      color:#fff;
+      font-size:14px;
+      outline:none;
+      transition:.18s ease;
+    }
+    input:focus, select:focus {
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(0,153,204,0.35);
+    }
+    .actions {
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-top:10px;
+    }
+    button {
+      cursor:pointer;
+      border:1px solid #056587;
+      background:var(--accent);
+      color:#032431;
+      font-weight:600;
+      font-size:14px;
+      padding:10px 24px;
+      border-radius:30px;
+      transition:.18s ease;
+    }
+    button:hover { background:var(--accent-hover); }
+    .cancel-link {
+      font-size:14px;
+      color:var(--text-soft);
+      text-decoration:none;
+      font-weight:500;
+      padding:6px 10px;
+      border-radius:8px;
+      transition:.18s ease;
+    }
+    .cancel-link:hover { color:#ffffff; background:#1a1a1a; }
+  </style>
 
-  <label>Nombre*:
-    <input name="nombre" required>
-  </label><br>
+  <body>
+    <main class="register-main">
+      <div class="register-panel">
+        <h1>Registrar usuario</h1>
 
-  <label>Apellido*:
-    <input name="apellido" required>
-  </label><br>
+        <div class="messages">
+          <div class="msg-error" th:if="${error}" th:text="${error}"></div>
+          <div class="msg-ok" th:if="${ok}" th:text="${ok}"></div>
+        </div>
 
-  <label>Email*:
-    <input type="email" name="email" required>
-  </label><br>
+        <!-- Aviso si no es PRESIDENTE -->
+        <div th:if="${session.rol} != 'PRESIDENTE'">
+          <p class="notice">No tenés permisos para registrar usuarios.</p>
+          <p><a class="inline-link" th:href="@{/home}">Volver</a></p>
+        </div>
 
-  <label>Teléfono:
-    <input name="telefono">
-  </label><br>
+        <!-- Formulario si es PRESIDENTE -->
+        <form th:if="${session.rol} == 'PRESIDENTE'" th:action="@{/auth/register}" method="post">
+          <div class="field">
+            <label for="username">Usuario*</label>
+            <input id="username" name="username" required>
+          </div>
+          <div class="field">
+            <label for="nombre">Nombre*</label>
+            <input id="nombre" name="nombre" required>
+          </div>
+            <div class="field">
+            <label for="apellido">Apellido*</label>
+            <input id="apellido" name="apellido" required>
+          </div>
+          <div class="field">
+            <label for="email">Email*</label>
+            <input id="email" type="email" name="email" required>
+          </div>
+          <div class="field">
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" name="telefono">
+          </div>
+          <div class="field">
+            <label for="rol">Rol</label>
+            <select id="rol" name="rol">
+              <option value="PRESIDENTE">PRESIDENTE</option>
+              <option value="VOCAL">VOCAL</option>
+              <option value="COORDINADOR">COORDINADOR</option>
+              <option value="VOLUNTARIO" selected>VOLUNTARIO</option>
+            </select>
+          </div>
 
-  <!-- NUEVO: selector de rol -->
-  <label>Rol:
-    <select name="rol">
-      <option value="PRESIDENTE">PRESIDENTE</option>
-      <option value="VOCAL">VOCAL</option>
-      <option value="COORDINADOR">COORDINADOR</option>
-      <option value="VOLUNTARIO" selected>VOLUNTARIO</option>
-    </select>
-  </label><br><br>
+          <div class="actions">
+            <button type="submit">Crear usuario</button>
+            <a class="cancel-link" th:href="@{/home}">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </main>
 
-  <button type="submit">Crear usuario</button>
-  <a th:href="@{/home}">Cancelar</a>
-</form>
-</body>
-  <th:block th:replace="fragments/base :: footer" />
+    <th:block th:replace="fragments/base :: footer" />
+  </body>
 </html>
