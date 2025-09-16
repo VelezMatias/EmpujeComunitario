@@ -1,149 +1,244 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- <link rel="manifest" href="site.webmanifest"> -->
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{charifit/img/favicon.png}">
+    <!-- Place favicon.ico in the root directory -->
+
+    <!-- CSS here -->
+    <link rel="stylesheet" th:href="@{charifit/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{charifit/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{charifit/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/themify-icons.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/gijgo.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/animate.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/slicknav.css}">
+    <link rel="stylesheet" th:href="@{charifit/css/style.css}">
+
+    <style>
+      .saludo {
+        color: white;
+      }
+
+      .saludo b{
+        color: white;
+      }
+
+    </style>
+    
   <title>Empuje Comunitario</title>
-  <style>
-    :root {
-      --bg:#2f2f2f;
-      --accent:#0099cc;
-      --accent-hover:#007399;
-      --text:#ffffff;
-      --text-soft:#d4d4d4;
-      --panel-bg:rgba(255,255,255,0.10);
-      --panel-border:#2a2a2a;
-      --radius:14px;
-      font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-    }
-    * { box-sizing:border-box; }
-
-    body {
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      background: var(--bg);
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      font-size:16px;
-      line-height:1.45;
-    }
-
-    header {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:20px;
-      padding:16px 44px;
-      background:#060606;
-      border-bottom:1px solid #1a1a1a;
-    }
-
-    header h1 {
-      margin:0;
-      font-size:30px;
-      font-weight:700;
-      letter-spacing:.5px;
-      color:#f2f2f2;
-    }
-
-    nav { display:flex; align-items:center; gap:10px; }
-
-    nav a {
-      text-decoration:none;
-      font-size:13px;
-      background:var(--accent);
-      color:#032431;
-      padding:7px 16px;
-      font-weight:600;
-      border-radius:999px;
-      transition:.18s ease;
-      border:1px solid #056587;
-    }
-    nav a:hover { background:var(--accent-hover); }
-
-    main {
-      flex-grow:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:60px 0 70px;
-    }
-
-    .panel {
-      width:380px;
-      background:var(--panel-bg);
-      border:2px solid var(--panel-border);
-      border-radius: var(--radius);
-      padding:32px 30px 34px;
-      box-shadow:0 4px 12px -4px rgba(0,0,0,0.55);
-      text-align:center;
-    }
-
-    .panel h2 {
-      margin:0 0 16px;
-      font-size:26px;
-      font-weight:600;
-      letter-spacing:.4px;
-      color:#ffffff;
-    }
-
-    .panel p {
-      margin:4px 0 0;
-      font-size:14px;
-      color:var(--text-soft);
-    }
-
-    .panel b { color:#fff; font-weight:600; }
-
-    /* Boton ingresar */ 
-    .login-btn {
-      display:inline-block;
-      margin-top:18px;
-      background:var(--accent);
-      color:#032431;
-      text-decoration:none;
-      font-weight:600;
-      font-size:14px;
-      padding:10px 28px;
-      border-radius:30px;
-      border:1px solid #056587;
-      transition:.18s ease;
-    }
-    .login-btn:hover { background:var(--accent-hover); }
-    .login-btn:focus-visible {
-      outline:2px solid var(--accent);
-      outline-offset:3px;
-    }
-  </style>
+  
 </head>
 <body>
-  <header>
-    <h1>Empuje Comunitario</h1>
-    <nav>
-      <span th:if="${session.rol} == 'PRESIDENTE'">
-        <a th:href="@{/auth/register}">Registrar usuario</a>
-        <a th:href="@{/admin/users}">Administrar Usuarios</a>
-      </span>
-      <span th:if="${session.username} != null">
-        <a th:href="@{/auth/logout}">Salir</a>
-      </span>
-    </nav>
-  </header>
+
+      <!-- header-start -->
+    <header>
+        <div class="header-area ">
+            <div class="header-top_area">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-6 col-md-12 col-lg-8">
+                            <div class="short_contact_list">
+                                <ul>
+                                    <li><a href="#"> <i class="fa fa-phone"></i> +1 (234) 567-8910</a></li>
+                                    <li><a href="#"> <i class="fa fa-envelope"></i>EmpujeComunitario@email.com</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-6 col-lg-4">
+                            <div class="social_media_links d-none d-lg-block">
+                                <a href="#">
+                                    <i class="fa fa-facebook"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-pinterest-p"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-linkedin"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sticky-header" class="main-header-area">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-xl-3 col-lg-3">
+                            <th:block th:if="${session.username} != null">
+                                <p class="saludo">¡Hola <b th:text="${session.username}"></b>! (rol: <span th:text="${session.rol}"></span>)</p>
+                            </th:block>
+                        </div>
+                        <div class="col-xl-9 col-lg-9">
+                            <div class="main-menu">
+                                <nav>
+                                    <ul id="navigation">
+                                         <li><a th:href="@{/home}">Inicio</a></li>
+
+                                         <li th:if="${session.username} == null">
+                                            <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                                         </li>
+                                    
+                                          <!-- Links según el rol -->
+                                          <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/auth/register}">Registrar usuario</a>
+                                          </li>
+                                          <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/admin/users}">Administrar Usuarios</a>
+                                          </li>
+
+                                          <li th:if="${session.username} != null">
+                                              <a th:href="@{/auth/logout}">Salir</a>
+                                          </li>
+                                    </ul>
+                                  
+                                        
+                                </nav>
+                                
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- header-end -->
+
+
 
   <main>
-    <div class="panel">
-      <h2 th:text="${mensaje}">Bienvenido</h2>
 
-      <div th:if="${session.username} != null">
-        <p>Sesión: <b th:text="${session.username}"></b>
-           (rol: <span th:text="${session.rol}"></span>)</p>
-      </div>
-
-      <div th:if="${session.username} == null">
-        <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
-      </div>
+    <!-- banner -->
+    <div class="slider_area">
+        <div class="single_slider  d-flex align-items-center slider_bg_1 overlay2">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="slider_text ">
+                            <span>¡Comienza hoy!</span>
+                            <h3>Empuje Comunitario</h3>
+                            <p>Encontrá tu plan de acción comunitaria<br>
+                               para un cambio duradero</p>
+                            <a href="#" class="boxed-btn3">Ver eventos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- fin banner -->
+
+    <!-- reson_area_start  -->
+    <div class="reson_area section_padding">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="section_title text-center mb-55">
+                        <h3><span>Razones para ayudar</span></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-4 col-md-6">
+                    <div class="single_reson">
+                        <div class="thum">
+                            <div class="thum_1">
+                                <img th:src="@{charifit/img/help/1.png}" alt="" />
+                            </div>
+                        </div>
+                        <div class="help_content">
+                            <h4>Recolección</h4>
+                            <p>Lo que donas llega directamente a personas o familias que lo necesitan, 
+                              mejorando su día a día de manera tangible.</p>
+                              <p></p>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="single_reson">
+                        <div class="thum">
+                            <div class="thum_1">
+                                <img th:src="@{charifit/img/help/2.png}" alt="" />
+                            </div>
+                        </div>
+                        <div class="help_content">
+                            <h4>Segunda oportunidad</h4>
+                            <p>Conviertes objetos que para ti pueden ser un recuerdo olvidado en un recurso invaluable para alguien más, 
+                              fomentando un consumo más responsable y solidario.</p>
+                              
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="single_reson">
+                        <div class="thum">
+                            <div class="thum_1">
+                                <img th:src="@{charifit/img/help/3.png}" alt="" />
+                            </div>
+                        </div>
+                        <div class="help_content">
+                            <h4>Impacto positivo</h4>
+                            <p>Tu contribución fortalece el tejido social, apoyando a los más vulnerables de tu entorno local y construyendo, 
+                              entre todos, una comunidad más unida.</p>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- reson_area_end  -->
+
+
+
   </main>
+
+
+    <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+    <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+    <script th:src="@{/charifit/js/popper.min.js}"></script>
+    <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+    <script th:src="@{/charifit/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/charifit/js/isotope.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/ajax-form.js}"></script>
+    <script th:src="@{/charifit/js/waypoints.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.counterup.min.js}"></script>
+    <script th:src="@{/charifit/js/imagesloaded.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/scrollIt.js}"></script>
+    <script th:src="@{/charifit/js/jquery.scrollUp.min.js}"></script>
+    <script th:src="@{/charifit/js/wow.min.js}"></script>
+    <script th:src="@{/charifit/js/nice-select.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.slicknav.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.magnific-popup.min.js}"></script>
+    <script th:src="@{/charifit/js/plugins.js}"></script>
+    <script th:src="@{/charifit/js/gijgo.min.js}"></script>
+    <!--contact js-->
+    <script th:src="@{/charifit/js/contact.js}"></script>
+    <script th:src="@{/charifit/js/jquery.ajaxchimp.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.form.js}"></script>
+    <script th:src="@{/charifit/js/jquery.validate.min.js}"></script>
+    <script th:src="@{/charifit/js/mail-script.js}"></script>
+
+    <script th:src="@{/charifit/js/main.js}"></script>
+
+
 </body>
 </html>
