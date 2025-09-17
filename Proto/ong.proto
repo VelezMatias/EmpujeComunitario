@@ -2,6 +2,10 @@ syntax = "proto3";
 package ong;
 
 option java_multiple_files = true;
+option java_package = "com.empuje.grpc.ong";   
+option java_outer_classname = "OngProto";      
+
+
 
 // -- Enums --
 enum Role {
@@ -205,4 +209,48 @@ service EventService {
   rpc RemoveMember(RemoveMemberRequest) returns (ApiResponse);
   rpc RegisterDistribution(RegisterDistributionRequest) returns (ApiResponse);
   rpc ListEvents(Empty) returns (ListEventsResponse);
+}
+
+
+// ===== Listado de solicitudes/eventos externos (paginado simple) =====
+message ListExternasRequest {
+  int32 page = 1;       // 1-based
+  int32 page_size = 2;  // por defecto 20
+}
+
+message SolicitudExterna {
+  int32 org_id = 1;
+  string solicitud_id = 2;
+  string estado = 3;
+  string fecha_hora = 4;    // ISO "yyyy-MM-dd HH:mm:ss"
+}
+
+message EventExterno {
+  int32 org_id = 1;
+  string evento_id = 2;
+  string estado = 3;
+  string fecha_hora = 4;    // ISO "yyyy-MM-dd HH:mm:ss"
+  string titulo = 5;
+  string lugar = 6;
+}
+
+message ListSolicitudesExternasResponse {
+  repeated SolicitudExterna data = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  bool has_more = 4;
+}
+
+message ListEventosExternosResponse {
+  repeated EventExterno data = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  bool has_more = 4;
+}
+
+service OngService {
+  // ... (tus RPCs existentes)
+
+  rpc ListSolicitudesExternas (ListExternasRequest) returns (ListSolicitudesExternasResponse);
+  rpc ListEventosExternos (ListExternasRequest) returns (ListEventosExternosResponse);
 }

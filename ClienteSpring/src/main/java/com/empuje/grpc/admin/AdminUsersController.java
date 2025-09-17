@@ -1,15 +1,15 @@
 package com.empuje.grpc.admin;
 
 import jakarta.servlet.http.HttpSession;
-import ong.UserServiceGrpc;
-import ong.Empty;
-import ong.CreateUserRequest;
-import ong.UpdateUserRequest;
-import ong.DeactivateUserRequest;
-import ong.AuthContext;
-import ong.Role;
-import ong.ListUsersResponse;
-import ong.ApiResponse;
+import com.empuje.grpc.ong.UserServiceGrpc;
+import com.empuje.grpc.ong.Empty;
+import com.empuje.grpc.ong.CreateUserRequest;
+import com.empuje.grpc.ong.UpdateUserRequest;
+import com.empuje.grpc.ong.DeactivateUserRequest;
+import com.empuje.grpc.ong.AuthContext;
+import com.empuje.grpc.ong.Role;
+import com.empuje.grpc.ong.ListUsersResponse;
+import com.empuje.grpc.ong.ApiResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;

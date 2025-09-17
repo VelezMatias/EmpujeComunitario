@@ -5,7 +5,7 @@ import warnings
 
 import ong_pb2 as ong__pb2
 
-GRPC_GENERATED_VERSION = '1.74.0'
+GRPC_GENERATED_VERSION = '1.75.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -792,6 +792,124 @@ class EventService(object):
             '/ong.EventService/ListEvents',
             ong__pb2.Empty.SerializeToString,
             ong__pb2.ListEventsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class OngServiceStub(object):
+    """... (tus RPCs existentes)
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.ListSolicitudesExternas = channel.unary_unary(
+                '/ong.OngService/ListSolicitudesExternas',
+                request_serializer=ong__pb2.ListExternasRequest.SerializeToString,
+                response_deserializer=ong__pb2.ListSolicitudesExternasResponse.FromString,
+                _registered_method=True)
+        self.ListEventosExternos = channel.unary_unary(
+                '/ong.OngService/ListEventosExternos',
+                request_serializer=ong__pb2.ListExternasRequest.SerializeToString,
+                response_deserializer=ong__pb2.ListEventosExternosResponse.FromString,
+                _registered_method=True)
+
+
+class OngServiceServicer(object):
+    """... (tus RPCs existentes)
+    """
+
+    def ListSolicitudesExternas(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListEventosExternos(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_OngServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'ListSolicitudesExternas': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListSolicitudesExternas,
+                    request_deserializer=ong__pb2.ListExternasRequest.FromString,
+                    response_serializer=ong__pb2.ListSolicitudesExternasResponse.SerializeToString,
+            ),
+            'ListEventosExternos': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListEventosExternos,
+                    request_deserializer=ong__pb2.ListExternasRequest.FromString,
+                    response_serializer=ong__pb2.ListEventosExternosResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'ong.OngService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('ong.OngService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class OngService(object):
+    """... (tus RPCs existentes)
+    """
+
+    @staticmethod
+    def ListSolicitudesExternas(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.OngService/ListSolicitudesExternas',
+            ong__pb2.ListExternasRequest.SerializeToString,
+            ong__pb2.ListSolicitudesExternasResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListEventosExternos(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.OngService/ListEventosExternos',
+            ong__pb2.ListExternasRequest.SerializeToString,
+            ong__pb2.ListEventosExternosResponse.FromString,
             options,
             channel_credentials,
             insecure,

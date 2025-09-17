@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Entrantes | Empuje Comunitario</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, Arial; margin: 24px; }
+    h1 { margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+    .pill { padding: 2px 8px; border-radius: 9999px; background: #eef; display: inline-block; }
+  </style>
+</head>
+<body>
+  <h1>Entrantes</h1>
+  <p>Solicitudes y eventos recibidos desde Kafka (persistidos por el core Python).</p>
+
+  <div class="grid">
+    <section>
+      <h2>Solicitudes externas</h2>
+      <table>
+        <thead>
+        <tr>
+          <th>Org</th><th>Solicitud</th><th>Estado</th><th>Fecha</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${sols}">
+          <td th:text="${s.orgId}">42</td>
+          <td th:text="${s.solicitudId}">SOL-2025-0001</td>
+          <td><span class="pill" th:text="${s.estado}">VIGENTE</span></td>
+          <td th:text="${s.fechaHora}">2025-09-15 03:10:00</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(sols)}">
+          <td colspan="4">Sin datos</td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Eventos externos</h2>
+      <table>
+        <thead>
+        <tr>
+          <th>Org</th><th>Evento</th><th>Título</th><th>Lugar</th><th>Estado</th><th>Fecha</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="e : ${evs}">
+          <td th:text="${e.orgId}">42</td>
+          <td th:text="${e.eventoId}">EV-2025-0001</td>
+          <td th:text="${e.titulo}">Colecta primavera</td>
+          <td th:text="${e.lugar}">Plaza Central</td>
+          <td><span class="pill" th:text="${e.estado}">VIGENTE</span></td>
+          <td th:text="${e.fechaHora}">2025-09-20 15:00:00</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(evs)}">
+          <td colspan="6">Sin datos</td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <p style="margin-top:16px;">
+    <a th:href="@{'/inbox'(page=${page+1}, size=${size})}" th:if="${hasMoreS || hasMoreE}">Siguiente página »</a>
+  </p>
+</body>
+</html>

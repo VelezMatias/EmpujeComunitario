@@ -56,11 +56,12 @@
   </dependency>
 
   <!-- Protobuf runtime -->
-  <dependency>
-    <groupId>com.google.protobuf</groupId>
-    <artifactId>protobuf-java</artifactId>
-    <version>${protobuf.java.version}</version>
-  </dependency>
+<dependency>
+  <groupId>com.google.protobuf</groupId>
+  <artifactId>protobuf-java</artifactId>
+  <version>3.25.3</version>
+</dependency>
+
 
 
 <!-- Kafka -->
@@ -91,49 +92,54 @@
 
 </dependencies>
 
-  <build>
-    <!-- Detecta SO/arquitectura para bajar el protoc correcto -->
-    <extensions>
-      <extension>
-        <groupId>kr.motd.maven</groupId>
-        <artifactId>os-maven-plugin</artifactId>
-        <version>${os.maven.plugin.version}</version>
-      </extension>
-    </extensions>
+<build>
+  <extensions>
+    <extension>
+      <groupId>kr.motd.maven</groupId>
+      <artifactId>os-maven-plugin</artifactId>
+      <version>1.7.0</version>
+    </extension>
+  </extensions>
 
-    <plugins>
-      <!-- Spring Boot -->
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-
- 
-
+  <plugins>
+    <!-- Protobuf + gRPC -->
     <plugin>
-      <groupId>org.xolstice.maven.plugins</groupId>
-      <artifactId>protobuf-maven-plugin</artifactId>
-      <version>0.6.1</version>
-      <configuration>
-        <protocArtifact>com.google.protobuf:protoc:3.21.12:exe:${os.detected.classifier}</protocArtifact>
-        <pluginId>grpc-java</pluginId>
-        <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.54.0:exe:${os.detected.classifier}</pluginArtifact>
-
-        <!-- IMPORTANTES: apuntar al proto unificado -->
-        <additionalProtoPathElements>
-          <additionalProtoPathElement>../Proto</additionalProtoPathElement>
-        </additionalProtoPathElements>
-        <protoSourceRoot>../Proto</protoSourceRoot>
+  <groupId>org.xolstice.maven.plugins</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>0.6.1</version>
+  <configuration>
+    <protocArtifact>com.google.protobuf:protoc:3.25.3:exe:${os.detected.classifier}</protocArtifact>
+    <protoSourceRoot>../Proto</protoSourceRoot>
   </configuration>
   <executions>
+    <!-- Generar clases Java de mensajes -->
     <execution>
+      <id>proto-compile</id>
       <goals>
         <goal>compile</goal>
+      </goals>
+      <configuration>
+        <protoSourceRoot>../Proto</protoSourceRoot>
+      </configuration>
+    </execution>
+
+    <!-- Generar stubs gRPC -->
+    <execution>
+      <id>grpc-compile</id>
+      <goals>
         <goal>compile-custom</goal>
       </goals>
+      <configuration>
+        <protoSourceRoot>../Proto</protoSourceRoot>
+        <pluginId>grpc-java</pluginId>
+        <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.63.0:exe:${os.detected.classifier}</pluginArtifact>
+      </configuration>
     </execution>
   </executions>
 </plugin>
-    </plugins>
-  </build>
+
+  </plugins>
+</build>
+
+
 </project>
