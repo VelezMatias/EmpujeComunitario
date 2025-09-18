@@ -3,6 +3,7 @@ package com.empuje.grpc.config;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import ong.UserServiceGrpc;
+import ong.EventServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,5 +23,11 @@ public class GrpcConfig {
     @Bean
     public UserServiceGrpc.UserServiceBlockingStub userStub(ManagedChannel ch) {
         return UserServiceGrpc.newBlockingStub(ch);
+    }
+
+
+    @Bean
+    public EventServiceGrpc.EventServiceBlockingStub eventStub(ManagedChannel ch) {
+        return EventServiceGrpc.newBlockingStub(ch);
     }
 }

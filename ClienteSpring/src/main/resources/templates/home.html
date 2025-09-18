@@ -92,11 +92,13 @@
                                     
                                           <!-- Links según el rol -->
                                           <li th:if="${session.rol} == 'PRESIDENTE'">
-                                              <a th:href="@{/auth/register}">Registrar usuario</a>
+                                              <a th:href="@{/admin/users}">Usuarios</a>
                                           </li>
-                                          <li th:if="${session.rol} == 'PRESIDENTE'">
-                                              <a th:href="@{/admin/users}">Administrar Usuarios</a>
+
+                                           <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/eventos}">Eventos</a>
                                           </li>
+
 
                                           <li th:if="${session.username} != null">
                                               <a th:href="@{/auth/logout}">Salir</a>

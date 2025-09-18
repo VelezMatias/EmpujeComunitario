@@ -125,11 +125,13 @@
                                     
                                           <!-- Links según el rol -->
                                           <li th:if="${session.rol} == 'PRESIDENTE'">
-                                              <a th:href="@{/auth/register}">Registrar usuario</a>
+                                              <a th:href="@{/admin/users}">Usuarios</a>
                                           </li>
-                                          <li th:if="${session.rol} == 'PRESIDENTE'">
-                                              <a th:href="@{/admin/users}">Administrar Usuarios</a>
+
+                                           <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/auth/eventos}">Eventos</a>
                                           </li>
+
 
                                           <li th:if="${session.username} != null">
                                               <a th:href="@{/auth/logout}">Salir</a>
@@ -239,6 +241,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        <p class="note">* La clave se genera aleatoria en el servidor y se guarda encriptada.</p>
                         
                         <div class="actions">
                           <button class="btn btn--radius-2 btn--red" type="submit">Crear usuario</button>

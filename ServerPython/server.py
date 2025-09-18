@@ -6,6 +6,7 @@ load_dotenv()
 
 import ong_pb2_grpc
 from app.services.user_service import UserServiceServicer
+from app.services.event_service import EventServiceServicer
 from app.db import get_conn  # para testear conexión
 
 def serve():
@@ -20,6 +21,9 @@ def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     ong_pb2_grpc.add_UserServiceServicer_to_server(UserServiceServicer(), server)
+    ong_pb2_grpc.add_EventServiceServicer_to_server(EventServiceServicer(), server)
+    print("[gRPC][Python] EventService registrado")
+
 
     server.add_insecure_port(f"[::]:{port}")
     print(f"[gRPC][Python] Escuchando en 0.0.0.0:{port} ...")

@@ -132,6 +132,7 @@ message Event {
   string descripcion = 3;
   string fecha_hora = 4;       // ISO8601 UTC, debe ser a futuro en alta
   repeated int32 miembros = 5; // ids de usuarios
+  int32 creador_id = 6;
 }
 
 message CreateEventRequest {

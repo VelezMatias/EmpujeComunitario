@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+     <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" >
+
+    <!-- <link rel="manifest" href="site.webmanifest"> -->
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{charifit/img/favicon.png}">
+    <!-- Place favicon.ico in the root directory -->
+
+    <!-- CSS here -->
+    <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/charifit/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/charifit/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/themify-icons.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/gijgo.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/slicknav.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/style.css}">
+
+
+    <!-- css tabla -->
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
+	  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	  <link rel="stylesheet" th:src="@{/tabla/css/style.css}">
+
+    <!-- css botones -->
+    <link rel="stylesheet" th:href="@{/boton/css/ionicons.min.css}">
+		<link rel="stylesheet" th:href="@{/boton/css/style.css}">
+
+
+    <style>
+      .saludo {
+        color: white;
+      }
+
+      .saludo b{
+        color: white;
+      }
+
+      .actions{
+        margin-left: 25%;
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+
+      .mb-md-0{
+        background-color: white;
+        color: black;
+      }
+
+      .mb-md-0:hover{
+        background-color: #28a745;
+        color:white;
+      }
+
+      .ftco-section{
+        padding-top:0px;
+        margin-top:0px;
+      }
+    
+    </style>
+
+
+
+  <title>ABM de Eventos</title>
+  
+</head>
+
+<body>
+
+       <!-- header-start -->
+    <header>
+        <div class="header-area ">
+            <div class="header-top_area">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-6 col-md-12 col-lg-8">
+                            <div class="short_contact_list">
+                                <ul>
+                                    <li><a href="#"> <i class="fa fa-phone"></i> +1 (234) 567-8910</a></li>
+                                    <li><a href="#"> <i class="fa fa-envelope"></i>EmpujeComunitario@email.com</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-6 col-lg-4">
+                            <div class="social_media_links d-none d-lg-block">
+                                <a href="#">
+                                    <i class="fa fa-facebook"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-pinterest-p"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-linkedin"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sticky-header" class="main-header-area">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-xl-3 col-lg-3">
+                            <th:block th:if="${session.username} != null">
+                                <p class="saludo">¡Hola <b th:text="${session.username}"></b>! (rol: <span th:text="${session.rol}"></span>)</p>
+                            </th:block>
+                        </div>
+                        <div class="col-xl-9 col-lg-9">
+                            <div class="main-menu">
+                                <nav>
+                                    <ul id="navigation">
+                                         <li><a th:href="@{/home}">Inicio</a></li>
+
+                                         <li th:if="${session.username} == null">
+                                            <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                                         </li>
+                                    
+                                          <!-- Links según el rol -->
+                                          <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/admin/users}">Usuarios</a>
+                                          </li>
+
+                                           <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/eventos}">Eventos</a>
+                                          </li>
+
+
+                                          <li th:if="${session.username} != null">
+                                              <a th:href="@{/auth/logout}">Salir</a>
+                                          </li>
+                                    </ul>
+                                  
+                                        
+                                </nav>
+                                
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- header-end -->
+
+     <div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="bradcam_text text-center">
+                        <h3>ABM de Eventos</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- bradcam_area_end  -->
+
+
+    <div class="actions">
+        <button type="button" class="btn btn-success mr-md-3 mb-2 mb-md-0">
+            <a th:href="@{/eventos/new}">+ Nuevo evento</a>
+        </button>
+        <button type="button" class="btn btn-success mr-md-3 mb-2 mb-md-0">
+        <a th:href="@{/home}">Volver</a>
+        </button>
+    </div>
+  
+<section class="ftco-section">
+		<div class="container">
+			
+			<div class="row">
+				<div class="col-md-12">
+					<div class="table-wrap">
+						<table class="table table-striped">
+						  <thead>
+						    <tr>
+                                <th>Id</th>
+                                <th>Título</th>
+                                <th>Descripción</th>
+                                <th>Fecha y Hora</th>
+                                <th>Creador</th>
+                                <th> </th>
+                                <th> </th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						    <tr th:each="e : ${events}">
+                                <td th:text="${e.id}">1</td>
+                                <td th:text="${e.nombre}">Nombre</td>
+                                <td th:text="${e.descripcion}">Descripción</td>
+                                <!-- fecha_hora ⇒ getter getFechaHora() ⇒ e.fechaHora -->
+                                <td th:text="${e.fechaHora}">2025-09-01T17:00:00+00:00</td>
+                                <td class="creador" th:attr="data-creator-id=${e.creadorId}"></td>
+                                <!-- cantidad de miembros -->
+                                <td th:text="${#lists.size(e.miembrosList)}">0</td>
+                                <td>
+                                <a th:href="@{|/eventos/${e.id}/edit|}">Editar</a>
+                                <form th:action="@{|/eventos/${e.id}/delete|}" method="post" style="display:inline">
+                                    <button type="submit" onclick="return confirm('¿Eliminar evento?')">Eliminar</button>
+                                </form>
+                                </td>
+                            </tr>
+						    
+						  </tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+
+
+
+
+
+
+
+
+<script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+    <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+    <script th:src="@{/charifit/js/popper.min.js}"></script>
+    <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+    <script th:src="@{/charifit/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/charifit/js/isotope.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/ajax-form.js}"></script>
+    <script th:src="@{/charifit/js/waypoints.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.counterup.min.js}"></script>
+    <script th:src="@{/charifit/js/imagesloaded.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/scrollIt.js}"></script>
+    <script th:src="@{/charifit/js/jquery.scrollUp.min.js}"></script>
+    <script th:src="@{/charifit/js/wow.min.js}"></script>
+    <script th:src="@{/charifit/js/nice-select.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.slicknav.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.magnific-popup.min.js}"></script>
+    <script th:src="@{/charifit/js/plugins.js}"></script>
+    <script th:src="@{/charifit/js/gijgo.min.js}"></script>
+    <!--contact js-->
+    <script th:src="@{/charifit/js/contact.js}"></script>
+    <script th:src="@{/charifit/js/jquery.ajaxchimp.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.form.js}"></script>
+    <script th:src="@{/charifit/js/jquery.validate.min.js}"></script>
+    <script th:src="@{/charifit/js/mail-script.js}"></script>
+
+    <script th:src="@{/charifit/js/main.js}"></script>
+
+
+    <!-- tabla js -->
+    <script th:src="@{/tabla/js/jquery.min.js}"></script>
+    <script th:src="@{/tabla/js/popper.js}"></script>
+    <script th:src="@{/tabla/js/bootstrap.min.js}"></script>
+    <script th:src="@{/tabla/js/main.js}"></script>
+
+    <!-- botones js -->
+    <script th:src="@{/tabla/js/jquery.min.js}"></script>
+    <script th:src="@{/tabla/js/popper.js}"></script>
+    <script th:src="@{/tabla/js/bootstrap.min.js}"></script>
+    <script th:src="@{/tabla/js/main.js}"></script>
+
+
+    <script>
+(async () => {
+  // Helpers
+  const getContextPath = () => {
+    // Si usás context-path en Spring, Thymeleaf lo resuelve solo, pero por las dudas:
+    const base = document.querySelector('base')?.getAttribute('href') || '';
+    return base.endsWith('/') ? base.slice(0, -1) : base;
+  };
+  const ctx = getContextPath();
+
+  const buildUrls = (id) => ([
+    `${ctx}/usuarios/${id}`,
+    `${ctx}/api/usuarios/${id}`,
+    `${ctx}/users/${id}`,
+    `${ctx}/api/users/${id}`,
+  ]);
+
+  const pickName = (obj) => {
+    if (!obj || typeof obj !== 'object') return '';
+    // Si viene envuelto
+    if (obj.usuario) return pickName(obj.usuario);
+    if (obj.user)    return pickName(obj.user);
+    // Campos comunes
+    const nombre   = obj.nombre ?? obj.firstName ?? obj.name ?? '';
+    const apellido = obj.apellido ?? obj.lastName ?? obj.surname ?? '';
+    const full     = obj.fullName ?? obj.nombreCompleto ?? '';
+    const combo    = `${nombre} ${apellido}`.trim();
+    return (full || combo || '').trim();
+  };
+
+  const cache = {};
+  async function resolveUserName(id) {
+    if (!id || Number(id) <= 0) return '';
+    if (cache[id]) return cache[id];
+
+    const urls = buildUrls(id);
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const name = pickName(data);
+        if (name) {
+          cache[id] = name;
+          return name;
+        }
+      } catch (_) { /* sigue probando */ }
+    }
+    cache[id] = ''; // no encontrado
+    return '';
+  }
+
+  // Rellenar celdas
+  const cells = Array.from(document.querySelectorAll('td.creador[data-creator-id]'));
+  // IDs únicos y válidos
+  const ids = [...new Set(cells.map(td => td.getAttribute('data-creator-id')).filter(x => x && Number(x) > 0))];
+
+  // Precarga en paralelo
+  await Promise.all(ids.map(id => resolveUserName(id)));
+
+  // Pintar
+  cells.forEach(td => {
+    const id = td.getAttribute('data-creator-id');
+    const name = cache[id];
+    td.textContent = name ? name : (Number(id) > 0 ? `#${id}` : '-');
+  });
+})();
+</script>
+
+
+
+</body>
+</html>

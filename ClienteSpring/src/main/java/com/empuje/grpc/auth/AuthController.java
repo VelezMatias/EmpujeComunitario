@@ -140,4 +140,18 @@ public class AuthController {
             return "register";
         }
     }
+
+
+    @GetMapping("/eventos")
+    public String eventosForm(HttpSession session) {
+        // Solo PRESIDENTE y VOCAl
+        if (session.getAttribute("rol") == null ||
+                !"PRESIDENTE".equals(session.getAttribute("rol").toString())) {
+            return "redirect:/home";
+        }
+        return "eventos";
+    }
+
+
+
 }

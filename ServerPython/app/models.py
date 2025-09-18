@@ -5,6 +5,7 @@ De momento implementamos usuarios/roles (login/registro).
 """
 
 from typing import Optional, List, Dict
+from datetime import datetime
 from app.db import fetch_one, fetch_all, execute
 
 # ========== USUARIOS ==========
@@ -83,3 +84,92 @@ def rol_existe(rol_id: int) -> bool:
     sql = "SELECT 1 AS ok FROM roles WHERE id = %s"
     # Si fuera id_rol, cambia a: "SELECT 1 AS ok FROM roles WHERE id_rol = %s"
     return fetch_one(sql, (rol_id,)) is not None
+
+
+# ========== EVENTOS ==========
+
+
+
+def crear_evento(*, nombre: str, descripcion: str, fecha_utc: datetime, creador_id: int) -> int:
+    """
+    Inserta un evento. fecha_utc debe venir como datetime UTC.
+    Guarda en DATETIME (sin tz) asumiendo UTC.
+    """
+    sql = """
+      INSERT INTO eventos (nombre, descripcion, fecha_hora, creador_id)
+      VALUES (%s, %s, %s, %s)
+    """
+    fecha_str = fecha_utc.strftime('%Y-%m-%d %H:%M:%S')
+    _, last_id = execute(sql, (nombre, descripcion, fecha_str, creador_id))
+    return last_id
+
+def evento_por_id(id_evento: int):
+    sql = "SELECT id, nombre, descripcion, fecha_hora, creador_id FROM eventos WHERE id = %s LIMIT 1"
+    row = fetch_one(sql, (id_evento,))
+    if not row:
+        return None
+    # Normalizamos fecha_hora a datetime (puede venir ya como datetime)
+    fh = row["fecha_hora"]
+    if isinstance(fh, str):
+        fh = datetime.strptime(fh, '%Y-%m-%d %H:%M:%S')
+    row["fecha_hora"] = fh
+    return row
+
+def actualizar_evento(*, id_evento: int,
+                      nombre: str | None,
+                      descripcion: str | None,
+                      fecha_utc: datetime | None) -> int:
+    campos = []
+    params = []
+    if nombre is not None:
+        campos.append("nombre=%s"); params.append(nombre)
+    if descripcion is not None:
+        campos.append("descripcion=%s"); params.append(descripcion)
+    if fecha_utc is not None:
+        campos.append("fecha_hora=%s"); params.append(fecha_utc.strftime('%Y-%m-%d %H:%M:%S'))
+    if not campos:
+        return 0
+    params.append(id_evento)
+    sql = f"UPDATE eventos SET {', '.join(campos)} WHERE id = %s"
+    rowcount, _ = execute(sql, tuple(params))
+    return rowcount
+
+def eliminar_evento(id_evento: int) -> int:
+    sql = "DELETE FROM eventos WHERE id = %s"
+    rowcount, _ = execute(sql, (id_evento,))
+    return rowcount
+
+def listar_eventos():
+    sql = """
+      SELECT id, nombre, descripcion, fecha_hora, creador_id
+      FROM eventos
+      ORDER BY fecha_hora DESC, id DESC
+    """
+    rows = fetch_all(sql)
+    return rows
+
+
+
+
+def miembros_ids_por_evento(event_id: int):
+    sql = "SELECT user_id FROM evento_participantes WHERE event_id = %s"
+    rows = fetch_all(sql, (event_id,))
+    return [r["user_id"] for r in rows] if rows else []
+
+def evento_tiene_miembro(event_id: int, user_id: int) -> bool:
+    sql = "SELECT 1 AS ok FROM evento_participantes WHERE event_id=%s AND user_id=%s LIMIT 1"
+    return fetch_one(sql, (event_id, user_id)) is not None
+
+def agregar_miembro_evento(event_id: int, user_id: int) -> int:
+    sql = "INSERT INTO evento_participantes (event_id, user_id) VALUES (%s, %s)"
+    rowcount, _ = execute(sql, (event_id, user_id))
+    return rowcount
+
+def quitar_miembro_evento(event_id: int, user_id: int) -> int:
+    sql = "DELETE FROM evento_participantes WHERE event_id=%s AND user_id=%s"
+    rowcount, _ = execute(sql, (event_id, user_id))
+    return rowcount
+
+def usuario_por_id(id_usuario: int):
+    sql = "SELECT id, activo FROM usuarios WHERE id = %s LIMIT 1"
+    return fetch_one(sql, (id_usuario,))
