@@ -192,6 +192,7 @@
                                 <th>Descripción</th>
                                 <th>Fecha y Hora</th>
                                 <th>Creador</th>
+                                <th>Miembros</th>
                                 <th> </th>
                                 <th> </th>
 						    </tr>
@@ -221,12 +222,6 @@
 			</div>
 		</div>
 	</section>
-
-
-
-
-
-
 
 
 
@@ -271,74 +266,7 @@
     <script th:src="@{/tabla/js/main.js}"></script>
 
 
-    <script>
-(async () => {
-  // Helpers
-  const getContextPath = () => {
-    // Si usás context-path en Spring, Thymeleaf lo resuelve solo, pero por las dudas:
-    const base = document.querySelector('base')?.getAttribute('href') || '';
-    return base.endsWith('/') ? base.slice(0, -1) : base;
-  };
-  const ctx = getContextPath();
-
-  const buildUrls = (id) => ([
-    `${ctx}/usuarios/${id}`,
-    `${ctx}/api/usuarios/${id}`,
-    `${ctx}/users/${id}`,
-    `${ctx}/api/users/${id}`,
-  ]);
-
-  const pickName = (obj) => {
-    if (!obj || typeof obj !== 'object') return '';
-    // Si viene envuelto
-    if (obj.usuario) return pickName(obj.usuario);
-    if (obj.user)    return pickName(obj.user);
-    // Campos comunes
-    const nombre   = obj.nombre ?? obj.firstName ?? obj.name ?? '';
-    const apellido = obj.apellido ?? obj.lastName ?? obj.surname ?? '';
-    const full     = obj.fullName ?? obj.nombreCompleto ?? '';
-    const combo    = `${nombre} ${apellido}`.trim();
-    return (full || combo || '').trim();
-  };
-
-  const cache = {};
-  async function resolveUserName(id) {
-    if (!id || Number(id) <= 0) return '';
-    if (cache[id]) return cache[id];
-
-    const urls = buildUrls(id);
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        if (!res.ok) continue;
-        const data = await res.json();
-        const name = pickName(data);
-        if (name) {
-          cache[id] = name;
-          return name;
-        }
-      } catch (_) { /* sigue probando */ }
-    }
-    cache[id] = ''; // no encontrado
-    return '';
-  }
-
-  // Rellenar celdas
-  const cells = Array.from(document.querySelectorAll('td.creador[data-creator-id]'));
-  // IDs únicos y válidos
-  const ids = [...new Set(cells.map(td => td.getAttribute('data-creator-id')).filter(x => x && Number(x) > 0))];
-
-  // Precarga en paralelo
-  await Promise.all(ids.map(id => resolveUserName(id)));
-
-  // Pintar
-  cells.forEach(td => {
-    const id = td.getAttribute('data-creator-id');
-    const name = cache[id];
-    td.textContent = name ? name : (Number(id) > 0 ? `#${id}` : '-');
-  });
-})();
-</script>
+    
 
 
 
