@@ -229,6 +229,21 @@ class EventServiceServicer(rpc.EventServiceServicer):
 
     def ListEvents(self, request, context):
         try:
+            filas = models.listar_eventos_con_miembros()
+            eventos = []
+            for r in filas:
+                eventos.append(pb.Event(
+                    id=r["id"],
+                    nombre=r.get("nombre") or "",
+                    descripcion=r.get("descripcion") or "",
+                    fecha_hora=_to_iso_utc_safe(r.get("fecha_hora")),
+                    miembros=r.get("miembros", []),
+                    creador_id=int(r.get("creador_id") or 0),
+                ))
+            return pb.ListEventsResponse(events=eventos)
+        except Exception as e:
+            print("[EVENTOS][List][ERR]", e)
+            # Fallback: al menos devolver eventos sin miembros
             filas = models.listar_eventos()
             eventos = []
             for r in filas:
@@ -237,13 +252,11 @@ class EventServiceServicer(rpc.EventServiceServicer):
                     nombre=r.get("nombre") or "",
                     descripcion=r.get("descripcion") or "",
                     fecha_hora=_to_iso_utc_safe(r.get("fecha_hora")),
-                    miembros=[]  # lo dejamos vacío por ahora
+                    miembros=[],
+                    creador_id=int(r.get("creador_id") or 0),
                 ))
             return pb.ListEventsResponse(events=eventos)
-        except Exception as e:
-            print("[EVENTOS][List][ERR]", e)
-            return pb.ListEventsResponse(events=[])
-        
+            
 
 
     
