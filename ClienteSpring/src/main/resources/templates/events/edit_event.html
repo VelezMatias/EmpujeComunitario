@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+     <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" >
+
+    <!-- <link rel="manifest" href="site.webmanifest"> -->
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{charifit/img/favicon.png}">
+    <!-- Place favicon.ico in the root directory -->
+
+    <!-- CSS here -->
+    <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/charifit/css/owl.carousel.min.css}" />
+    <link rel="stylesheet" th:href="@{/charifit/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/themify-icons.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/gijgo.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/slicknav.css}">
+    <link rel="stylesheet" th:href="@{/charifit/css/style.css}">
+
+
+    <!-- css tabla -->
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
+	  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	  <link rel="stylesheet" th:src="@{/tabla/css/style.css}">
+
+    <!-- css botones -->
+    <link rel="stylesheet" th:href="@{/boton/css/ionicons.min.css}">
+		<link rel="stylesheet" th:href="@{/boton/css/style.css}">
+
+
+    <style>
+      .saludo {
+        color: white;
+      }
+
+      .saludo b{
+        color: white;
+      }
+
+      .actions{
+        margin-left: 25%;
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+
+      .mb-md-0{
+        background-color: white;
+        color: black;
+      }
+
+      .mb-md-0:hover{
+        background-color: #28a745;
+        color:white;
+      }
+
+      .ftco-section{
+        padding-top:0px;
+        margin-top:0px;
+      }
+
+      .card-5{
+        padding-left: 15%;
+        padding-top: 20px;
+      }
+
+      .form-row {
+        margin-top: 10px;
+      }
+
+      .input--style-5 {
+        margin-left: 5px;
+      }
+
+      #col-2-apellido{
+        margin-left: 100px;
+      }
+
+      .form-group{
+        padding-right: 20%;
+      }
+
+      .input-group{
+        width: 150px;
+      }
+    
+    </style>
+
+
+
+  <title>Modificar Evento</title>
+  
+</head>
+
+<body>
+
+       <!-- header-start -->
+    <header>
+        <div class="header-area ">
+            <div class="header-top_area">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-6 col-md-12 col-lg-8">
+                            <div class="short_contact_list">
+                                <ul>
+                                    <li><a href="#"> <i class="fa fa-phone"></i> +1 (234) 567-8910</a></li>
+                                    <li><a href="#"> <i class="fa fa-envelope"></i>EmpujeComunitario@email.com</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-6 col-lg-4">
+                            <div class="social_media_links d-none d-lg-block">
+                                <a href="#">
+                                    <i class="fa fa-facebook"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-pinterest-p"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-linkedin"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sticky-header" class="main-header-area">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-xl-3 col-lg-3">
+                            <th:block th:if="${session.username} != null">
+                                <p class="saludo">¡Hola <b th:text="${session.username}"></b>! (rol: <span th:text="${session.rol}"></span>)</p>
+                            </th:block>
+                        </div>
+                        <div class="col-xl-9 col-lg-9">
+                            <div class="main-menu">
+                                <nav>
+                                    <ul id="navigation">
+                                         <li><a th:href="@{/home}">Inicio</a></li>
+
+                                         <li th:if="${session.username} == null">
+                                            <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                                         </li>
+                                    
+                                          <!-- Links según el rol -->
+                                          <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/admin/users}">Usuarios</a>
+                                          </li>
+
+                                           <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/eventos}">Eventos</a>
+                                          </li>
+
+
+                                          <li th:if="${session.username} != null">
+                                              <a th:href="@{/auth/logout}">Salir</a>
+                                          </li>
+                                    </ul>
+                                  
+                                        
+                                </nav>
+                                
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- header-end -->
+
+     <div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="bradcam_text text-center">
+                        <h3>Modificar Evento</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- bradcam_area_end  -->
+
+
+    <div class="page-wrapper bg-gra-03 p-t-45 p-b-50">
+        <div class="wrapper wrapper--w790">
+            <div class="card card-5">
+                <div class="card-heading">
+                    <h2 class="title">Editor de evento</h2>
+                </div>
+                <div class="card-body">
+                    <form th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'COORDINADOR'"
+                            th:action="@{/eventos/{id}/edit(id=${ev.id})}" method="post">
+
+                        <!-- CSRF (si usás Spring Security) -->
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <!-- Nombre / Título -->
+                        <div class="form-row">
+                            <div class="name">Título* &ensp;:&ensp;</div>
+                            <div class="value">
+                            <div class="input-group">
+                                <input class="input--style-5" type="text" id="nombre" name="nombre"
+                                    placeholder="Nombre del evento" required 
+                                    th:value="${ev.nombre}"/>
+                            </div>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="form-row">
+                            <div class="col-12">
+                            <div class="name">Descripción &ensp;:&ensp;</div>
+                            <div class="form-group">
+                                <textarea class="form-control w-100" id="descripcion" name="descripcion"
+                                        cols="30" rows="6"
+                                        placeholder="Descripción del evento (opcional)"
+                                        th:text="${ev.descripcion}"></textarea>
+                            </div>
+                            </div>
+                        </div>
+
+                        <!-- Fecha y hora local (datetime-local) -->
+                        <div class="form-row">
+                            <div class="name">Fecha y hora* &ensp;:&ensp;</div>
+                            <div class="value">
+                            <div class="input-group">
+                                <!-- nowLocal viene del controller: model.addAttribute("nowLocal", LocalDateTime.now()) -->
+                                <input class="input--style-5" type="datetime-local" id="fechaLocal" name="fechaLocal"
+                                    required 
+                                    th:value="${fechaLocalStr}" />
+                            </div>
+                            <small>Se tomará en tu zona local y se convertirá a UTC en el servidor.</small>
+                            </div>
+                        </div>
+
+
+                        
+
+
+                        <!-- Acciones -->
+                        <div class="actions">
+                            <button class="btn btn--radius-2 btn--red" type="submit">Confirmar</button>
+                            <a class="cancel-link" th:href="@{/eventos}">Cancelar</a>
+                        </div>
+
+                        <!-- Mensajes -->
+                        <div class="messages" style="margin-top:10px">
+                            <div class="msg-error" th:if="${error}" th:text="${error}"></div>
+                            <div class="msg-ok" th:if="${ok}" th:text="${ok}"></div>
+                        </div>
+                        </form>
+
+
+                        <h3>Miembros del evento</h3>
+
+                        <!-- Buscador por nombre/apellido -->
+                        <form th:action="@{|/eventos/${ev.id}/edit|}" method="get" style="margin-bottom:10px">
+                        <label>Agregar miembro: </label>
+                        <input type="text" name="q" placeholder="Buscar por nombre o apellido" th:value="${q}">
+                        <button type="submit">Buscar</button>
+                        <a th:href="@{|/eventos/${ev.id}/edit|}">Limpiar</a>
+                        </form>
+
+                        <div style="display:flex; gap:24px; align-items:flex-start;">
+                            <!-- Columna izquierda: resultados/buscador -->
+                            <div style="flex:1;">
+                                <h4>Resultados</h4>
+                                <table class="table">
+                                <thead>
+                                    <tr><th>Nombre</th><th>Apellido</th><th>Rol</th><th></th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="u : ${users}">
+                                    <td th:text="${u.nombre}">Nombre</td>
+                                    <td th:text="${u.apellido}">Apellido</td>
+                                    <td th:text="${u.rol}">ROL</td>
+                                    <td>
+                                        <!-- Mostrar 'Agregar' solo si NO es miembro -->
+                                        <form th:if="${!memberIds.contains(u.id)}"
+                                            th:action="@{|/eventos/${ev.id}/assign|}" method="post" style="display:inline">
+                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <input type="hidden" name="userId" th:value="${u.id}"/>
+                                        <input type="hidden" name="q" th:value="${q}"/>
+                                        <button type="submit">Agregar</button>
+                                        </form>
+                                        <!-- Si ya es miembro, mostrar deshabilitado -->
+                                        <span th:if="${memberIds.contains(u.id)}">Ya es miembro</span>
+                                    </td>
+                                    </tr>
+                                </tbody>
+                                </table>
+                            </div>
+
+                            <div style="flex:1;">
+                            <h4>Participantes actuales</h4>
+                            <table class="table">
+                                <thead>
+                                <tr><th>Usuario</th><th>Rol</th><th></th></tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="u : ${currentParticipants}">
+                                    <td th:text="${u.id}">1</td>
+                                    <td th:text="${u.nombre + ' ' + u.apellido}">Nombre Apellido</td>
+                                    <td th:text="${u.email}">correo@ejemplo.com</td>
+                                    <td th:text="${u.rol}">VOLUNTARIO</td>
+                                    <td>
+                                        <form th:action="@{|/eventos/${ev.id}/remove|}" method="post" style="display:inline">
+                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <input type="hidden" name="userId" th:value="${u.id}"/>
+                                        <input type="hidden" name="q" th:value="${q}"/>
+                                        <button type="submit" class="btn btn-sm btn-danger">Quitar</button>
+                                        </form>
+                                    </td>
+                                    </tr>
+                                <tr th:if="${#lists.isEmpty(ev.miembrosList)}">
+                                    <td colspan="3">Sin miembros asignados.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </div>
+
+                       
+                        </div>
+
+
+                        <hr/>
+<h3>Donaciones planificadas</h3>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Categoría</th>
+      <th>Descripción</th>
+      <th>Cantidad planificada</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="link : ${plannedDonations}"
+        th:with="d=${donationsById[link.donationId]}">
+      <td th:text="${link.donationId}">1</td>
+      <td th:text="${d != null ? d.categoria : '—'}">ALIMENTOS</td>
+      <td th:text="${d != null ? d.descripcion : '—'}">Caja</td>
+      <td th:text="${link.cantidad}">0</td>
+      <td>
+        <form th:action="@{|/eventos/${ev.id}/donaciones/quitar|}" method="post" style="display:inline">
+          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <input type="hidden" name="donationId" th:value="${link.donationId}"/>
+          <button type="submit" class="btn btn-sm btn-danger">Quitar</button>
+        </form>
+      </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(plannedDonations)}">
+      <td colspan="5">Sin donaciones planificadas.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 class="mt-3">Asignar / Actualizar donación</h4>
+<form th:action="@{|/eventos/${ev.id}/donaciones/asignar|}" method="post" class="form-inline" style="gap:8px;">
+  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+  <label for="donationId" style="margin-right:6px;">Donación:</label>
+  <select id="donationId" name="donationId" class="form-control" required>
+    <option th:each="d : ${allDonations}" th:value="${d.id}"
+            th:text="${'#' + d.id + ' - ' + d.categoria + ' - ' + d.descripcion}">
+      #1 - ALIMENTOS - Caja
+    </option>
+  </select>
+
+  <label for="cantidad" style="margin-left:12px; margin-right:6px;">Cantidad:</label>
+  <input id="cantidad" name="cantidad" type="number" min="0" class="form-control" value="0" required/>
+
+  <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+        <div class="register-panel">
+          
+          <div class="messages">
+            <div class="msg-error" th:if="${error}" th:text="${error}"></div>
+            <div class="msg-ok" th:if="${ok}" th:text="${ok}"></div>
+          </div>
+
+          <!-- Aviso si no es PRESIDENTE -->
+          <div th:if="${session.rol} != 'PRESIDENTE'">
+            <p class="notice">No tenés permisos para registrar usuarios.</p>
+            <p><a class="inline-link" th:href="@{/home}">Volver</a></p>
+          </div>
+
+          
+        </div>
+
+      </div>
+    </div>
+    </main>
+
+
+
+
+    <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+    <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+    <script th:src="@{/charifit/js/popper.min.js}"></script>
+    <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+    <script th:src="@{/charifit/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/charifit/js/isotope.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/ajax-form.js}"></script>
+    <script th:src="@{/charifit/js/waypoints.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.counterup.min.js}"></script>
+    <script th:src="@{/charifit/js/imagesloaded.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/scrollIt.js}"></script>
+    <script th:src="@{/charifit/js/jquery.scrollUp.min.js}"></script>
+    <script th:src="@{/charifit/js/wow.min.js}"></script>
+    <script th:src="@{/charifit/js/nice-select.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.slicknav.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.magnific-popup.min.js}"></script>
+    <script th:src="@{/charifit/js/plugins.js}"></script>
+    <script th:src="@{/charifit/js/gijgo.min.js}"></script>
+    <!--contact js-->
+    <script th:src="@{/charifit/js/contact.js}"></script>
+    <script th:src="@{/charifit/js/jquery.ajaxchimp.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.form.js}"></script>
+    <script th:src="@{/charifit/js/jquery.validate.min.js}"></script>
+    <script th:src="@{/charifit/js/mail-script.js}"></script>
+
+    <script th:src="@{/charifit/js/main.js}"></script>
+
+
+    <!-- tabla js -->
+    <script th:src="@{/tabla/js/jquery.min.js}"></script>
+    <script th:src="@{/tabla/js/popper.js}"></script>
+    <script th:src="@{/tabla/js/bootstrap.min.js}"></script>
+    <script th:src="@{/tabla/js/main.js}"></script>
+
+    <!-- botones js -->
+    <script th:src="@{/tabla/js/jquery.min.js}"></script>
+    <script th:src="@{/tabla/js/popper.js}"></script>
+    <script th:src="@{/tabla/js/bootstrap.min.js}"></script>
+    <script th:src="@{/tabla/js/main.js}"></script>
+
+</body>
+</html>

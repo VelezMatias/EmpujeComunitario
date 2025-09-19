@@ -8,9 +8,25 @@ import ong.Role;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import ong.ApiResponse;
+import ong.AssignDonationToEventRequest;
+import ong.RemoveDonationFromEventRequest;
+import ong.ListDonationsByEventRequest;
+import ong.ListDonationsByEventResponse;
+import ong.EventDonationLink;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+<<<<<<< Updated upstream
+=======
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.function.Function;
+import java.util.List;
+
+>>>>>>> Stashed changes
 
 
 @Controller
@@ -18,9 +34,19 @@ import java.time.ZoneId;
 public class EventController {
 
     private final EventGateway gateway;
+<<<<<<< Updated upstream
 
     public EventController(EventGateway gateway) {
         this.gateway = gateway;
+=======
+    private final UserServiceGrpc.UserServiceBlockingStub users;
+    private final DonationServiceGrpc.DonationServiceBlockingStub donations; // <-- NUEVO
+
+    public EventController(EventGateway gateway, UserServiceGrpc.UserServiceBlockingStub users, DonationServiceGrpc.DonationServiceBlockingStub donations ) {
+        this.gateway = gateway;
+        this.users = users;
+        this.donations = donations;
+>>>>>>> Stashed changes
     }
 
    
@@ -113,6 +139,7 @@ public String list(Model model) {
         return "events/edit"; // form con: nombre, descripcion, fechaLocal
     }
 
+<<<<<<< Updated upstream
     @PostMapping("/{id}/edit")
     public String update(
             @PathVariable int id, HttpSession s, Model model,
@@ -133,8 +160,80 @@ public String list(Model model) {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             return "events/edit";
-        }
+=======
+    if (q != null && !q.isBlank()) {
+        String qLower = q.toLowerCase();
+        allUsers = allUsers.stream().filter(u ->
+                (u.getNombre() != null && u.getNombre().toLowerCase().contains(qLower)) ||
+                (u.getApellido() != null && u.getApellido().toLowerCase().contains(qLower))
+        ).collect(java.util.stream.Collectors.toList());
     }
+
+    java.util.Set<Integer> memberIds = ev.getMiembrosList().stream()
+            .collect(java.util.stream.Collectors.toSet());
+
+    java.util.List<ong.User> currentParticipants = usersAllRaw.stream()
+            .filter(u -> memberIds.contains(u.getId()))
+            .collect(java.util.stream.Collectors.toList());
+
+    // --- donaciones planificadas del evento ---
+    var planned = gateway.listDonationsByEvent(id);
+    model.addAttribute("plannedDonations", planned);
+
+    // --- catálogo de donaciones + mapa id->donation ---
+    java.util.List<ong.DonationItem> allDonations;
+    try {
+        allDonations = donations.listDonationItems(ong.Empty.getDefaultInstance()).getItemsList();
+    } catch (Exception e) {
+        allDonations = java.util.List.of();
+    }
+    var donationsById = allDonations.stream()
+            .collect(Collectors.toMap(ong.DonationItem::getId, Function.identity()));
+    model.addAttribute("allDonations", allDonations);
+    model.addAttribute("donationsById", donationsById);
+
+    // --- atributos existentes ---
+    model.addAttribute("ev", ev);
+    model.addAttribute("fechaLocalStr", fechaLocalStr);
+    model.addAttribute("users", allUsers);
+    model.addAttribute("memberIds", memberIds);
+    model.addAttribute("q", q == null ? "" : q);
+    model.addAttribute("currentParticipants", currentParticipants);
+
+    return "events/edit_event"; // ojo con el nombre de la vista
+}
+
+
+
+   @PostMapping("/{id}/edit")
+public String update(@PathVariable int id,
+                     HttpSession s, Model model,
+                     @RequestParam String nombre,
+                     @RequestParam(required = false) String descripcion,
+                     @RequestParam String fechaLocal) {
+    if (!canManage(s)) return "redirect:/eventos";
+    try {
+        var ldt = LocalDateTime.parse(fechaLocal);
+        if (!ldt.isAfter(LocalDateTime.now())) {
+            model.addAttribute("error", "La fecha/hora debe ser a futuro.");
+            // repoblar el modelo para re-renderizar la misma vista
+            return editForm(id, null, s, model);
+>>>>>>> Stashed changes
+        }
+
+        var zona = ZoneId.systemDefault();
+        var resp = gateway.updateFromLocal(id, nombre.trim(), descripcion, ldt, zona, userId(s), role(s));
+        if (!resp.getSuccess()) {
+            model.addAttribute("error", resp.getMessage());
+            return editForm(id, null, s, model);
+        }
+        return "redirect:/eventos/" + id + "/edit";
+    } catch (Exception e) {
+        model.addAttribute("error", e.getMessage());
+        return editForm(id, null, s, model);
+    }
+}
+
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable int id, HttpSession s) {
@@ -170,6 +269,29 @@ public String debug() {
         return "APP_ERROR | " + t.getClass().getSimpleName() + " | " + t.getMessage();
     }
 }
+
+
+
+    @PostMapping("/{id}/donaciones/asignar")
+    public String asignarDonacion(@PathVariable int id,
+                                @RequestParam int donationId,
+                                @RequestParam int cantidad,
+                                HttpSession s, RedirectAttributes ra) {
+        if (!canManage(s)) return "redirect:/eventos";
+        var r = gateway.assignDonation(userId(s), role(s), id, donationId, cantidad);
+        ra.addFlashAttribute(r.getSuccess() ? "ok" : "error", r.getMessage());
+        return "redirect:/eventos/" + id + "/edit";
+    }
+
+    @PostMapping("/{id}/donaciones/quitar")
+    public String quitarDonacion(@PathVariable int id,
+                                @RequestParam int donationId,
+                                HttpSession s, RedirectAttributes ra) {
+        if (!canManage(s)) return "redirect:/eventos";
+        var r = gateway.removeDonation(userId(s), role(s), id, donationId);
+        ra.addFlashAttribute(r.getSuccess() ? "ok" : "error", r.getMessage());
+        return "redirect:/eventos/" + id + "/edit";
+    }
 
 
     

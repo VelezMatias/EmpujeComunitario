@@ -6,6 +6,8 @@ from app import models
 import ong_pb2 as pb
 import ong_pb2_grpc as rpc
 
+from app.db import get_conn
+
 
 # === Helpers de roles/fechas ===
 
@@ -37,6 +39,9 @@ class EventServiceServicer(rpc.EventServiceServicer):
     Implementación sin ORM, delegando todo a app.models (consultas directas).
     Asegurate de exponer en models las funciones listadas abajo.
     """
+
+    def __init__(self):
+        pass
 
     # --------- CREATE ---------
     def CreateEvent(self, request: pb.CreateEventRequest, context):
@@ -224,6 +229,48 @@ class EventServiceServicer(rpc.EventServiceServicer):
 
         except Exception as e:
             return pb.ApiResponse(success=False, message=f"Error: {e}")
+        
+
+
+    def AssignDonationToEvent(self, request, context):
+        conn = get_conn()
+        try:
+            ok, msg = models.assign_donation_to_event(
+                conn,
+                request.event_id,
+                request.donation_id,
+                request.cantidad,
+            )
+            return pb.ApiResponse(success=ok, message=msg)
+        finally:
+            conn.close()
+
+    def RemoveDonationFromEvent(self, request, context):
+        conn = get_conn()
+        try:
+            ok, msg = models.remove_donation_from_event(
+                conn,
+                request.event_id,
+                request.donation_id,
+            )
+            return pb.ApiResponse(success=ok, message=msg)
+        finally:
+            conn.close()
+
+    def ListDonationsByEvent(self, request, context):
+        conn = get_conn()
+        try:
+            rows = models.list_donations_by_event(conn, request.event_id)
+            items = [
+                pb.EventDonationLink(
+                    donation_id=(r["donacion_id"] if isinstance(r, dict) else r[0]),
+                    cantidad=(r["cantidad"] if isinstance(r, dict) else (r[1] if len(r) > 1 else 0))
+                )
+                for r in rows
+            ]
+            return pb.ListDonationsByEventResponse(items=items)
+        finally:
+            conn.close()
 
 
 
@@ -264,3 +311,9 @@ def _to_iso_utc_safe(fecha):
         return fecha.isoformat()
     except Exception:
         return ""
+    
+
+    
+    
+
+    

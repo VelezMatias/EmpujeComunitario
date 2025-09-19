@@ -172,4 +172,64 @@ def quitar_miembro_evento(event_id: int, user_id: int) -> int:
 
 def usuario_por_id(id_usuario: int):
     sql = "SELECT id, activo FROM usuarios WHERE id = %s LIMIT 1"
+<<<<<<< Updated upstream
     return fetch_one(sql, (id_usuario,))
+=======
+    return fetch_one(sql, (id_usuario,))
+
+
+
+#------------- Evento - Donacion ------------------------------
+def assign_donation_to_event(conn, event_id: int, donation_id: int, cantidad: int):
+    if cantidad is None or cantidad < 0:
+        return False, "Cantidad inválida"
+    with conn.cursor() as cur:
+        # (opcional) validar existencia
+        cur.execute("SELECT 1 FROM eventos WHERE id=%s", (event_id,))
+        if not cur.fetchone():
+            return False, "Evento no existe"
+        cur.execute("SELECT 1 FROM donaciones WHERE id=%s AND eliminado=0", (donation_id,))
+        if not cur.fetchone():
+            return False, "Donación no existe o está eliminada"
+
+        # upsert por UNIQUE(evento_id, donacion_id)
+        cur.execute("""
+            INSERT INTO evento_donacion (evento_id, donacion_id, cantidad)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE cantidad = VALUES(cantidad)
+        """, (event_id, donation_id, cantidad))
+    conn.commit()
+    return True, "OK"
+
+
+def remove_donation_from_event(conn, event_id: int, donation_id: int):
+    with conn.cursor() as cur:
+        cur.execute("""
+            DELETE FROM evento_donacion
+            WHERE evento_id=%s AND donacion_id=%s
+        """, (event_id, donation_id))
+    conn.commit()
+    return True, "OK"
+
+
+def list_donations_by_event(conn, event_id: int):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT donacion_id, COALESCE(cantidad,0) AS cantidad
+            FROM evento_donacion
+            WHERE evento_id=%s
+            ORDER BY donacion_id
+        """, (event_id,))
+        rows = cur.fetchall()
+    # Soporta tanto DictCursor como cursor por defecto:
+    result = []
+    for r in rows:
+        if isinstance(r, dict):
+            result.append({"donacion_id": r["donacion_id"], "cantidad": r["cantidad"]})
+        else:
+            result.append({"donacion_id": r[0], "cantidad": r[1]})
+    return result
+
+
+
+>>>>>>> Stashed changes

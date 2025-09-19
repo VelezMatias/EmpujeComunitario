@@ -517,6 +517,21 @@ class EventServiceStub(object):
                 request_serializer=ong__pb2.Empty.SerializeToString,
                 response_deserializer=ong__pb2.ListEventsResponse.FromString,
                 _registered_method=True)
+        self.AssignDonationToEvent = channel.unary_unary(
+                '/ong.EventService/AssignDonationToEvent',
+                request_serializer=ong__pb2.AssignDonationToEventRequest.SerializeToString,
+                response_deserializer=ong__pb2.ApiResponse.FromString,
+                _registered_method=True)
+        self.RemoveDonationFromEvent = channel.unary_unary(
+                '/ong.EventService/RemoveDonationFromEvent',
+                request_serializer=ong__pb2.RemoveDonationFromEventRequest.SerializeToString,
+                response_deserializer=ong__pb2.ApiResponse.FromString,
+                _registered_method=True)
+        self.ListDonationsByEvent = channel.unary_unary(
+                '/ong.EventService/ListDonationsByEvent',
+                request_serializer=ong__pb2.ListDonationsByEventRequest.SerializeToString,
+                response_deserializer=ong__pb2.ListDonationsByEventResponse.FromString,
+                _registered_method=True)
 
 
 class EventServiceServicer(object):
@@ -564,6 +579,24 @@ class EventServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def AssignDonationToEvent(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RemoveDonationFromEvent(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListDonationsByEvent(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_EventServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -601,6 +634,21 @@ def add_EventServiceServicer_to_server(servicer, server):
                     servicer.ListEvents,
                     request_deserializer=ong__pb2.Empty.FromString,
                     response_serializer=ong__pb2.ListEventsResponse.SerializeToString,
+            ),
+            'AssignDonationToEvent': grpc.unary_unary_rpc_method_handler(
+                    servicer.AssignDonationToEvent,
+                    request_deserializer=ong__pb2.AssignDonationToEventRequest.FromString,
+                    response_serializer=ong__pb2.ApiResponse.SerializeToString,
+            ),
+            'RemoveDonationFromEvent': grpc.unary_unary_rpc_method_handler(
+                    servicer.RemoveDonationFromEvent,
+                    request_deserializer=ong__pb2.RemoveDonationFromEventRequest.FromString,
+                    response_serializer=ong__pb2.ApiResponse.SerializeToString,
+            ),
+            'ListDonationsByEvent': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListDonationsByEvent,
+                    request_deserializer=ong__pb2.ListDonationsByEventRequest.FromString,
+                    response_serializer=ong__pb2.ListDonationsByEventResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -792,6 +840,87 @@ class EventService(object):
             '/ong.EventService/ListEvents',
             ong__pb2.Empty.SerializeToString,
             ong__pb2.ListEventsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AssignDonationToEvent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.EventService/AssignDonationToEvent',
+            ong__pb2.AssignDonationToEventRequest.SerializeToString,
+            ong__pb2.ApiResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RemoveDonationFromEvent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.EventService/RemoveDonationFromEvent',
+            ong__pb2.RemoveDonationFromEventRequest.SerializeToString,
+            ong__pb2.ApiResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListDonationsByEvent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.EventService/ListDonationsByEvent',
+            ong__pb2.ListDonationsByEventRequest.SerializeToString,
+            ong__pb2.ListDonationsByEventResponse.FromString,
             options,
             channel_credentials,
             insecure,

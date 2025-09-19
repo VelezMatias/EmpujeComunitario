@@ -5,6 +5,8 @@ import ong.Empty;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
+import java.util.List;
+
 
 @Service
 public class EventGateway {
@@ -21,6 +23,35 @@ public class EventGateway {
                 .setActorRole(role)
                 .build();
     }
+
+    public ApiResponse assignDonation(int actorId, Role role,
+                                      int eventId, int donationId, int cantidad) {
+        var req = AssignDonationToEventRequest.newBuilder()
+                .setAuth(auth(actorId, role))
+                .setEventId(eventId)
+                .setDonationId(donationId)
+                .setCantidad(cantidad)
+                .build();
+        return stub.assignDonationToEvent(req);
+    }
+
+    public ApiResponse removeDonation(int actorId, Role role,
+                                      int eventId, int donationId) {
+        var req = RemoveDonationFromEventRequest.newBuilder()
+                .setAuth(auth(actorId, role))
+                .setEventId(eventId)
+                .setDonationId(donationId)
+                .build();
+        return stub.removeDonationFromEvent(req);
+    }
+
+    public List<EventDonationLink> listDonationsByEvent(int eventId) {
+        var req = ListDonationsByEventRequest.newBuilder()
+                .setEventId(eventId)
+                .build();
+        return stub.listDonationsByEvent(req).getItemsList();
+    }
+
 
     // Helper: LocalDateTime (zona local) -> ISO-8601 UTC string con 'Z'
     private static String toIsoUtc(LocalDateTime local, ZoneId zone) {
@@ -118,4 +149,11 @@ public class EventGateway {
                 .setCantidad(cantidad)
                 .build();
     }
+
+
+
+
+
+
+
 }
