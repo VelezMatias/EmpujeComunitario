@@ -105,4 +105,37 @@ public String create(@RequestParam("categoria") Category categoria,
 }
 
 
+    // EDIT (form)
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable int id, HttpSession s, Model model) {
+        if (!canManage(s)) return "redirect:/donaciones";
+        DonationItem item = gateway.list().getItemsList().stream()
+                .filter(i -> i.getId() == id).findFirst().orElse(null);
+        if (item == null) return "redirect:/donaciones";
+        model.addAttribute("isEdit", true);
+        model.addAttribute("item", item);
+        model.addAttribute("categorias", Category.values());
+        return "donaciones/form";
+    }
+
+    // UPDATE
+    @PostMapping("/{id}")
+    public String update(@PathVariable int id,
+                         @RequestParam("descripcion") String descripcion,
+                         @RequestParam("cantidad") int cantidad,
+                         HttpSession s, Model model) {
+        if (!canManage(s)) return "redirect:/donaciones";
+        if (descripcion == null || descripcion.isBlank() || cantidad < 0) {
+            model.addAttribute("error", "Descripción requerida y cantidad >= 0");
+            return editForm(id, s, model);
+        }
+        ApiResponse res = gateway.update(id, descripcion.trim(), cantidad, userId(s), role(s));
+        if (!res.getSuccess()) {
+            model.addAttribute("error", res.getMessage());
+            return editForm(id, s, model);
+        }
+        return "redirect:/donaciones";
+    }
+
+
 }
