@@ -6,12 +6,12 @@ __consumer_offsets 32 0
 oferta-donaciones 2 0
 __consumer_offsets 25 10
 __consumer_offsets 41 0
-__consumer_offsets 49 0
+__consumer_offsets 49 1
 baja-evento-solidario 1 1
 __consumer_offsets 40 3
 __consumer_offsets 27 0
 eventos-solidarios 2 1
-solicitud-donaciones 1 3
+solicitud-donaciones 1 6
 adhesion-evento.42 2 0
 baja-solicitud-donaciones 1 0
 __consumer_offsets 12 0
@@ -21,7 +21,7 @@ __consumer_offsets 10 0
 baja-evento-solidario 2 0
 __consumer_offsets 11 3
 transferencia-donaciones.42 2 0
-__consumer_offsets 20 3
+__consumer_offsets 20 4
 oferta-donaciones 1 0
 transferencia-donaciones.42 1 0
 __consumer_offsets 18 0
@@ -30,7 +30,7 @@ __consumer_offsets 48 0
 adhesion-evento.42 0 0
 eventos-solidarios 1 0
 __consumer_offsets 23 3
-__consumer_offsets 42 0
+__consumer_offsets 42 10
 __consumer_offsets 28 8
 __consumer_offsets 4 0
 __consumer_offsets 1 0
@@ -51,7 +51,7 @@ __consumer_offsets 8 0
 __consumer_offsets 24 0
 adhesion-evento.42 1 0
 __consumer_offsets 3 0
-solicitud-donaciones 2 3
+solicitud-donaciones 2 5
 __consumer_offsets 17 0
 __consumer_offsets 39 0
 solicitud-donaciones 0 0
