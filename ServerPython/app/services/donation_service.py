@@ -1,6 +1,6 @@
 # ServerPython/app/services/donation_service.py
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import datetime
+from typing import Optional
 
 from app.db import fetch_one, fetch_all, execute
 import ong_pb2 as pb
@@ -21,26 +21,27 @@ NAME_TO_ENUM = {
 }
 ENUM_TO_NAME = {v: k for k, v in NAME_TO_ENUM.items()}
 
-def _to_iso_utc_safe(fecha):
+def _to_iso_local(fecha):
+    """
+    Devuelve la fecha tal cual LOCAL (sin 'Z'), formato ISO compacto "YYYY-MM-DDTHH:MM:SS".
+    No fuerza UTC.
+    """
     if not fecha:
         return ""
     try:
         if isinstance(fecha, str):
+            # Formatos comunes de MySQL
             try:
                 fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S')
             except Exception:
-                s = fecha[:-1] + '+00:00' if fecha.endswith('Z') else fecha
-                fecha = datetime.fromisoformat(s)
-        if fecha.tzinfo is None:
-            fecha = fecha.replace(tzinfo=timezone.utc)
-        else:
-            fecha = fecha.astimezone(timezone.utc)
-        return fecha.isoformat()
+                if fecha.endswith('Z'):
+                    fecha = fecha[:-1]
+                fecha = datetime.fromisoformat(fecha)
+        return fecha.strftime('%Y-%m-%dT%H:%M:%S')
     except Exception:
         return ""
 
 def _categoria_id_from_enum(cat_enum: pb.Category) -> Optional[int]:
-    """Busca el ID en tabla categorias a partir del nombre asociado al enum."""
     nombre = ENUM_TO_NAME.get(cat_enum)
     if not nombre:
         return None
@@ -60,9 +61,9 @@ def _row_to_pb(r: dict) -> pb.DonationItem:
         descripcion=r.get("descripcion") or "",
         cantidad=int(r.get("cantidad") or 0),
         eliminado=bool(r.get("eliminado") or 0),
-        created_at=_to_iso_utc_safe(r.get("fecha_alta")),
+        created_at=_to_iso_local(r.get("fecha_alta")),
         created_by=int(r.get("usuario_alta") or 0),
-        updated_at=_to_iso_utc_safe(r.get("fecha_modificacion")),
+        updated_at=_to_iso_local(r.get("fecha_modificacion")),
         updated_by=int(r.get("usuario_modificacion") or 0),
     )
 
@@ -80,13 +81,17 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             if request.cantidad < 0:
                 raise ValueError("La cantidad no puede ser negativa.")
 
+            # Fijamos TZ de la SESIÓN (solo para esta conexión del servicio) a -03:00
+            execute("SET time_zone = '-03:00'")
+
             cat_id = _categoria_id_from_enum(request.categoria)
             if cat_id is None:
                 raise ValueError("Categoría inexistente.")
 
+            # Guarda hora local (NOW) en fecha_alta (TIMESTAMP) y usuario_alta
             sql = """
                 INSERT INTO donaciones (categoria_id, descripcion, cantidad, eliminado, fecha_alta, usuario_alta)
-                VALUES (%s, %s, %s, 0, UTC_TIMESTAMP(), %s)
+                VALUES (%s, %s, %s, 0, NOW(), %s)
             """
             _, last_id = execute(sql, (cat_id, request.descripcion.strip(), int(request.cantidad), int(request.auth.actor_id)))
             return pb.ApiResponse(success=True, message=f"Donación creada (id={last_id}).")
@@ -105,16 +110,19 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             if request.cantidad < 0:
                 raise ValueError("La cantidad no puede ser negativa.")
 
-            # Verificar existencia
+            execute("SET time_zone = '-03:00'")
+
             row = fetch_one("SELECT id FROM donaciones WHERE id=%s LIMIT 1", (int(request.id),))
             if not row:
                 return pb.ApiResponse(success=False, message="Donación no encontrada.")
 
+            # fecha_modificacion es TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+            # Forzamos NOW() (local) y usuario_modificacion
             sql = """
                 UPDATE donaciones
                    SET descripcion=%s,
                        cantidad=%s,
-                       fecha_modificacion=UTC_TIMESTAMP(),
+                       fecha_modificacion=NOW(),
                        usuario_modificacion=%s
                  WHERE id=%s
             """
@@ -131,6 +139,9 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
     def SoftDeleteDonationItem(self, request: pb.SoftDeleteDonationRequest, context):
         try:
             _require_vocal_o_presidente(request.auth)
+
+            execute("SET time_zone = '-03:00'")
+
             row = fetch_one("SELECT id FROM donaciones WHERE id=%s LIMIT 1", (int(request.id),))
             if not row:
                 return pb.ApiResponse(success=False, message="Donación no encontrada.")
@@ -138,7 +149,7 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             sql = """
                 UPDATE donaciones
                    SET eliminado=1,
-                       fecha_modificacion=UTC_TIMESTAMP(),
+                       fecha_modificacion=NOW(),
                        usuario_modificacion=%s
                  WHERE id=%s
             """
@@ -151,16 +162,18 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             print("[DONACIONES][Delete][ERR]", e)
             return pb.ApiResponse(success=False, message="Error interno al eliminar.")
 
-    # Listado (muestra activos y eliminados, con etiqueta)
+    # Listado
     def ListDonationItems(self, request: pb.Empty, context):
         try:
+            execute("SET time_zone = '-03:00'")
+
             rows = fetch_all("""
                 SELECT d.id, d.categoria_id, d.descripcion, d.cantidad, d.eliminado,
                        d.fecha_alta, d.usuario_alta, d.fecha_modificacion, d.usuario_modificacion
                   FROM donaciones d
                  ORDER BY d.eliminado ASC, d.categoria_id, d.descripcion
             """)
-            items = [ _row_to_pb(r) for r in (rows or []) ]
+            items = [_row_to_pb(r) for r in (rows or [])]
             return pb.ListDonationsResponse(items=items)
         except Exception as e:
             print("[DONACIONES][List][ERR]", e)

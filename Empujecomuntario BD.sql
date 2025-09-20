@@ -70,8 +70,8 @@ CREATE TABLE `donaciones` (
 -- Se agregan columnas en tabla `donaciones` para Auditoria de Modificacion
 --
 ALTER TABLE `donaciones`
-  ADD COLUMN `fecha_modificacion` DATETIME NULL,
-  ADD COLUMN `usuario_modificacion` INT NULL,
+  ADD COLUMN `fecha_modificacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN `usuario_modificacion` int DEFAULT NULL,
   ADD CONSTRAINT `donaciones_ibfk_3` FOREIGN KEY (`usuario_modificacion`) REFERENCES `usuarios`(`id`);
 
 --
