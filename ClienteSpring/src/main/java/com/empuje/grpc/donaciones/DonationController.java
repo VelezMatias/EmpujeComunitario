@@ -137,5 +137,14 @@ public String create(@RequestParam("categoria") Category categoria,
         return "redirect:/donaciones";
     }
 
+        // DELETE lógico
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable int id, HttpSession s) {
+        if (!canManage(s)) return "redirect:/donaciones";
+        gateway.softDelete(id, userId(s), role(s));
+        return "redirect:/donaciones";
+    }
+
+
 
 }
