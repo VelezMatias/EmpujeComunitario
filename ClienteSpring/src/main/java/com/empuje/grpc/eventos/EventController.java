@@ -4,6 +4,8 @@ import com.empuje.grpc.web.EventGateway;
 import jakarta.servlet.http.HttpSession;
 import ong.ListEventsResponse;
 import ong.Role;
+import ong.UserServiceGrpc;            
+import ong.DonationServiceGrpc;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,14 +21,12 @@ import ong.EventDonationLink;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-<<<<<<< Updated upstream
-=======
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.List;
+import java.util.Collections;
 
->>>>>>> Stashed changes
 
 
 @Controller
@@ -34,11 +34,6 @@ import java.util.List;
 public class EventController {
 
     private final EventGateway gateway;
-<<<<<<< Updated upstream
-
-    public EventController(EventGateway gateway) {
-        this.gateway = gateway;
-=======
     private final UserServiceGrpc.UserServiceBlockingStub users;
     private final DonationServiceGrpc.DonationServiceBlockingStub donations; // <-- NUEVO
 
@@ -46,7 +41,6 @@ public class EventController {
         this.gateway = gateway;
         this.users = users;
         this.donations = donations;
->>>>>>> Stashed changes
     }
 
    
@@ -78,22 +72,22 @@ public class EventController {
     }
 
     @GetMapping
-public String list(Model model) {
-    try {
-        var res = gateway.listAll();
-        model.addAttribute("events", res.getEventsList());
-        model.addAttribute("eventsCount", res.getEventsCount());
-    } catch (io.grpc.StatusRuntimeException sre) {
-        model.addAttribute("error", "gRPC: " + sre.getStatus() + " - " + sre.getStatus().getDescription());
-        model.addAttribute("events", java.util.List.of());
-        model.addAttribute("eventsCount", 0);
-    } catch (Exception ex) {
-        model.addAttribute("error", "Error listando eventos: " + ex.getMessage());
-        model.addAttribute("events", java.util.List.of());
-        model.addAttribute("eventsCount", 0);
+    public String list(Model model) {
+        try {
+            var res = gateway.listAll();
+            model.addAttribute("events", res.getEventsList());
+            model.addAttribute("eventsCount", res.getEventsCount());
+        } catch (io.grpc.StatusRuntimeException sre) {
+            model.addAttribute("error", "gRPC: " + sre.getStatus() + " - " + sre.getStatus().getDescription());
+            model.addAttribute("events", java.util.List.of());
+            model.addAttribute("eventsCount", 0);
+        } catch (Exception ex) {
+            model.addAttribute("error", "Error listando eventos: " + ex.getMessage());
+            model.addAttribute("events", java.util.List.of());
+            model.addAttribute("eventsCount", 0);
+        }
+        return "events/list";
     }
-    return "events/list";
-}
 
     @GetMapping("/new")
     public String newForm(HttpSession s, Model model) {
@@ -129,38 +123,39 @@ public String list(Model model) {
             }
     }
 
-    @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable int id, HttpSession s, Model model) {
-        if (!canManage(s)) return "redirect:/eventos";
-        var list = gateway.listAll().getEventsList();
-        var ev = list.stream().filter(x -> x.getId() == id).findFirst().orElse(null);
-        if (ev == null) return "redirect:/eventos";
-        model.addAttribute("ev", ev);
-        return "events/edit"; // form con: nombre, descripcion, fechaLocal
-    }
+   @GetMapping("/{id}/edit")
+public String editForm(@PathVariable int id,
+                       @RequestParam(name = "q", required = false) String q,
+                       HttpSession s,
+                       Model model) {
+    if (!canManage(s)) return "redirect:/eventos";
 
-<<<<<<< Updated upstream
-    @PostMapping("/{id}/edit")
-    public String update(
-            @PathVariable int id, HttpSession s, Model model,
-            @RequestParam String nombre,
-            @RequestParam(required = false) String descripcion,
-            @RequestParam String fechaLocal
-    ) {
-        if (!canManage(s)) return "redirect:/eventos";
-        try {
-            LocalDateTime ldt = LocalDateTime.parse(fechaLocal);
-            if (!ldt.isAfter(LocalDateTime.now())) {
-                model.addAttribute("error", "La fecha/hora debe ser a futuro.");
-                return "events/edit";
-            }
-            ZoneId zona = ZoneId.systemDefault();
-            gateway.updateFromLocal(id, nombre.trim(), descripcion, ldt, zona, userId(s), role(s));
-            return "redirect:/eventos";
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "events/edit";
-=======
+    // Buscar el evento
+    var ev = gateway.listAll().getEventsList().stream()
+            .filter(x -> x.getId() == id)
+            .findFirst()
+            .orElse(null);
+    if (ev == null) return "redirect:/eventos";
+
+    // fechaLocalStr desde ev.fechaHora (ISO-8601 UTC)
+    String fechaLocalStr = "";
+    try {
+        var odt = java.time.OffsetDateTime.parse(ev.getFechaHora());
+        var ldtLocal = odt.atZoneSameInstant(java.time.ZoneId.systemDefault()).toLocalDateTime();
+        fechaLocalStr = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm").format(ldtLocal);
+    } catch (Exception ignore) {}
+
+    // Usuarios (para buscar/agregar)
+    java.util.List<ong.User> usersAllRaw;
+    java.util.List<ong.User> allUsers;
+    try {
+        var usersResp = users.listUsers(ong.Empty.getDefaultInstance());
+        usersAllRaw = new java.util.ArrayList<>(usersResp.getUsersList());
+        allUsers    = new java.util.ArrayList<>(usersResp.getUsersList());
+    } catch (Exception ex) {
+        usersAllRaw = new java.util.ArrayList<>();
+        allUsers    = new java.util.ArrayList<>();
+    }
     if (q != null && !q.isBlank()) {
         String qLower = q.toLowerCase();
         allUsers = allUsers.stream().filter(u ->
@@ -169,18 +164,18 @@ public String list(Model model) {
         ).collect(java.util.stream.Collectors.toList());
     }
 
+    // Miembros actuales
     java.util.Set<Integer> memberIds = ev.getMiembrosList().stream()
             .collect(java.util.stream.Collectors.toSet());
-
     java.util.List<ong.User> currentParticipants = usersAllRaw.stream()
             .filter(u -> memberIds.contains(u.getId()))
             .collect(java.util.stream.Collectors.toList());
 
-    // --- donaciones planificadas del evento ---
+    // Donaciones planificadas del evento
     var planned = gateway.listDonationsByEvent(id);
     model.addAttribute("plannedDonations", planned);
 
-    // --- catálogo de donaciones + mapa id->donation ---
+    // Catálogo de donaciones + mapa id -> DonationItem
     java.util.List<ong.DonationItem> allDonations;
     try {
         allDonations = donations.listDonationItems(ong.Empty.getDefaultInstance()).getItemsList();
@@ -188,11 +183,20 @@ public String list(Model model) {
         allDonations = java.util.List.of();
     }
     var donationsById = allDonations.stream()
-            .collect(Collectors.toMap(ong.DonationItem::getId, Function.identity()));
+            .collect(java.util.stream.Collectors.toMap(ong.DonationItem::getId, java.util.function.Function.identity()));
     model.addAttribute("allDonations", allDonations);
     model.addAttribute("donationsById", donationsById);
 
-    // --- atributos existentes ---
+    List<EventDonationLink> items;
+    try {
+        items = gateway.listDonationsByEvent(id); // <- hoy retorna List<EventDonationLink>
+    } catch (io.grpc.StatusRuntimeException ex) {
+        System.err.println("gRPC ListDonationsByEvent failed: " + ex.getMessage());
+        items = Collections.emptyList();
+    }
+
+
+    // Atributos para la vista
     model.addAttribute("ev", ev);
     model.addAttribute("fechaLocalStr", fechaLocalStr);
     model.addAttribute("users", allUsers);
@@ -200,39 +204,38 @@ public String list(Model model) {
     model.addAttribute("q", q == null ? "" : q);
     model.addAttribute("currentParticipants", currentParticipants);
 
-    return "events/edit_event"; // ojo con el nombre de la vista
+    return "events/edit_event";
 }
 
 
 
    @PostMapping("/{id}/edit")
-public String update(@PathVariable int id,
-                     HttpSession s, Model model,
-                     @RequestParam String nombre,
-                     @RequestParam(required = false) String descripcion,
-                     @RequestParam String fechaLocal) {
-    if (!canManage(s)) return "redirect:/eventos";
-    try {
-        var ldt = LocalDateTime.parse(fechaLocal);
-        if (!ldt.isAfter(LocalDateTime.now())) {
-            model.addAttribute("error", "La fecha/hora debe ser a futuro.");
-            // repoblar el modelo para re-renderizar la misma vista
-            return editForm(id, null, s, model);
->>>>>>> Stashed changes
-        }
+    public String update(@PathVariable int id,
+                        HttpSession s, Model model,
+                        @RequestParam String nombre,
+                        @RequestParam(required = false) String descripcion,
+                        @RequestParam String fechaLocal) {
+        if (!canManage(s)) return "redirect:/eventos";
+        try {
+            var ldt = LocalDateTime.parse(fechaLocal);
+            if (!ldt.isAfter(LocalDateTime.now())) {
+                model.addAttribute("error", "La fecha/hora debe ser a futuro.");
+                // repoblar el modelo para re-renderizar la misma vista
+                return editForm(id, null, s, model);
+            }
 
-        var zona = ZoneId.systemDefault();
-        var resp = gateway.updateFromLocal(id, nombre.trim(), descripcion, ldt, zona, userId(s), role(s));
-        if (!resp.getSuccess()) {
-            model.addAttribute("error", resp.getMessage());
+            var zona = ZoneId.systemDefault();
+            var resp = gateway.updateFromLocal(id, nombre.trim(), descripcion, ldt, zona, userId(s), role(s));
+            if (!resp.getSuccess()) {
+                model.addAttribute("error", resp.getMessage());
+                return editForm(id, null, s, model);
+            }
+            return "redirect:/eventos/" + id + "/edit";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
             return editForm(id, null, s, model);
         }
-        return "redirect:/eventos/" + id + "/edit";
-    } catch (Exception e) {
-        model.addAttribute("error", e.getMessage());
-        return editForm(id, null, s, model);
     }
-}
 
 
     @PostMapping("/{id}/delete")
@@ -244,31 +247,31 @@ public String update(@PathVariable int id,
 
 
     @GetMapping("/debug")
-@ResponseBody
-public String debug() {
-    try {
-        System.out.println("[Controller] /eventos/debug → gateway.listAll()");
-        var res = gateway.listAll();
-        StringBuilder sb = new StringBuilder();
-        sb.append("OK | count=").append(res.getEventsCount());
-        if (res.getEventsCount() > 0) {
-            var e = res.getEventsList().get(0);
-            sb.append(" | first={id=").append(e.getId())
-              .append(", nombre=").append(e.getNombre())
-              .append(", fecha=").append(e.getFechaHora())
-              .append("}");
+    @ResponseBody
+    public String debug() {
+        try {
+            System.out.println("[Controller] /eventos/debug → gateway.listAll()");
+            var res = gateway.listAll();
+            StringBuilder sb = new StringBuilder();
+            sb.append("OK | count=").append(res.getEventsCount());
+            if (res.getEventsCount() > 0) {
+                var e = res.getEventsList().get(0);
+                sb.append(" | first={id=").append(e.getId())
+                .append(", nombre=").append(e.getNombre())
+                .append(", fecha=").append(e.getFechaHora())
+                .append("}");
+            }
+            return sb.toString();
+        } catch (io.grpc.StatusRuntimeException sre) {
+            // Error de gRPC (server no reachable, UNIMPLEMENTED, INTERNAL, etc.)
+            sre.printStackTrace();
+            return "GRPC_ERROR | status=" + sre.getStatus()
+                + " | desc=" + sre.getStatus().getDescription();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return "APP_ERROR | " + t.getClass().getSimpleName() + " | " + t.getMessage();
         }
-        return sb.toString();
-    } catch (io.grpc.StatusRuntimeException sre) {
-        // Error de gRPC (server no reachable, UNIMPLEMENTED, INTERNAL, etc.)
-        sre.printStackTrace();
-        return "GRPC_ERROR | status=" + sre.getStatus()
-             + " | desc=" + sre.getStatus().getDescription();
-    } catch (Throwable t) {
-        t.printStackTrace();
-        return "APP_ERROR | " + t.getClass().getSimpleName() + " | " + t.getMessage();
     }
-}
 
 
 
@@ -295,6 +298,6 @@ public String debug() {
 
 
     
-    
-
 }
+
+

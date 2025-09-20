@@ -132,6 +132,9 @@
                                               <a th:href="@{/auth/eventos}">Eventos</a>
                                           </li>
 
+                                          <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+                                            <a th:href="@{/donaciones}">Donaciones</a>
+                                          </li>
 
                                           <li th:if="${session.username} != null">
                                               <a th:href="@{/auth/logout}">Salir</a>

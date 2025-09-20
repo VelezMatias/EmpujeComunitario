@@ -159,6 +159,9 @@
                                               <a th:href="@{/eventos}">Eventos</a>
                                           </li>
 
+                                          <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+                                            <a th:href="@{/donaciones}">Donaciones</a>
+                                          </li>
 
                                           <li th:if="${session.username} != null">
                                               <a th:href="@{/auth/logout}">Salir</a>
@@ -334,58 +337,6 @@
 
                        
                         </div>
-
-
-                        <hr/>
-<h3>Donaciones planificadas</h3>
-
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Categoría</th>
-      <th>Descripción</th>
-      <th>Cantidad planificada</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr th:each="link : ${plannedDonations}"
-        th:with="d=${donationsById[link.donationId]}">
-      <td th:text="${link.donationId}">1</td>
-      <td th:text="${d != null ? d.categoria : '—'}">ALIMENTOS</td>
-      <td th:text="${d != null ? d.descripcion : '—'}">Caja</td>
-      <td th:text="${link.cantidad}">0</td>
-      <td>
-        <form th:action="@{|/eventos/${ev.id}/donaciones/quitar|}" method="post" style="display:inline">
-          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-          <input type="hidden" name="donationId" th:value="${link.donationId}"/>
-          <button type="submit" class="btn btn-sm btn-danger">Quitar</button>
-        </form>
-      </td>
-    </tr>
-    <tr th:if="${#lists.isEmpty(plannedDonations)}">
-      <td colspan="5">Sin donaciones planificadas.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h4 class="mt-3">Asignar / Actualizar donación</h4>
-<form th:action="@{|/eventos/${ev.id}/donaciones/asignar|}" method="post" class="form-inline" style="gap:8px;">
-  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-  <label for="donationId" style="margin-right:6px;">Donación:</label>
-  <select id="donationId" name="donationId" class="form-control" required>
-    <option th:each="d : ${allDonations}" th:value="${d.id}"
-            th:text="${'#' + d.id + ' - ' + d.categoria + ' - ' + d.descripcion}">
-      #1 - ALIMENTOS - Caja
-    </option>
-  </select>
-
-  <label for="cantidad" style="margin-left:12px; margin-right:6px;">Cantidad:</label>
-  <input id="cantidad" name="cantidad" type="number" min="0" class="form-control" value="0" required/>
-
-  <button type="submit" class="btn btn-primary">Guardar</button>
-</form>
 
                 </div>
             </div>

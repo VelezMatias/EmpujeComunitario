@@ -258,24 +258,43 @@ class EventServiceServicer(rpc.EventServiceServicer):
             conn.close()
 
     def ListDonationsByEvent(self, request, context):
-        conn = get_conn()
         try:
-            rows = models.list_donations_by_event(conn, request.event_id)
+            rows = models.list_donations_by_event(request.event_id)  # <-- SOLO un arg
             items = [
-                pb.EventDonationLink(
-                    donation_id=(r["donacion_id"] if isinstance(r, dict) else r[0]),
-                    cantidad=(r["cantidad"] if isinstance(r, dict) else (r[1] if len(r) > 1 else 0))
+                ong_pb2.EventDonationLink(
+                    donation_id=row["donation_id"],
+                    cantidad=row["cantidad"],
                 )
-                for r in rows
+                for row in rows
             ]
-            return pb.ListDonationsByEventResponse(items=items)
-        finally:
-            conn.close()
+            return ong_pb2.ListDonationsByEventResponse(items=items)
+        except Exception as e:
+            # log server-side y superficie error gRPC razonable
+            import traceback, sys
+            traceback.print_exc(file=sys.stderr)
+            context.set_code(ong_pb2_grpc.grpc.StatusCode.UNKNOWN)
+            context.set_details(f"ListDonationsByEvent failed: {e}")
+            return ong_pb2.ListDonationsByEventResponse()
 
 
 
     def ListEvents(self, request, context):
         try:
+            filas = models.listar_eventos_con_miembros()
+            eventos = []
+            for r in filas:
+                eventos.append(pb.Event(
+                    id=r["id"],
+                    nombre=r.get("nombre") or "",
+                    descripcion=r.get("descripcion") or "",
+                    fecha_hora=_to_iso_utc_safe(r.get("fecha_hora")),
+                    miembros=r.get("miembros", []),
+                    creador_id=int(r.get("creador_id") or 0),
+                ))
+            return pb.ListEventsResponse(events=eventos)
+        except Exception as e:
+            print("[EVENTOS][List][ERR]", e)
+            # Fallback: al menos devolver eventos sin miembros
             filas = models.listar_eventos()
             eventos = []
             for r in filas:
@@ -284,13 +303,11 @@ class EventServiceServicer(rpc.EventServiceServicer):
                     nombre=r.get("nombre") or "",
                     descripcion=r.get("descripcion") or "",
                     fecha_hora=_to_iso_utc_safe(r.get("fecha_hora")),
-                    miembros=[]  # lo dejamos vacío por ahora
+                    miembros=[],
+                    creador_id=int(r.get("creador_id") or 0),
                 ))
             return pb.ListEventsResponse(events=eventos)
-        except Exception as e:
-            print("[EVENTOS][List][ERR]", e)
-            return pb.ListEventsResponse(events=[])
-        
+            
 
 
     

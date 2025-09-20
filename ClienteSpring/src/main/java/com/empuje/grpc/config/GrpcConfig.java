@@ -4,6 +4,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import ong.UserServiceGrpc;
 import ong.EventServiceGrpc;
+import ong.DonationServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,9 +33,9 @@ public class GrpcConfig {
         return EventServiceGrpc.newBlockingStub(ch);
     }
 
-    @Bean
-    public DonationServiceGrpc.DonationServiceBlockingStub donationStub(ManagedChannel channel) {
-        return DonationServiceGrpc.newBlockingStub(channel);
-    }
 
+    @Bean
+    public DonationServiceGrpc.DonationServiceBlockingStub donationStub(ManagedChannel ch) {
+        return DonationServiceGrpc.newBlockingStub(ch);
+    }
 }
