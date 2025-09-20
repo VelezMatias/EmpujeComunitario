@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+     <meta charset="utf-8">
+     <meta http-equiv="x-ua-compatible" content="ie=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
+     <link rel="stylesheet" th:href="@{/charifit/css/font-awesome.min.css}">
+     <link rel="stylesheet" th:href="@{/charifit/css/style.css}">
+     <title>Donaciones</title>
+</head>
+<body>
+<header> <!-- header con navegación -->
+    <div class="header-area ">
+        <div class="header-top_area">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-6 col-md-12 col-lg-8">
+                        <div class="short_contact_list"><ul><li><a href="#">Empuje Comunitario</a></li></ul></div>
+                    </div>
+                    <div class="col-xl-6 col-md-6 col-lg-4">
+                        <div class="social_media_links">
+                            <a th:if="${session.username} != null" th:href="@{/auth/logout}">Salir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="sticky-header" class="main-header-area">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-xl-3 col-lg-3">
+                        <div class="logo">
+                            <a th:href="@{/home}">
+                                <img th:src="@{/charifit/img/logo.png}" alt="">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-xl-9 col-lg-9">
+                        <div class="main-menu d-none d-lg-block">
+                            <nav>
+                                <ul id="navigation">
+                                    <li><a th:href="@{/home}">Inicio</a></li>
+                                    <li th:if="${session.rol} == 'PRESIDENTE'"><a th:href="@{/admin/users}">Usuarios</a></li>
+                                    <li th:if="${session.rol} == 'PRESIDENTE'"><a th:href="@{/eventos}">Eventos</a></li>
+                                    <!-- NUEVO enlace -->
+                                    <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+                                        <a th:href="@{/donaciones}">Donaciones</a>
+                                    </li>
+                                    <li th:if="${session.username} == null"><a class="login-btn" th:href="@{/auth/login}">Ingresar</a></li>
+                                    <li th:if="${session.username} != null"><a th:href="@{/auth/logout}">Salir</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="col-12"><div class="mobile_menu d-block d-lg-none"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container" style="margin-top:30px;">
+    <h2>Inventario de Donaciones</h2>
+    <div class="mb-3">
+        <a class="btn btn-primary" th:href="@{/donaciones/nuevo}">Nueva donación</a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Estado</th>
+                <th style="width:220px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="d : ${items}">
+                <td th:text="${d.categoria}">ROPA</td>
+                <td th:text="${d.descripcion}">remeras</td>
+                <td th:text="${d.cantidad}">0</td>
+                <td>
+                    <span th:if="${d.eliminado}" class="badge bg-danger">ELIMINADO</span>
+                    <span th:if="${!d.eliminado}" class="badge bg-success">ACTIVO</span>
+                </td>
+                <td>
+                    <a th:if="${!d.eliminado}" class="btn btn-sm btn-secondary" th:href="@{|/donaciones/${d.id}/edit|}">Editar</a>
+                    <form th:if="${!d.eliminado}" th:action="@{|/donaciones/${d.id}/delete|}" method="post" style="display:inline"
+                          onsubmit="return confirm('¿Confirmás la baja lógica de este ítem?');">
+                        <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
