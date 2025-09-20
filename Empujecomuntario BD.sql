@@ -208,4 +208,16 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+DROP TABLE IF EXISTS `evento_donacion`;
+CREATE TABLE evento_donacion (
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    evento_id INT NOT NULL,
+    donacion_id INT NOT NULL,
+    cantidad INT DEFAULT NULL, 
+    FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE,
+    FOREIGN KEY (donacion_id) REFERENCES donaciones(id) ON DELETE CASCADE,
+    UNIQUE (evento_id, donacion_id) -- evita duplicados exactos
+);
+
+
 -- Dump completed on 2025-09-07 19:02:51

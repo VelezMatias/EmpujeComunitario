@@ -9,6 +9,8 @@ from datetime import datetime
 from app.db import fetch_one, fetch_all, execute
 
 import os
+import pymysql
+from decimal import Decimal
 
 # ========== USUARIOS ==========
 
@@ -68,7 +70,6 @@ def desactivar_usuario(id_usuario: int) -> int:
     return rowcount
 
 def listar_usuarios() -> List[Dict]:
-    # Si tu tabla roles usa 'id' como PK (recomendado):
     sql = """
       SELECT u.id, u.username, u.nombre, u.apellido, u.telefono,
              u.email, u.rol_id, u.activo, r.nombre AS rol_nombre
@@ -76,15 +77,13 @@ def listar_usuarios() -> List[Dict]:
       LEFT JOIN roles r ON r.id = u.rol_id
       ORDER BY u.id ASC
     """
-    # Si en tu BD 'roles' usa 'id_rol' como PK, cambia ON r.id = u.rol_id -> ON r.id_rol = u.rol_id
+    
     return fetch_all(sql)
 
 # ========== ROLES ==========
 
 def rol_existe(rol_id: int) -> bool:
-    # Si roles.id es la PK:
     sql = "SELECT 1 AS ok FROM roles WHERE id = %s"
-    # Si fuera id_rol, cambia a: "SELECT 1 AS ok FROM roles WHERE id_rol = %s"
     return fetch_one(sql, (rol_id,)) is not None
 
 
@@ -229,3 +228,44 @@ def quitar_miembro_evento(event_id: int, user_id: int) -> int:
 def usuario_por_id(id_usuario: int):
     sql = "SELECT id, activo FROM usuarios WHERE id = %s LIMIT 1"
     return fetch_one(sql, (id_usuario,))
+
+
+# ========== EVENTO - DONACION ==========
+
+def get_conn():
+    # Usa tu helper real; dejo un stub por claridad si no lo tenés visible acá
+    import os
+    return pymysql.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASS", ""),
+        database=os.getenv("DB_NAME", "empujecomunitario"),
+        port=int(os.getenv("DB_PORT", "3306")),
+        cursorclass=pymysql.cursors.DictCursor,
+        autocommit=True,
+    )
+
+def list_donations_by_event(event_id: int):
+    """
+    Devuelve filas con sólo donacion_id y cantidad desde la tabla puente evento_donacion.
+    (Exactamente lo que necesita EventDonationLink del .proto)
+    """
+    sql = """
+        SELECT
+            ed.donacion_id  AS donation_id,
+            COALESCE(ed.cantidad, 0) AS cantidad
+        FROM evento_donacion ed
+        WHERE ed.evento_id = %s
+        ORDER BY ed.id DESC
+    """
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, (event_id,))
+            rows = cur.fetchall()  # [{'donation_id': ..., 'cantidad': ...}, ...]
+    finally:
+        conn.close()
+    # Normalizo cantidad a int
+    for r in rows:
+        r["cantidad"] = int(r.get("cantidad") or 0)
+    return rows

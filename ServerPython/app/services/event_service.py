@@ -6,6 +6,8 @@ from app import models
 import ong_pb2 as pb
 import ong_pb2_grpc as rpc
 
+from app.db import get_conn
+
 
 # === Helpers de roles/fechas ===
 
@@ -37,6 +39,9 @@ class EventServiceServicer(rpc.EventServiceServicer):
     Implementación sin ORM, delegando todo a app.models (consultas directas).
     Asegurate de exponer en models las funciones listadas abajo.
     """
+
+    def __init__(self):
+        pass
 
     # --------- CREATE ---------
     def CreateEvent(self, request: pb.CreateEventRequest, context):
@@ -224,6 +229,52 @@ class EventServiceServicer(rpc.EventServiceServicer):
 
         except Exception as e:
             return pb.ApiResponse(success=False, message=f"Error: {e}")
+        
+
+
+    def AssignDonationToEvent(self, request, context):
+        conn = get_conn()
+        try:
+            ok, msg = models.assign_donation_to_event(
+                conn,
+                request.event_id,
+                request.donation_id,
+                request.cantidad,
+            )
+            return pb.ApiResponse(success=ok, message=msg)
+        finally:
+            conn.close()
+
+    def RemoveDonationFromEvent(self, request, context):
+        conn = get_conn()
+        try:
+            ok, msg = models.remove_donation_from_event(
+                conn,
+                request.event_id,
+                request.donation_id,
+            )
+            return pb.ApiResponse(success=ok, message=msg)
+        finally:
+            conn.close()
+
+    def ListDonationsByEvent(self, request, context):
+        try:
+            rows = models.list_donations_by_event(request.event_id)  # <-- SOLO un arg
+            items = [
+                ong_pb2.EventDonationLink(
+                    donation_id=row["donation_id"],
+                    cantidad=row["cantidad"],
+                )
+                for row in rows
+            ]
+            return ong_pb2.ListDonationsByEventResponse(items=items)
+        except Exception as e:
+            # log server-side y superficie error gRPC razonable
+            import traceback, sys
+            traceback.print_exc(file=sys.stderr)
+            context.set_code(ong_pb2_grpc.grpc.StatusCode.UNKNOWN)
+            context.set_details(f"ListDonationsByEvent failed: {e}")
+            return ong_pb2.ListDonationsByEventResponse()
 
 
 
@@ -277,3 +328,9 @@ def _to_iso_utc_safe(fecha):
         return fecha.isoformat()
     except Exception:
         return ""
+    
+
+    
+    
+
+    

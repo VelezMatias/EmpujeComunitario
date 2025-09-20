@@ -23,9 +23,7 @@ def serve():
 
     ong_pb2_grpc.add_UserServiceServicer_to_server(UserServiceServicer(), server)
     ong_pb2_grpc.add_EventServiceServicer_to_server(EventServiceServicer(), server)
-    print("[gRPC][Python] EventService registrado")
     ong_pb2_grpc.add_DonationServiceServicer_to_server(DonationServiceServicer(), server)
-    print("[gRPC][Python] DonationService registrado")
 
 
     server.add_insecure_port(f"[::]:{port}")
