@@ -53,5 +53,56 @@ public class DonationController {
         return "donaciones/list";
     }
 
-    // (Las acciones de alta/mod/ baja se agregan en commits siguientes)
+    // NUEVO (form)
+@GetMapping("/nuevo")
+public String newForm(HttpSession s, Model model) {
+    if (!canManage(s)) return "redirect:/donaciones";
+    model.addAttribute("isEdit", false);
+    // 👇 Necesario para que form.html pueda leer ${item.descripcion} y ${item.cantidad}
+    model.addAttribute("item", DonationItem.getDefaultInstance());
+    model.addAttribute("categorias", Category.values());
+    return "donaciones/form";
+}
+
+
+    // CREAR
+@PostMapping
+public String create(@RequestParam("categoria") Category categoria,
+                     @RequestParam("descripcion") String descripcion,
+                     @RequestParam("cantidad") int cantidad,
+                     HttpSession s, Model model) {
+    if (!canManage(s)) return "redirect:/donaciones";
+
+    if (categoria == Category.CATEGORY_UNSPECIFIED || descripcion == null || descripcion.isBlank() || cantidad < 0) {
+        model.addAttribute("error", "Complete categoría, descripción y cantidad >= 0");
+        model.addAttribute("isEdit", false);
+        model.addAttribute("categorias", Category.values());
+        // 👇 repinto el form con lo ingresado
+        DonationItem item = DonationItem.newBuilder()
+                .setCategoria(categoria)
+                .setDescripcion(descripcion == null ? "" : descripcion)
+                .setCantidad(Math.max(0, cantidad))
+                .build();
+        model.addAttribute("item", item);
+        return "donaciones/form";
+    }
+
+    ApiResponse res = gateway.create(categoria, descripcion.trim(), cantidad, userId(s), role(s));
+    if (!res.getSuccess()) {
+        model.addAttribute("error", res.getMessage());
+        model.addAttribute("isEdit", false);
+        model.addAttribute("categorias", Category.values());
+        DonationItem item = DonationItem.newBuilder()
+                .setCategoria(categoria)
+                .setDescripcion(descripcion == null ? "" : descripcion)
+                .setCantidad(Math.max(0, cantidad))
+                .build();
+        model.addAttribute("item", item);
+        return "donaciones/form";
+    }
+
+    return "redirect:/donaciones";
+}
+
+
 }
