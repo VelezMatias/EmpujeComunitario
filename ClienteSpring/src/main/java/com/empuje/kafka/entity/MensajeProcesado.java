@@ -4,19 +4,20 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "mensajes_procesados", uniqueConstraints = @UniqueConstraint(name = "uk_mensaje_unico", columnNames = {
-        "topic", "partition_no", "offset_no" }), indexes = {
-                @Index(name = "idx_msg_topic", columnList = "topic"),
-                @Index(name = "idx_msg_partition", columnList = "partition_no"),
-                @Index(name = "idx_msg_offset", columnList = "offset_no")
-        })
+@Table(name = "mensajes_procesados", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_topic_part_offset", columnNames = { "topic", "partition_no", "offset_no" })
+}, indexes = {
+        @Index(name = "idx_msg_topic", columnList = "topic"),
+        @Index(name = "idx_msg_partition", columnList = "partition_no"),
+        @Index(name = "idx_msg_offset", columnList = "offset_no")
+})
 public class MensajeProcesado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
+    @Column(name = "topic", length = 200, nullable = false)
     private String topic;
 
     @Column(name = "message_key", length = 200)
@@ -28,8 +29,9 @@ public class MensajeProcesado {
     @Column(name = "offset_no", nullable = false)
     private Long offsetNo;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
+    // ⬇ Ajustado para que apunte a processed_at (NO created_at)
+    @Column(name = "processed_at", insertable = false, updatable = false)
+    private LocalDateTime processedAt;
 
     public MensajeProcesado() {
     }
@@ -81,11 +83,11 @@ public class MensajeProcesado {
         this.offsetNo = offsetNo;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public LocalDateTime getProcessedAt() {
+        return processedAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setProcessedAt(LocalDateTime processedAt) {
+        this.processedAt = processedAt;
     }
 }
