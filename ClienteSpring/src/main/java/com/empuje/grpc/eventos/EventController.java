@@ -274,6 +274,36 @@ public String editForm(@PathVariable int id,
     }
 
 
+    @PostMapping("/{id}/assign")
+    public String assignMember(
+            @PathVariable int id,
+            @RequestParam("userId") int memberId,
+            @RequestParam(value = "q", required = false) String q,
+            HttpSession s,
+            RedirectAttributes ra
+    ) {
+        if (!canManage(s)) return "redirect:/eventos";
+        var resp = gateway.assignMember(id, memberId, userId(s), role(s));
+        ra.addFlashAttribute(resp.getSuccess() ? "ok" : "error", resp.getMessage());
+        // Volver a la misma pantalla (con el buscador, si estaba)
+        return "redirect:/eventos/" + id + "/edit" + (q != null && !q.isBlank() ? ("?q=" + q) : "");
+    }
+
+    @PostMapping("/{id}/remove")
+    public String removeMember(
+            @PathVariable int id,
+            @RequestParam("userId") int memberId,
+            @RequestParam(value = "q", required = false) String q,
+            HttpSession s,
+            RedirectAttributes ra
+    ) {
+        if (!canManage(s)) return "redirect:/eventos";
+        var resp = gateway.removeMember(id, memberId, userId(s), role(s));
+        ra.addFlashAttribute(resp.getSuccess() ? "ok" : "error", resp.getMessage());
+        return "redirect:/eventos/" + id + "/edit" + (q != null && !q.isBlank() ? ("?q=" + q) : "");
+    }
+
+
 
     @PostMapping("/{id}/donaciones/asignar")
     public String asignarDonacion(@PathVariable int id,

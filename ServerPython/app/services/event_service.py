@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 from typing import List
 
+import grpc
 from app import models
 import ong_pb2 as pb
 import ong_pb2_grpc as rpc
@@ -97,8 +98,15 @@ class EventServiceServicer(rpc.EventServiceServicer):
                 descripcion=descripcion,
                 fecha_utc=nueva_fecha
             )
+            rows = models.actualizar_evento(
+                id_evento=request.id,
+                nombre=nombre,
+                descripcion=descripcion,
+                fecha_utc=nueva_fecha
+            )
+           
             if rows == 0:
-                return pb.ApiResponse(success=False, message="Sin cambios o evento no encontrado.")
+                return pb.ApiResponse(success=True, message="Sin cambios.")
 
             return pb.ApiResponse(success=True, message="Evento actualizado.")
 
@@ -259,22 +267,19 @@ class EventServiceServicer(rpc.EventServiceServicer):
 
     def ListDonationsByEvent(self, request, context):
         try:
-            rows = models.list_donations_by_event(request.event_id)  # <-- SOLO un arg
+            rows = models.list_donations_by_event(request.event_id)
             items = [
-                ong_pb2.EventDonationLink(
-                    donation_id=row["donation_id"],
-                    cantidad=row["cantidad"],
-                )
+                pb.EventDonationLink(donation_id=row["donation_id"], cantidad=row["cantidad"])
                 for row in rows
             ]
-            return ong_pb2.ListDonationsByEventResponse(items=items)
+            return pb.ListDonationsByEventResponse(items=items)
         except Exception as e:
-            # log server-side y superficie error gRPC razonable
             import traceback, sys
             traceback.print_exc(file=sys.stderr)
-            context.set_code(ong_pb2_grpc.grpc.StatusCode.UNKNOWN)
+            context.set_code(grpc.StatusCode.UNKNOWN)
             context.set_details(f"ListDonationsByEvent failed: {e}")
-            return ong_pb2.ListDonationsByEventResponse()
+            return pb.ListDonationsByEventResponse()
+
 
 
 

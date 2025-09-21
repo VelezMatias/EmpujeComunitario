@@ -42,27 +42,51 @@
       .saludo b{
         color: white;
       }
-
-      .actions{
-        margin-left: 25%;
-        margin-top: 15px;
-        margin-bottom: 15px;
-      }
-
-      .mb-md-0{
-        background-color: white;
-        color: black;
-      }
-
-      .mb-md-0:hover{
-        background-color: #28a745;
-        color:white;
-      }
+      
 
       .ftco-section{
         padding-top:0px;
         margin-top:0px;
       }
+
+
+      /* acciones prolijas */
+    td.actions-cell { white-space: nowrap; }
+    .actions-cell .btn-group { gap:8px; }
+    .actions-cell .btn-group .genric-btn{ margin:0; }
+    .badge-state{
+      display:inline-block; padding:6px 10px; border-radius:6px; font-size:.85rem; font-weight:600;
+    }
+    .badge-active{ background:#28a745; color:#fff; }
+    .badge-deleted{ background:#dc3545; color:#fff; }
+
+
+
+  /* Botón "+ Nuevo ítem" — verde sólido y oscuro en hover */
+  .btn-new-item.boxed-btn3{
+    background: #2cc185;
+    border: 1px solid #2cc185;
+    color:#fff !important;
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-weight: 600;
+    transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .btn-new-item.boxed-btn3:hover{
+    background:#24a871;      /* un tono más oscuro */
+    border-color:#24a871;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
+    text-decoration:none;
+  }
+  .btn-new-item.boxed-btn3:active{
+    filter: brightness(0.95);
+  }
+
+  .mb-3{
+    margin-left: 25%;
+        margin-top: 15px;
+        margin-bottom: 15px;
+  }
     
     </style>
 
@@ -172,14 +196,14 @@
     <!-- bradcam_area_end  -->
 
 
-    <div class="actions">
-        <button type="button" class="btn btn-success mr-md-3 mb-2 mb-md-0">
-            <a th:href="@{/eventos/new}">+ Nuevo evento</a>
-        </button>
-        <button type="button" class="btn btn-success mr-md-3 mb-2 mb-md-0">
-        <a th:href="@{/home}">Volver</a>
-        </button>
+
+    <div class="row mb-3">
+    <div class="col">
+      <a class="boxed-btn3 btn-new-item" th:href="@{/eventos/new}">+ Nuevo evento</a>
+      <a class="boxed-btn" th:href="@{/home}" style="margin-left:8px;">Volver</a>
     </div>
+  </div>
+
   
 <section class="ftco-section">
 		<div class="container">
