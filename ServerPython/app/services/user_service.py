@@ -1,5 +1,6 @@
 from app import models
 from app.security import hash_password, verify_password, generate_random_password
+from app.emailer import send_password_email
 import ong_pb2 as pb
 import ong_pb2_grpc as rpc
 
@@ -50,8 +51,18 @@ class UserServiceServicer(rpc.UserServiceServicer):
             print(f"        username: {request.username}")
             print(f"        email   : {request.email}")
             print(f"        pass    : {plain}")
-
-            return pb.ApiResponse(success=True, message="Usuario creado. Contraseña generada y registrada.")
+            
+            # Enviar credenciales por email
+            email_sent = send_password_email(
+                to_email=request.email,
+                username=request.username,
+                generated_password=plain
+            )
+            
+            if email_sent:
+                return pb.ApiResponse(success=True, message="Usuario creado. Las credenciales han sido enviadas por email.")
+            else:
+                return pb.ApiResponse(success=True, message="Usuario creado. ATENCIÓN: No se pudo enviar el email. Revisar logs para las credenciales.")
         except PermissionError as e:
             return pb.ApiResponse(success=False, message=str(e))
         except Exception as e:

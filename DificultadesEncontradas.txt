@@ -1,0 +1,49 @@
+# ERRORES ENCONTRADOS Y SOLUCIONES - Sistema Empuje Comunitario
+---------------------------------------------------------------
+
+## 1. ERROR: Módulo 'smtplib' no encontrado para envío de emails
+**Descripción**: Al intentar implementar el sistema de envío de emails, Python no reconocía el módulo smtplib.
+**Código error**: `ModuleNotFoundError: No module named 'smtplib'`
+**Solución**: 
+- Usar import correcto: `import smtplib`
+
+## 2. ERROR: Conexión rechazada al servidor SMTP de Hotmail/Outlook
+**Descripción**: El sistema no podía conectarse a smtp-mail.outlook.com
+**Código error**: `[WinError 10060] Se produjo un error durante el intento de conexión`
+**Solución**: 
+- Cambiar a Gmail SMTP (smtp.gmail.com:587)
+- Usar contraseñas de aplicación en lugar de contraseña principal (Se tuvo que setear 2FA en la cuenta)
+- Configurar EMAIL_HOST=smtp.gmail.com / EMAIL_PORT=587
+
+## 3. ERROR: Spring Boot - Compilation failure
+**Descripción**: El cliente SpringBoot mostraba errores de compilación en VS Code debido al cache corrompido de VS Code
+**Código error**: `[ERROR] COMPILATION ERROR` en terminal de VS Code
+**Solución**: 
+- Reiniciar Visual Studio Code
+
+## 4. ERROR: Credenciales de base de datos rechazadas
+**Descripción**: Error de acceso denegado al conectar con MySQL debido a una inconsistencia entre nombres de variables de entorno (.env usa DB_PASS vs DB_PASSWORD)
+**Código error**: `(1045, "Access denied for user 'root'@'localhost' (using password: NO)")`
+**Solución**: 
+- Usar DB_PASS en lugar de DB_PASSWORD para consistencia
+- Confirmar credenciales de MySQL root
+
+## 5. ERROR: No se pueden reorganizar IDs por claves foráneas
+**Descripción**: Las relaciones de clave foránea impedían eliminar/recrear tabla usuarios
+**Código error**: `(3730, "Cannot drop table 'usuarios' referenced by a foreign key constraint")`
+**Solución**: 
+- Usar ALTER TABLE usuarios AUTO_INCREMENT = nuevo_valor
+
+## 6. ERROR: Paquete 'cryptography' faltante
+**Descripción**: Error al usar funciones de cifrado para contraseñas ya que la dependencia cryptography no figuraba en requirements.txt
+**Código error**: `ModuleNotFoundError: No module named 'cryptography'`
+**Solución**: 
+- Instalar: `pip install cryptography`
+- Agregar a requirements.txt para futuras instalaciones
+
+## 7. ERROR: Archivos protobuf no encontrados en cliente Spring
+**Descripción**: El cliente Spring no encontraba las clases gRPC generadas porque los archivos  protobuf no estaban generados en target/generated-sources/
+**Código error**: `cannot find symbol` para clases ong_pb2
+**Solución**: 
+- Ejecutar: `mvn clean compile` para regenerar clases
+- Verificar que ong.proto esté en src/main/resources/

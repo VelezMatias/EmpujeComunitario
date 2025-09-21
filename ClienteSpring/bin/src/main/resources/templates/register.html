@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+  <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1" >
+
+    <!-- <link rel="manifest" href="site.webmanifest"> -->
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{charifit/img/favicon.png}">
+    <!-- Place favicon.ico in the root directory -->
+
+    <!-- CSS here -->
+    <link rel="stylesheet" href="/charifit/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/charifit/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="/charifit/css/magnific-popup.css">
+    <link rel="stylesheet" href="/charifit/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/charifit/css/themify-icons.css">
+    <link rel="stylesheet" href="/charifit/css/nice-select.css">
+    <link rel="stylesheet" href="/charifit/css/flaticon.css">
+    <link rel="stylesheet" href="/charifit/css/gijgo.css">
+    <link rel="stylesheet" href="/charifit/css/animate.css">
+    <link rel="stylesheet" href="/charifit/css/slicknav.css">
+    <link rel="stylesheet" href="/charifit/css/style.css">
+
+    <!-- css del forms-->
+     <link href="/form/vendor/mdi-font/css/material-design-iconic-font.min.css" rel="stylesheet" media="all">
+    <link href="/form/vendor/font-awesome-4.7/css/font-awesome.min.css" rel="stylesheet" media="all">
+    <!-- Font special for pages-->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i" rel="stylesheet">
+
+    <!-- Vendor CSS-->
+    <link href="/form/vendor/select2/select2.min.css" rel="stylesheet" media="all">
+    <link href="/form/vendor/datepicker/daterangepicker.css" rel="stylesheet" media="all">
+
+    
+
+    <style>
+      .saludo {
+        color: white;
+      }
+
+      .saludo b{
+        color: white;
+      }
+
+      .card-5{
+        padding-left: 25%;
+        padding-top: 20px;
+      }
+
+      .form-row {
+        margin-top: 10px;
+      }
+
+      .input--style-5 {
+        margin-left: 5px;
+      }
+
+      #col-2-apellido{
+        margin-left: 100px;
+      }
+
+      .actions{
+        margin-top: 20px;
+      }
+
+    </style>
+    
+  <title>Empuje Comunitario</title>
+  
+  </head>
+  <body>
+
+      <!-- header-start -->
+    <header>
+        <div class="header-area ">
+            <div class="header-top_area">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-6 col-md-12 col-lg-8">
+                            <div class="short_contact_list">
+                                <ul>
+                                    <li><a href="#"> <i class="fa fa-phone"></i> +1 (234) 567-8910</a></li>
+                                    <li><a href="#"> <i class="fa fa-envelope"></i>EmpujeComunitario@email.com</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-6 col-lg-4">
+                            <div class="social_media_links d-none d-lg-block">
+                                <a href="#">
+                                    <i class="fa fa-facebook"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-pinterest-p"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-linkedin"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sticky-header" class="main-header-area">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-xl-3 col-lg-3">
+                            <th:block th:if="${session.username} != null">
+                                <p class="saludo">¡Hola <b th:text="${session.username}"></b>! (rol: <span th:text="${session.rol}"></span>)</p>
+                            </th:block>
+                        </div>
+                        <div class="col-xl-9 col-lg-9">
+                            <div class="main-menu">
+                                <nav>
+                                    <ul id="navigation">
+                                         <li><a th:href="@{/home}">Inicio</a></li>
+
+                                         <li th:if="${session.username} == null">
+                                            <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                                         </li>
+                                    
+                                          <!-- Links según el rol -->
+                                          <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/admin/users}">Usuarios</a>
+                                          </li>
+
+                                           <li th:if="${session.rol} == 'PRESIDENTE'">
+                                              <a th:href="@{/auth/eventos}">Eventos</a>
+                                          </li>
+
+                                          <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+                                            <a th:href="@{/donaciones}">Donaciones</a>
+                                          </li>
+
+                                          <li th:if="${session.username} != null">
+                                              <a th:href="@{/auth/logout}">Salir</a>
+                                          </li>
+                                    </ul>
+                                  
+                                        
+                                </nav>
+                                
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- header-end -->
+
+
+
+    <main>
+
+
+      <div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="bradcam_text text-center">
+                        <h3>Registrar usuario</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- bradcam_area_end  -->
+    
+ <div class="page-wrapper bg-gra-03 p-t-45 p-b-50">
+        <div class="wrapper wrapper--w790">
+            <div class="card card-5">
+                <div class="card-heading">
+                    <h2 class="title">Ingrese los datos correspondientes al usuario nuevo</h2>
+                </div>
+                <div class="card-body">
+                    <form th:if="${session.rol} == 'PRESIDENTE'" th:action="@{/auth/register}" method="POST">
+                        <div class="form-row m-b-55">
+                            <div class="name">Nombre* &ensp;: &ensp;</div>
+                            <div class="value">
+                                <div class="row row-space">
+                                    <div class="col-2">
+                                        <div class="input-group-desc">
+                                            <input class="input--style-5" type="text" id="nombre" name="nombre" required>
+                                            <label class="label--desc" for="nombre">Nombre</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-2" id="col-2-apellido">
+                                        <div class="input-group-desc">
+                                            <input class="input--style-5" type="text" id="apellido" name="apellido" required>
+                                            <label class="label--desc" for="apellido">Apellido</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="name">Usuario* &ensp;:&ensp;</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <input class="input--style-5" type="text" id="username" name="username" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="name">Email* &ensp;&ensp;&ensp;:&ensp;</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <input class="input--style-5" type="email" id="email" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="name">Teléfono* :&ensp;</div>
+                            <div class="value">
+                                
+                                    <div class="input-group">
+                                            <input class="input--style-5" type="text" id="telefono" name="telefono">
+                                    </div>
+                               
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="name">Rol &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;:&ensp;&ensp; </div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <div class="rs-select2 js-select-simple select--no-search">
+                                        <select id="rol" name="rol">
+                                            <option disabled="disabled" selected="selected">Elegir opción</option>
+                                            <option value="PRESIDENTE">PRESIDENTE</option>
+                                            <option value="VOCAL">VOCAL</option>
+                                            <option value="COORDINADOR">COORDINADOR</option>
+                                            <option value="VOLUNTARIO">VOLUNTARIO</option>
+                                        </select>
+                                        <div class="select-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="note">* La clave se genera aleatoria en el servidor y se guarda encriptada.</p>
+                        
+                        <div class="actions">
+                          <button class="btn btn--radius-2 btn--red" type="submit">Crear usuario</button>
+                          <a class="cancel-link" th:href="@{/home}">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+        <div class="register-panel">
+          
+          <div class="messages">
+            <div class="msg-error" th:if="${error}" th:text="${error}"></div>
+            <div class="msg-ok" th:if="${ok}" th:text="${ok}"></div>
+          </div>
+
+          <!-- Aviso si no es PRESIDENTE -->
+          <div th:if="${session.rol} != 'PRESIDENTE'">
+            <p class="notice">No tenés permisos para registrar usuarios.</p>
+            <p><a class="inline-link" th:href="@{/home}">Volver</a></p>
+          </div>
+
+          
+        </div>
+
+      </div>
+    </div>
+    </main>
+
+    <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+    <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+    <script th:src="@{/charifit/js/popper.min.js}"></script>
+    <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+    <script th:src="@{/charifit/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/charifit/js/isotope.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/ajax-form.js}"></script>
+    <script th:src="@{/charifit/js/waypoints.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.counterup.min.js}"></script>
+    <script th:src="@{/charifit/js/imagesloaded.pkgd.min.js}"></script>
+    <script th:src="@{/charifit/js/scrollIt.js}"></script>
+    <script th:src="@{/charifit/js/jquery.scrollUp.min.js}"></script>
+    <script th:src="@{/charifit/js/wow.min.js}"></script>
+    <script th:src="@{/charifit/js/nice-select.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.slicknav.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.magnific-popup.min.js}"></script>
+    <script th:src="@{/charifit/js/plugins.js}"></script>
+    <script th:src="@{/charifit/js/gijgo.min.js}"></script>
+    <!--registar usuario js-->
+    <script th:src="@{/charifit/js/contact.js}"></script>
+    <script th:src="@{/charifit/js/jquery.ajaxchimp.min.js}"></script>
+    <script th:src="@{/charifit/js/jquery.form.js}"></script>
+    <script th:src="@{/charifit/js/jquery.validate.min.js}"></script>
+    <script th:src="@{/charifit/js/mail-script.js}"></script>
+
+    <script th:src="@{/charifit/js/main.js}"></script>
+
+    <!--forms js-->
+    <!-- Jquery JS-->
+    <script src="/forms/vendor/jquery/jquery.min.js"></script>
+    <!-- Vendor JS-->
+    <script src="/forms/vendor/select2/select2.min.js"></script>
+    <script src="/forms/vendor/datepicker/moment.min.js"></script>
+    <script src="/forms/vendor/datepicker/daterangepicker.js"></script>
+
+    <!-- Main JS-->
+    <script src="/forms/js/global.js"></script>
+
+
+    <th:block th:replace="fragments/base :: footer" />
+  </body>
+</html>
