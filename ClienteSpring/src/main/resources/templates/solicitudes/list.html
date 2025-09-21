@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Solicitudes recibidas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body{background:#222;color:#eee;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{max-width:1000px;margin:40px auto;padding:24px;background:#2b2b2b;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    h1{margin:0 0 12px}
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .toolbar{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .btn{background:#0ea5e9;border:none;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;text-decoration:none}
+    .card{background:#262626;border:1px solid #3a3a3a;border-radius:14px;padding:14px 14px;margin:12px 0}
+    .row1{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .row1 .left{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .label{opacity:.85}
+    .state{background:#1f2937;border:1px solid #374151;border-radius:999px;padding:4px 10px;font-size:12px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px 6px;border-bottom:1px solid #3a3a3a}
+    th{opacity:.85;text-align:left;font-weight:600}
+    .muted{opacity:.8}
+    .pager{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <a class="btn" th:href="@{/home}">← Inicio</a>
+    <a class="btn" th:href="@{/ui/solicitudes/nueva}">+ Nueva solicitud</a>
+  </div>
+
+  <div th:if="${param.msg}" class="state" style="background:#064e3b;border-color:#065f46;margin-bottom:10px;">
+  <span th:text="${param.msg}">OK</span>
+</div>
+
+  <h1>Solicitudes recibidas</h1>
+
+  <div th:each="se : ${page.content}" class="card">
+<div class="row1">
+  <div class="left">
+    <span class="label">Solicitud:</span>
+    <a th:href="@{|/ui/solicitudes/${se.solicitudId}|}" th:text="${se.solicitudId}">SOL-XXXX</a>
+    <span class="label">· Fecha:</span>
+    <span th:text="${se.fechaHora != null ? #temporals.format(se.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+    <span class="label">· Org:</span>
+    <span th:text="${se.orgId != null ? se.orgId : '-'}">-</span>
+  </div>
+
+  <div style="display:flex; gap:10px; align-items:center;">
+    <span class="state" th:text="${se.estado}">VIGENTE</span>
+
+    <!-- Botón eliminar (solo si no está ya ANULADA) -->
+    <form th:if="${se.estado != 'ANULADA'}"
+          th:action="@{|/ui/solicitudes/${se.solicitudId}/eliminar|}"
+          method="post"
+          onsubmit="return confirm('¿Anular la solicitud ' + /*[[${se.solicitudId}]]*/'?' + ' Esta acción también borra sus ítems.');">
+      <button class="btn" type="submit" style="background:#ef4444;border:1px solid #7f1d1d">
+        Eliminar
+      </button>
+    </form>
+  </div>
+</div>
+
+    <!-- Renglón 2: tabla de ítems de esta solicitud -->
+    <table>
+      <thead>
+      <tr>
+        <th style="width:160px">Categoría</th>
+        <th>Descripción</th>
+        <th style="width:120px">Cantidad</th>
+        <th style="width:100px">Unidad</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="it : ${itemsBy[se.solicitudId]}">
+        <td th:text="${it.categoria}">-</td>
+        <td th:text="${it.descripcion}">-</td>
+        <td th:text="${it.cantidad != null ? it.cantidad : '-'}">-</td>
+        <td th:text="${it.unidad}">-</td>
+      </tr>
+      <tr th:if="${itemsBy[se.solicitudId] == null or itemsBy[se.solicitudId].isEmpty()}">
+        <td colspan="4" class="muted">Sin ítems.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="muted" th:if="${page.content.isEmpty()}">Sin resultados.</div>
+
+  <div class="pager">
+    <a th:if="${!page.first}" th:href="@{|/ui/solicitudes?page=${page.number-1}&size=${page.size}|}">← Anterior</a>
+    <span>Página <span th:text="${page.number + 1}">1</span> / <span th:text="${page.totalPages == 0 ? 1 : page.totalPages}">1</span></span>
+    <a th:if="${!page.last}" th:href="@{|/ui/solicitudes?page=${page.number+1}&size=${page.size}|}">Siguiente →</a>
+  </div>
+</div>
+</body>
+</html>

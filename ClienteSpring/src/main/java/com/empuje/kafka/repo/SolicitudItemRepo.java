@@ -8,6 +8,7 @@ import java.util.List;
 public interface SolicitudItemRepo extends JpaRepository<SolicitudItem, Long> {
     List<SolicitudItem> findBySolicitudId(String solicitudId);
 
-
     long deleteBySolicitudId(String solicitudId);
+
+    long countBySolicitudId(String solicitudId);
 }
