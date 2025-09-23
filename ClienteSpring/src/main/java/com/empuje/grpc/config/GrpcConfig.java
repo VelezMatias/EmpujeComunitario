@@ -2,14 +2,14 @@ package com.empuje.grpc.config;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import ong.UserServiceGrpc;
-import ong.EventServiceGrpc;
-import ong.DonationServiceGrpc;
+import com.empuje.grpc.ong.UserServiceGrpc;
+import com.empuje.grpc.ong.EventServiceGrpc;
+import com.empuje.grpc.ong.DonationServiceGrpc;
 import com.empuje.grpc.ong.UserServiceGrpc; 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ong.DonationServiceGrpc;
+import com.empuje.grpc.ong.DonationServiceGrpc;
 
 @Configuration
 public class GrpcConfig {

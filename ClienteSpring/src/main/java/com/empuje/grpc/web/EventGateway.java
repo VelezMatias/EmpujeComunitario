@@ -1,7 +1,7 @@
 package com.empuje.grpc.web;
 
-import ong.*;
-import ong.Empty;
+import com.empuje.grpc.ong.*;
+import com.empuje.grpc.ong.Empty;
 import org.springframework.stereotype.Service;
 
 import java.time.*;

@@ -852,6 +852,85 @@ class EventService(object):
 
     @staticmethod
     def AssignDonationToEvent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.EventService/AssignDonationToEvent',
+            ong__pb2.AssignDonationToEventRequest.SerializeToString,
+            ong__pb2.ApiResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RemoveDonationFromEvent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.EventService/RemoveDonationFromEvent',
+            ong__pb2.RemoveDonationFromEventRequest.SerializeToString,
+            ong__pb2.ApiResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListDonationsByEvent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.EventService/ListDonationsByEvent',
+            ong__pb2.ListDonationsByEventRequest.SerializeToString,
+            ong__pb2.ListDonationsByEventResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
 
 class OngServiceStub(object):
     """... (tus RPCs existentes)
@@ -930,9 +1009,6 @@ class OngService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/ong.EventService/AssignDonationToEvent',
-            ong__pb2.AssignDonationToEventRequest.SerializeToString,
-            ong__pb2.ApiResponse.FromString,
             '/ong.OngService/ListSolicitudesExternas',
             ong__pb2.ListExternasRequest.SerializeToString,
             ong__pb2.ListSolicitudesExternasResponse.FromString,
@@ -947,7 +1023,6 @@ class OngService(object):
             _registered_method=True)
 
     @staticmethod
-    def RemoveDonationFromEvent(request,
     def ListEventosExternos(request,
             target,
             options=(),
@@ -961,36 +1036,6 @@ class OngService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/ong.EventService/RemoveDonationFromEvent',
-            ong__pb2.RemoveDonationFromEventRequest.SerializeToString,
-            ong__pb2.ApiResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def ListDonationsByEvent(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/ong.EventService/ListDonationsByEvent',
-            ong__pb2.ListDonationsByEventRequest.SerializeToString,
-            ong__pb2.ListDonationsByEventResponse.FromString,
             '/ong.OngService/ListEventosExternos',
             ong__pb2.ListExternasRequest.SerializeToString,
             ong__pb2.ListEventosExternosResponse.FromString,
