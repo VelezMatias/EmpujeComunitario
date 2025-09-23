@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Nueva solicitud</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body{background:#222;color:#eee;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{max-width:900px;margin:40px auto;padding:24px;background:#2b2b2b;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    h1{margin:0 0 12px}
+    label{font-size:14px;opacity:.9}
+    input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #444;background:#1f1f1f;color:#eee}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px 6px;border-bottom:1px solid #3a3a3a}
+    .row{display:grid;grid-template-columns:1fr;gap:16px}
+    .mt{margin-top:14px}
+    .btn{background:#0ea5e9;border:none;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn.secondary{background:#3b82f6}
+    .btn.danger{background:#ef4444}
+    .pill{padding:8px 12px;border-radius:999px;display:inline-block}
+    .ok{background:#065f46;color:#d1fae5}
+    .err{background:#7f1d1d;color:#fee2e2}
+    .toolbar{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Publicar solicitud de donaciones → Kafka</h1>
+
+  <div th:if="${mensaje}" class="pill ok" th:text="${mensaje}"></div>
+  <div th:if="${error}" class="pill err" th:text="${error}"></div>
+
+  <form th:action="@{/ui/solicitudes}" th:object="${dto}" method="post">
+  
+
+    <h3 class="mt">Ítems</h3>
+    <table>
+      <thead>
+      <tr>
+        <th style="width:140px">Categoría</th>
+        <th>Descripción</th>
+        <th style="width:130px">Cantidad</th>
+        <th style="width:110px">Unidad</th>
+        <th style="width:60px"></th>
+      </tr>
+      </thead>
+      <tbody id="items-tbody">
+      <!-- Una fila inicial vacía -->
+      <tr>
+        <td>
+          <select name="items[0].categoria">
+            <option value="ALIMENTOS">ALIMENTOS</option>
+            <option value="ROPA">ROPA</option>
+            <option value="JUGUETES">JUGUETES</option>
+            <option value="UTILES_ESCOLARES">UTILES_ESCOLARES</option>
+          </select>
+        </td>
+        <td><input name="items[0].descripcion" placeholder="Descripción"/></td>
+        <td><input name="items[0].cantidad" type="number" min="1"/></td>
+        <td><input name="items[0].unidad" placeholder="u / kg / l"/></td>
+        <td><button type="button" class="btn danger" onclick="removeRow(this)">-</button></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="toolbar">
+      <button type="button" class="btn secondary" onclick="addRow()">Agregar ítem</button>
+      <button type="submit" class="btn">Publicar en Kafka</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function addRow() {
+    const tbody = document.getElementById('items-tbody');
+    const idx = tbody.querySelectorAll('tr').length;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <select name="items[${idx}].categoria">
+          <option value="ALIMENTOS">ALIMENTOS</option>
+          <option value="ROPA">ROPA</option>
+          <option value="JUGUETES">JUGUETES</option>
+          <option value="UTILES_ESCOLARES">UTILES_ESCOLARES</option>
+        </select>
+      </td>
+      <td><input name="items[${idx}].descripcion" placeholder="Descripción"/></td>
+      <td><input name="items[${idx}].cantidad" type="number" min="1"/></td>
+      <td><input name="items[${idx}].unidad" placeholder="u / kg / l"/></td>
+      <td><button type="button" class="btn danger" onclick="removeRow(this)">-</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function removeRow(btn) {
+    const tr = btn.closest('tr');
+    tr.parentNode.removeChild(tr);
+  }
+</script>
+</body>
+</html>

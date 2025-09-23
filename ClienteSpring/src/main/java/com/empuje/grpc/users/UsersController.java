@@ -1,10 +1,10 @@
 package com.empuje.grpc.users;
 
 import io.grpc.StatusRuntimeException;
-import ong.UserServiceGrpc;
-import ong.LoginRequest;
-import ong.ListUsersResponse;
-import ong.Empty;
+import com.empuje.grpc.ong.UserServiceGrpc;
+import com.empuje.grpc.ong.LoginRequest;
+import com.empuje.grpc.ong.ListUsersResponse;
+import com.empuje.grpc.ong.Empty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

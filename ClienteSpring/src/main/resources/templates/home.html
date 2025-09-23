@@ -125,6 +125,22 @@
     <!-- header-end -->
 
 
+  <header>
+    <h1>Empuje Comunitario</h1>
+    <nav>
+      <!--listado -->
+      <a th:href="@{/ui/solicitudes}">Ver solicitudes</a>
+
+      <a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a>
+      <span th:if="${session.rol} == 'PRESIDENTE'">
+        <a th:href="@{/auth/register}">Registrar usuario</a>
+        <a th:href="@{/admin/users}">Administrar Usuarios</a>
+      </span>
+      <span th:if="${session.username} != null">
+        <a th:href="@{/auth/logout}">Salir</a>
+      </span>
+    </nav>
+  </header>
 
   <main>
 
