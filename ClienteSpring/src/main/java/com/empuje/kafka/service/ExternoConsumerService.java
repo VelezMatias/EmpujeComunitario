@@ -1,4 +1,5 @@
 package com.empuje.kafka.service;
+import com.empuje.kafka.config.OrgConfig;
 
 import com.empuje.kafka.dto.SolicitudDtos;
 import com.empuje.kafka.entity.MensajeProcesado;
@@ -28,15 +29,18 @@ public class ExternoConsumerService {
     private final SolicitudExternaRepo solicitudes;
     private final SolicitudItemRepo items;
     private final MensajeProcesadoRepo procesados;
+    private final OrgConfig org; // <- NUEVO
 
     public ExternoConsumerService(ObjectMapper om,
-            SolicitudExternaRepo solicitudes,
-            SolicitudItemRepo items,
-            MensajeProcesadoRepo procesados) {
+                                  SolicitudExternaRepo solicitudes,
+                                  SolicitudItemRepo items,
+                                  MensajeProcesadoRepo procesados,
+                                  OrgConfig org) {
         this.om = om;
         this.solicitudes = solicitudes;
         this.items = items;
         this.procesados = procesados;
+        this.org = org;
     }
 
     @KafkaListener(topics = "solicitud-donaciones", groupId = "cliente-spring-fix")
@@ -45,10 +49,16 @@ public class ExternoConsumerService {
         log.info("Kafka RX topic={} key={} partition={} offset={}",
                 record.topic(), record.key(), record.partition(), record.offset());
 
-        // Idempotencia por (topic, partition, offset)
         if (procesados.findByTopicAndPartitionNoAndOffsetNo(
                 record.topic(), record.partition(), record.offset()).isPresent()) {
             log.info("Mensaje ya procesado (idempotencia) offset={}", record.offset());
+            return;
+        }
+
+        // Ignoro mis propias solicitudes si por algún motivo me llegan
+        if (record.key() != null && record.key().equals(String.valueOf(org.getOrgId()))) {
+            log.info("Descarto solicitud propia (key==ORG_ID={})", org.getOrgId());
+            marcarProcesado(record);
             return;
         }
 
@@ -57,15 +67,16 @@ public class ExternoConsumerService {
                 dto.getSolicitud_id(), dto.getItems() == null ? 0 : dto.getItems().size());
 
         final String solicitudId = dto.getSolicitud_id();
-        final Integer orgId = dto.getOrg_id(); // puede ser null
+
+        // org_id del JSON o lo infiero desde la key del record
+        Integer orgId = dto.getOrg_id();
+        if (orgId == null && record.key() != null) {
+            try { orgId = Integer.parseInt(record.key()); } catch (NumberFormatException ignored) {}
+        }
 
         LocalDateTime fecha = (dto.getFecha_hora() != null && !dto.getFecha_hora().isBlank())
                 ? OffsetDateTime.parse(dto.getFecha_hora(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime()
-                : null;
-
-        if (fecha == null) {
-            fecha = LocalDateTime.now();
-        }
+                : LocalDateTime.now();
 
         var se = solicitudes.findBySolicitudId(solicitudId).orElse(new SolicitudExterna());
         se.setSolicitudId(solicitudId);
@@ -74,12 +85,8 @@ public class ExternoConsumerService {
         se.setEstado("VIGENTE");
         se.setPayloadJson(record.value());
         solicitudes.save(se);
-        log.info("UPSERT solicitudes_externas OK solicitud_id={}", solicitudId);
 
-        // Borrado atómico por solicitud_id
         long borrados = items.deleteBySolicitudId(solicitudId);
-        log.debug("Items borrados previos: {}", borrados);
-
         if (dto.getItems() != null) {
             for (var it : dto.getItems()) {
                 var row = new SolicitudItem();
@@ -91,15 +98,16 @@ public class ExternoConsumerService {
                 items.save(row);
             }
         }
-        log.info("Insert items OK solicitud_id={} count={}",
-                solicitudId, dto.getItems() == null ? 0 : dto.getItems().size());
 
+        marcarProcesado(record);
+    }
+
+    private void marcarProcesado(ConsumerRecord<String,String> record) {
         var mp = new MensajeProcesado();
         mp.setTopic(record.topic());
         mp.setMessageKey(record.key());
         mp.setPartitionNo(record.partition());
         mp.setOffsetNo(record.offset());
         procesados.save(mp);
-        log.info("Marca mensajes_procesados OK offset={}", record.offset());
     }
 }

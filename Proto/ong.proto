@@ -233,6 +233,7 @@ service DonationService {
   rpc UpdateDonationItem(UpdateDonationRequest) returns (ApiResponse);
   rpc SoftDeleteDonationItem(SoftDeleteDonationRequest) returns (ApiResponse);
   rpc ListDonationItems(Empty) returns (ListDonationsResponse);
+  rpc TransferDonations(TransferDonationsRequest) returns (TransferDonationsResponse);
 }
 
 service EventService {
@@ -290,4 +291,24 @@ service OngService {
 
   rpc ListSolicitudesExternas (ListExternasRequest) returns (ListSolicitudesExternasResponse);
   rpc ListEventosExternos (ListExternasRequest) returns (ListEventosExternosResponse);
+}
+
+
+//----- Transferir donaciones -----
+message TransferDonationItem {
+  string categoria = 1;     // mantiene string porque el Kafka msg pide texto
+  string descripcion = 2;
+  double cantidad = 3;
+  string unidad = 4;
+}
+
+message TransferDonationsRequest {
+  string solicitud_id = 1;     // <-- CAMBIADO a string
+  int32 org_receptora_id = 2;  // id de la ONG receptora (org_id de la solicitud)
+  repeated TransferDonationItem items = 3;
+}
+
+message TransferDonationsResponse {
+  string transfer_uid = 1;
+  string status = 2;           // "PUBLICADA"
 }

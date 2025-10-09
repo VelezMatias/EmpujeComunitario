@@ -1,10 +1,13 @@
 # ServerPython/app/services/donation_service.py
-from datetime import datetime
+
 from typing import Optional
 
 from app.db import fetch_one, fetch_all, execute
-import ong_pb2 as pb
-import ong_pb2_grpc as rpc
+from app import ong_pb2 as pb
+from app import ong_pb2_grpc as rpc
+
+import os, uuid, datetime, pytz, grpc
+from app.kafka_bus import publish
 
 
 # ===== Helpers =====
@@ -66,6 +69,11 @@ def _row_to_pb(r: dict) -> pb.DonationItem:
         updated_at=_to_iso_local(r.get("fecha_modificacion")),
         updated_by=int(r.get("usuario_modificacion") or 0),
     )
+
+
+def _categoria_id_from_nombre(nombre: str) -> int | None:
+    row = fetch_one("SELECT id FROM categorias WHERE UPPER(nombre)=UPPER(%s) LIMIT 1", (nombre or "",))
+    return int(row["id"]) if row else None
 
 
 class DonationServiceServicer(rpc.DonationServiceServicer):
@@ -166,15 +174,140 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
     def ListDonationItems(self, request: pb.Empty, context):
         try:
             execute("SET time_zone = '-03:00'")
-
             rows = fetch_all("""
                 SELECT d.id, d.categoria_id, d.descripcion, d.cantidad, d.eliminado,
-                       d.fecha_alta, d.usuario_alta, d.fecha_modificacion, d.usuario_modificacion
-                  FROM donaciones d
-                 ORDER BY d.eliminado ASC, d.categoria_id, d.descripcion
+                    d.fecha_alta, d.usuario_alta, d.fecha_modificacion, d.usuario_modificacion
+                FROM donaciones d
+                ORDER BY d.eliminado ASC, d.categoria_id, d.descripcion
             """)
+            print("[SRV] ListDonationItems count:", len(rows or []))  # <- LOG
             items = [_row_to_pb(r) for r in (rows or [])]
             return pb.ListDonationsResponse(items=items)
         except Exception as e:
             print("[DONACIONES][List][ERR]", e)
             return pb.ListDonationsResponse(items=[])
+            
+
+
+   
+        # Transferencia
+    def TransferDonations(self, request: pb.TransferDonationsRequest, context):
+        """
+        request:
+        solicitud_id: string (ej: "SOL-2025-79D82A3D")
+        org_receptora_id: int32
+        items[]: { categoria: string, descripcion: string, cantidad: double, unidad?: string }
+        """
+
+        # (Opcional) permisos:
+        # if hasattr(request, "auth"):
+        #     _require_vocal_o_presidente(request.auth)
+
+        if not request.items:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "La transferencia no tiene ítems.")
+
+        # 1) Validar/descontar inventario local (somos donantes)
+        for it in request.items:
+            cat_nombre = (it.categoria or "").strip().upper()
+            if not cat_nombre:
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Categoría vacía en ítem.")
+
+            cat_id = _categoria_id_from_nombre(cat_nombre)  # por NOMBRE (STRING)
+            if cat_id is None:
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Categoría inexistente: {it.categoria}")
+
+            desc = (it.descripcion or "").strip()
+            try:
+                cant = float(it.cantidad or 0)
+            except Exception:
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Cantidad inválida para {cat_nombre} - {desc}")
+            if cant <= 0:
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Cantidad inválida para {cat_nombre} - {desc}")
+
+            # --- Intento 1: match EXACTO por descripcion ---
+            rc, _ = execute(
+                """
+                UPDATE donaciones
+                SET cantidad = cantidad - %s
+                WHERE categoria_id = %s
+                AND TRIM(descripcion) = %s
+                AND eliminado = 0
+                AND cantidad >= %s
+                """,
+                (cant, int(cat_id), desc, cant)
+            )
+            if rc == 0:
+                # --- Fallback: por categoría con reparto FIFO (si hay stock suficiente en la categoría) ---
+                row = fetch_one(
+                    """
+                    SELECT COALESCE(SUM(cantidad),0) AS total
+                    FROM donaciones
+                    WHERE categoria_id = %s AND eliminado = 0
+                    """,
+                    (int(cat_id),)
+                )
+                total = float(row["total"] if row and row["total"] is not None else 0.0)
+                if total < cant:
+                    context.abort(
+                        grpc.StatusCode.FAILED_PRECONDITION,
+                        f"Stock insuficiente: {cat_nombre} - {desc}"
+                    )
+
+                # Descuento en orden FIFO por fecha_alta, luego id
+                filas = fetch_all(
+                    """
+                    SELECT id, cantidad
+                    FROM donaciones
+                    WHERE categoria_id = %s AND eliminado = 0 AND cantidad > 0
+                    ORDER BY fecha_alta ASC, id ASC
+                    """,
+                    (int(cat_id),)
+                ) or []
+
+                restante = cant
+                for f in filas:
+                    if restante <= 1e-9:
+                        break
+                    si = int(f["id"])
+                    disp = float(f["cantidad"] or 0)
+                    usar = min(disp, restante)
+                    if usar > 0:
+                        execute("UPDATE donaciones SET cantidad = cantidad - %s WHERE id = %s", (usar, si))
+                        restante -= usar
+
+                # por robustez, chequear que realmente se descontó todo
+                if restante > 1e-9:
+                    context.abort(
+                        grpc.StatusCode.INTERNAL,
+                        f"No se pudo completar el descuento por categoría {cat_nombre} (restante={restante})."
+                    )
+
+        # 2) Publicar en Kafka
+        ORG_ID = int(os.getenv("ORG_ID", "42"))
+        transfer_uid = str(uuid.uuid4())
+
+        payload = {
+            "transfer_id": transfer_uid,
+            "solicitud_id": request.solicitud_id,   # string
+            "org_donante_id": ORG_ID,
+            "items": [
+                {
+                    "categoria": (it.categoria or "").strip().upper(),
+                    "descripcion": (it.descripcion or "").strip(),
+                    "cantidad": float(it.cantidad or 0),
+                    "unidad": (it.unidad or None)
+                }
+                for it in request.items
+            ],
+            "emitted_at_utc": datetime.datetime.utcnow().replace(tzinfo=pytz.UTC).isoformat(),
+            "schema_version": 1,
+        }
+
+        topic = "transferencia-donaciones"
+        key = str(int(request.org_receptora_id))
+        publish(topic, key=key, payload=payload)
+
+        return pb.TransferDonationsResponse(
+            transfer_uid=transfer_uid,
+            status="PUBLICADA"
+        )
