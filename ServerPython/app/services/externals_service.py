@@ -74,19 +74,22 @@ class ExternalsService(ong_pb2_grpc.OngServiceServicer):
         size = request.page_size or 20
         off = (page - 1) * size
 
+        # Solo mostrar eventos VIGENTE y de otras organizaciones
+        my_org = int(os.getenv("ORG_ID", "42"))
         sql = """
         SELECT org_id, evento_id, estado,
                DATE_FORMAT(fecha_hora, '%%Y-%%m-%%d %%H:%%i:%%s') AS fecha_hora,
                JSON_UNQUOTE(JSON_EXTRACT(payload_json, '$.titulo')) AS titulo,
                JSON_UNQUOTE(JSON_EXTRACT(payload_json, '$.lugar')) AS lugar
         FROM eventos_externos
+        WHERE estado = 'VIGENTE' AND org_id <> %s
         ORDER BY id DESC
         LIMIT %s OFFSET %s
         """
 
         with _get_conn() as conn:
             with conn.cursor() as cur:
-                cur.execute(sql, (size + 1, off))
+                cur.execute(sql, (my_org, size + 1, off))
                 rows = cur.fetchall()
 
         has_more = len(rows) > size

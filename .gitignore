@@ -63,3 +63,10 @@ ServerPython/app/ong_pb2.py
 ServerPython/app/ong_pb2_grpc.py
 ServerPython/ong_pb2.py
 ServerPython/ong_pb2_grpc.py
+
+# ========= LOCAL ENVS / DOCKER DATA =========
+# Evitar commitear entornos locales y datos de Kafka/ZooKeeper
+ServerPython/.venv312/
+infra/kafka/data/
+infra/kafka/zk-data/
+infra/kafka/zk-txn-logs/

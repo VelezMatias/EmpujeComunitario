@@ -70,8 +70,19 @@ def handle_baja_solicitud(cur, payload):
 def handle_evento(cur, payload):
     org_id = int(payload["org_id"])
     evento_id = str(payload["evento_id"])
-    fecha_dt = iso_to_dt(payload.get("fecha_hora",""))
+    # Los docs usan fecha_inicio/fecha_fin; aceptar fecha_hora o fecha_inicio
+    fecha_dt = iso_to_dt(
+        payload.get("fecha_hora") or payload.get("fecha_inicio") or ""
+    )
     estado = payload.get("estado","VIGENTE")
+    # Descartar eventos propios (solo guardar de otras organizaciones)
+    try:
+        my_org = int(ORG_ID)
+        if org_id == my_org:
+            print(f"[SKIP] evento propio org_id={org_id} evento_id={evento_id}")
+            return  # ignorar
+    except Exception:
+        pass
     cur.execute("""
         INSERT INTO eventos_externos (org_id, evento_id, fecha_hora, estado, payload_json)
         VALUES (%s,%s,%s,%s,%s)
@@ -87,8 +98,58 @@ def handle_baja_evento(cur, payload):
     """, (org_id, evento_id))
 
 # stubs para más adelante
-def handle_transferencia(cur, payload): pass
-def handle_adhesion(cur, payload): pass
+def handle_transferencia(cur, payload):
+    org_id_origen = int(payload.get("org_id_origen") or 0)
+    org_id_destino = int(payload.get("org_id_destino") or 0)
+    solicitud_id = str(payload.get("solicitud_id") or "")
+    fecha_dt = iso_to_dt(payload.get("fecha_hora", ""))
+    idem_key = str(payload.get("idempotency_key") or f"TRF:{org_id_origen}->{org_id_destino}:{solicitud_id}")
+
+    cur.execute(
+        """
+        INSERT INTO transferencias_externas (
+            org_id_origen, org_id_destino, solicitud_id, fecha_hora, idempotency_key, payload_json
+        ) VALUES (%s,%s,%s,%s,%s,%s)
+        ON DUPLICATE KEY UPDATE
+            fecha_hora = VALUES(fecha_hora),
+            payload_json = VALUES(payload_json)
+        """,
+        (
+            org_id_origen,
+            org_id_destino,
+            solicitud_id,
+            fecha_dt,
+            idem_key,
+            json.dumps(payload, ensure_ascii=False),
+        ),
+    )
+
+
+def handle_adhesion(cur, payload):
+    org_id_org = int(payload.get("org_id_organizador") or 0)
+    org_id_adh = int(payload.get("org_id_adherente") or 0)
+    evento_id = str(payload.get("evento_id") or "")
+    fecha_dt = iso_to_dt(payload.get("fecha_hora", ""))
+    idem_key = str(payload.get("idempotency_key") or f"ADH:{org_id_adh}->{org_id_org}:{evento_id}")
+
+    cur.execute(
+        """
+        INSERT INTO adhesiones_evento (
+            org_id_organizador, evento_id, org_id_adherente, fecha_hora, idempotency_key, payload_json
+        ) VALUES (%s,%s,%s,%s,%s,%s)
+        ON DUPLICATE KEY UPDATE
+            fecha_hora = VALUES(fecha_hora),
+            payload_json = VALUES(payload_json)
+        """,
+        (
+            org_id_org,
+            evento_id,
+            org_id_adh,
+            fecha_dt,
+            idem_key,
+            json.dumps(payload, ensure_ascii=False),
+        ),
+    )
 
 HANDLERS = {
     "solicitud-donaciones": handle_solicitud,
