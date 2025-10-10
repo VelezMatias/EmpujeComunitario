@@ -23,8 +23,6 @@ TOPIC = "solicitud-donaciones"  # arrancamos con este; luego sumamos otros
 
 def get_db_conn():
     return pymysql.connect(
-
-        # en user=DB_USER, password=DB_PASS, cambiar por pass y contraseña correspondient
         host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS,
         database=DB_NAME, autocommit=False, charset="utf8mb4",
         cursorclass=pymysql.cursors.DictCursor
@@ -38,12 +36,10 @@ def persist_solicitud_externa(cur, payload: dict):
     org_id = int(payload["org_id"])
     solicitud_id = str(payload["solicitud_id"])
 
-    # fecha_hora viene ISO; normalizamos a DATETIME
-    # ejemplo: "2025-09-15T03:10:00-03:00" → tomamos la parte '2025-09-15 03:10:00'
+    # fecha_hora viene ISO; normalizamos a DATETIME sin zona (naive)
+    # ejemplo: "2025-09-15T03:10:00-03:00" -> '2025-09-15 03:10:00'
     fecha_hora_str = payload.get("fecha_hora", "")
-    fecha_dt = None
     try:
-        # recorte simple para MySQL (sin tz); si querés exacto, parsea y convierte a UTC/local
         fecha_dt = fecha_hora_str[:19].replace("T", " ")
     except Exception:
         fecha_dt = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -77,6 +73,32 @@ def ya_procesado(cur, topic, message_key):
         (topic, message_key)
     )
     return cur.fetchone() is not None
+
+def build_message_key(payload: dict, key: str | None) -> str:
+    """
+    Calcula una clave de idempotencia estable por solicitud:
+    1) payload.idempotency_key
+    2) f"{org_id}:{solicitud_id}"
+    3) key de Kafka (fallback)
+    """
+    # Normalizar campos
+    sid = str(payload.get("solicitud_id", "")).strip()
+    oid = str(payload.get("org_id", "")).strip()
+    idk = payload.get("idempotency_key")
+
+    if isinstance(idk, str):
+        idk = idk.strip()
+    else:
+        idk = None
+
+    if idk:  # (1) respetar idempotency_key si viene
+        return idk
+
+    if oid and sid:  # (2) org_id:solicitud_id
+        return f"{oid}:{sid}"
+
+    # (3) fallback: key del record
+    return (key or "").strip()
 
 def main():
     conf = {
@@ -119,21 +141,22 @@ def main():
                 consumer.commit(message=msg)
                 continue
 
-            # Clave de idempotencia: si viene idempotency_key la usamos; si no, usamos la key del record
-            message_key = payload.get("idempotency_key") or key or ""
+            # Idempotencia robusta
+            message_key = build_message_key(payload, key)
             if not message_key:
-                # como fallback, podrías construirla con org_id:solicitud_id si existen
-                mk_fallback = f"{payload.get('org_id','')}: {payload.get('solicitud_id','')}"
-                message_key = mk_fallback.strip()
+                # último fallback defensivo
+                mk_fallback = f"{payload.get('org_id','')}:{payload.get('solicitud_id','')}".strip()
+                message_key = mk_fallback or (key or "")
+            # log útil
+            print(f"[DEBUG] Calc message_key='{message_key}' for key='{key}' payload.solicitud_id='{payload.get('solicitud_id')}'")
 
             try:
                 with conn.cursor() as cur:
                     # idempotencia lógica
                     if ya_procesado(cur, topic, message_key):
                         print(f"[SKIP] Duplicado topic={topic} key={message_key} offset={offset}")
-                        # aún así podemos commitear el offset para no reprocesar
-                        conn.commit()
-                        consumer.commit(message=msg)
+                        conn.commit()                 # no tocamos datos, pero avanzamos estado de transacción
+                        consumer.commit(message=msg)  # avanzamos offset
                         continue
 
                     # persistimos la solicitud
@@ -149,7 +172,6 @@ def main():
             except Exception as e:
                 conn.rollback()
                 print(f"[ERROR] DB/Proc: {e} -> no se commitea offset, se volverá a intentar")
-                # pequeña espera para evitar loop caliente si hay error permanente
                 time.sleep(1)
 
     except KeyboardInterrupt:

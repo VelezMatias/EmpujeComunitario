@@ -359,17 +359,10 @@
               <div style="display:flex; gap:10px; align-items:center;">
                 <span class="state" th:text="${se.estado}">VIGENTE</span>
 
-                <!-- Botón eliminar (solo si no está ya ANULADA) -->
-                <form th:if="${se.estado != 'ANULADA'}"
-                      th:action="@{|/ui/solicitudes/${se.solicitudId}/eliminar|}"
-                      method="post"
-                      onsubmit="return confirm('¿Anular la solicitud ' + /*[[${se.solicitudId}]]*/'?' + ' Esta acción también borra sus ítems.');">
-                  <button class="btn" type="submit" style="background:#ef4444;border:1px solid #7f1d1d">
-                    Eliminar
-                  </button>
-                </form>
+      
 
-                <form th:action="@{|/ui/solicitudes/${se.solicitudId}/transferir|}"
+                <form th:if="${se.estado != 'ANULADA'}"
+                      th:action="@{|/ui/solicitudes/${se.solicitudId}/transferir|}"
                       method="post" style="display:inline">
                   <input type="hidden" th:if="${_csrf != null}"
                         th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -441,7 +434,8 @@
                   <form class="frm-del-sol"
                         th:if="${cumplidas == null or !#lists.contains(cumplidas, sp.solicitudId)}"
                         th:action="@{|/ui/solicitudes/${sp.solicitudId}/eliminar|}"
-                        method="post" data-sid="[[${sp.solicitudId}]]">
+                        method="post" 
+                        th:attr="onsubmit=|return confirm('¿Anular la solicitud ${sp.solicitudId}? Esta acción también borra sus ítems.');|"> 
                     <input type="hidden" th:if="${_csrf != null}"
                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button class="btn" type="submit" style="background:#ef4444;border:1px solid #7f1d1d">
@@ -519,17 +513,6 @@
   <script th:src="@{/charifit/js/mail-script.js}"></script>
   <script th:src="@{/charifit/js/main.js}"></script>
 
-  <script>
-    document.addEventListener('submit', function (ev) {
-      var f = ev.target;
-      if (f.classList.contains('frm-del-sol')) {
-        var sid = f.getAttribute('data-sid') || '';
-        if (!confirm('¿Eliminar la solicitud ' + sid + '? Esta acción también borra sus ítems.')) {
-          ev.preventDefault();
-        }
-      }
-    }, true);
-  </script>
 
 
 
