@@ -18,7 +18,7 @@ import java.util.Comparator;
 public class SolicitudesTransferController {
 
     private final SolicitudExternaRepo solicitudes;
-    private final SolicitudItemRepo solicitudItemRepo;   // <-- usa tu repo
+    private final SolicitudItemRepo solicitudItemRepo;   
     private final DonationServiceGrpc.DonationServiceBlockingStub donationStub;
 
     @Autowired
