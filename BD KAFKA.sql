@@ -327,4 +327,65 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+
+-- 1) Solicitudes PROPIAS (las que publica TU organización)
+CREATE TABLE IF NOT EXISTS solicitudes (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  org_id        INT NOT NULL,                                  
+  solicitud_id  VARCHAR(100) NOT NULL UNIQUE,                  
+  fecha_hora    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,   
+  payload_json  JSON NOT NULL,                                 
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_sol_org (org_id),
+  KEY idx_sol_fechahora (fecha_hora)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 2) Ítems de solicitudes PROPIAS (separado de los ítems de externas)
+CREATE TABLE IF NOT EXISTS solicitud_prop_items (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  solicitud_id  VARCHAR(100) NOT NULL,                          -- FK por código lógico
+  categoria     VARCHAR(50),
+  descripcion   VARCHAR(255),
+  cantidad      INT,
+  unidad        VARCHAR(20),
+  CONSTRAINT fk_prop_items
+    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(solicitud_id)
+    ON DELETE CASCADE,
+  KEY idx_prop_items_sol (solicitud_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 3) Vistas de conveniencia (propias, externas, unión)
+DROP VIEW IF EXISTS vw_solicitudes_propias;
+CREATE VIEW vw_solicitudes_propias AS
+SELECT
+  s.solicitud_id,
+  s.org_id,
+  s.fecha_hora,
+  'PROPIA' AS origen,
+  JSON_EXTRACT(s.payload_json, '$.items') AS items_json
+FROM solicitudes s;
+
+DROP VIEW IF EXISTS vw_solicitudes_externas;
+CREATE VIEW vw_solicitudes_externas AS
+SELECT
+  se.solicitud_id,
+  COALESCE(se.org_id, 0) AS org_id,
+  se.fecha_hora,
+  'EXTERNA' AS origen,
+  JSON_EXTRACT(se.payload_json, '$.items') AS items_json
+FROM solicitudes_externas se;
+
+DROP VIEW IF EXISTS vw_solicitudes_todas;
+CREATE VIEW vw_solicitudes_todas AS
+SELECT * FROM vw_solicitudes_propias
+UNION ALL
+SELECT * FROM vw_solicitudes_externas;
+
+
+CREATE TABLE IF NOT EXISTS solicitudes_cumplidas (
+  solicitud_id VARCHAR(100) PRIMARY KEY,
+  cumplida_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- Dump completed on 2025-10-08 12:43:57

@@ -3,9 +3,9 @@
 import grpc
 import warnings
 
-import ong_pb2 as ong__pb2
+from . import ong_pb2 as ong__pb2
 
-GRPC_GENERATED_VERSION = '1.75.0'
+GRPC_GENERATED_VERSION = '1.75.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -301,6 +301,11 @@ class DonationServiceStub(object):
                 request_serializer=ong__pb2.Empty.SerializeToString,
                 response_deserializer=ong__pb2.ListDonationsResponse.FromString,
                 _registered_method=True)
+        self.TransferDonations = channel.unary_unary(
+                '/ong.DonationService/TransferDonations',
+                request_serializer=ong__pb2.TransferDonationsRequest.SerializeToString,
+                response_deserializer=ong__pb2.TransferDonationsResponse.FromString,
+                _registered_method=True)
 
 
 class DonationServiceServicer(object):
@@ -330,6 +335,12 @@ class DonationServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def TransferDonations(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DonationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -352,6 +363,11 @@ def add_DonationServiceServicer_to_server(servicer, server):
                     servicer.ListDonationItems,
                     request_deserializer=ong__pb2.Empty.FromString,
                     response_serializer=ong__pb2.ListDonationsResponse.SerializeToString,
+            ),
+            'TransferDonations': grpc.unary_unary_rpc_method_handler(
+                    servicer.TransferDonations,
+                    request_deserializer=ong__pb2.TransferDonationsRequest.FromString,
+                    response_serializer=ong__pb2.TransferDonationsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -462,6 +478,33 @@ class DonationService(object):
             '/ong.DonationService/ListDonationItems',
             ong__pb2.Empty.SerializeToString,
             ong__pb2.ListDonationsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def TransferDonations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ong.DonationService/TransferDonations',
+            ong__pb2.TransferDonationsRequest.SerializeToString,
+            ong__pb2.TransferDonationsResponse.FromString,
             options,
             channel_credentials,
             insecure,

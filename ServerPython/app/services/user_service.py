@@ -1,8 +1,8 @@
 from app import models
 from app.security import hash_password, verify_password, generate_random_password
 from app.emailer import send_password_email
-import ong_pb2 as pb
-import ong_pb2_grpc as rpc
+from app import ong_pb2 as pb
+from app import ong_pb2_grpc as rpc
 
 # Map enums gRPC <-> rol_id BD (ajusta si tus ids difieren)
 _PB_TO_ROL_ID = {
