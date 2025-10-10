@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Eventos externos</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f5f5f5; text-align: left; }
+  </style>
+</head>
+<body>
+<h2>Eventos externos (VIGENTES, de otras organizaciones)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Org</th>
+      <th>Evento ID</th>
+      <th>Título</th>
+      <th>Lugar</th>
+      <th>Fecha/Hora</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr th:each="e : ${items}">
+    <td th:text="${e.orgId}"></td>
+    <td th:text="${e.eventoId}"></td>
+    <td th:text="${e.titulo}"></td>
+    <td th:text="${e.lugar}"></td>
+    <td th:text="${e.fechaHora}"></td>
+    <td th:text="${e.estado}"></td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>
