@@ -52,16 +52,22 @@
               <nav>
                 <ul id="navigation">
                   <li><a th:href="@{/home}">Inicio</a></li>
-                  <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
-                  <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
 
                   <!-- según rol -->
-                  <li th:if="${session.rol} == 'PRESIDENTE'">
-                    <a th:href="@{/auth/register}">Registrar usuario</a>
+                  <li  th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+                    <ul class="submenu">
+                        <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+                        <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+                    </ul>
                   </li>
-                  <li th:if="${session.rol} == 'PRESIDENTE'">
-                    <a th:href="@{/admin/users}">Administrar Usuarios</a>
+
+                  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+                    <ul class="submenu">
+                     <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+                     <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+                    </ul>
                   </li>
+
                   <li th:if="${session.rol} == 'PRESIDENTE'">
                     <a th:href="@{/eventos}">Eventos</a>
                   </li>
