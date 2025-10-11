@@ -1,7 +1,7 @@
 package com.empuje.ui.solicitudes;
 
 import com.empuje.kafka.repo.SolicitudExternaRepo;
-import com.empuje.kafka.repo.SolicitudItemRepo;     // <-- tu repo existente
+import com.empuje.kafka.repo.SolicitudItemRepo;    
 import com.empuje.kafka.entity.SolicitudItem;
 import com.empuje.grpc.ong.DonationServiceGrpc;
 import com.empuje.grpc.ong.TransferDonationItem;
