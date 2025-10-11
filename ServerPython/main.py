@@ -5,7 +5,7 @@ from app.db import Base, engine
 from app import models
 from app.config import GRPC_HOST, GRPC_PORT
 
-import ong_pb2_grpc as rpc
+from app import ong_pb2_grpc as rpc
 
 from app.services.user_service import UserServiceServicer
 from app.services.donation_service import DonationServiceServicer

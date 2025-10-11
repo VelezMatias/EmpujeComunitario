@@ -2,22 +2,22 @@ package com.empuje.grpc.eventos;
 
 import com.empuje.grpc.web.EventGateway; 
 import jakarta.servlet.http.HttpSession;
-import ong.ListEventsResponse;
-import ong.Role;
-import ong.UserServiceGrpc;            
-import ong.DonationServiceGrpc;
+import com.empuje.grpc.ong.ListEventsResponse;
+import com.empuje.grpc.ong.Role;
+import com.empuje.grpc.ong.UserServiceGrpc;            
+import com.empuje.grpc.ong.DonationServiceGrpc;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import ong.ApiResponse;
-import ong.AssignDonationToEventRequest;
-import ong.RemoveDonationFromEventRequest;
-import ong.ListDonationsByEventRequest;
-import ong.ListDonationsByEventResponse;
-import ong.EventDonationLink;
+import com.empuje.grpc.ong.ApiResponse;
+import com.empuje.grpc.ong.AssignDonationToEventRequest;
+import com.empuje.grpc.ong.RemoveDonationFromEventRequest;
+import com.empuje.grpc.ong.ListDonationsByEventRequest;
+import com.empuje.grpc.ong.ListDonationsByEventResponse;
+import com.empuje.grpc.ong.EventDonationLink;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -146,10 +146,10 @@ public String editForm(@PathVariable int id,
     } catch (Exception ignore) {}
 
     // Usuarios (para buscar/agregar)
-    java.util.List<ong.User> usersAllRaw;
-    java.util.List<ong.User> allUsers;
+    java.util.List<com.empuje.grpc.ong.User> usersAllRaw;
+    java.util.List<com.empuje.grpc.ong.User> allUsers;
     try {
-        var usersResp = users.listUsers(ong.Empty.getDefaultInstance());
+        var usersResp = users.listUsers(com.empuje.grpc.ong.Empty.getDefaultInstance());
         usersAllRaw = new java.util.ArrayList<>(usersResp.getUsersList());
         allUsers    = new java.util.ArrayList<>(usersResp.getUsersList());
     } catch (Exception ex) {
@@ -167,7 +167,7 @@ public String editForm(@PathVariable int id,
     // Miembros actuales
     java.util.Set<Integer> memberIds = ev.getMiembrosList().stream()
             .collect(java.util.stream.Collectors.toSet());
-    java.util.List<ong.User> currentParticipants = usersAllRaw.stream()
+    java.util.List<com.empuje.grpc.ong.User> currentParticipants = usersAllRaw.stream()
             .filter(u -> memberIds.contains(u.getId()))
             .collect(java.util.stream.Collectors.toList());
 
@@ -176,14 +176,14 @@ public String editForm(@PathVariable int id,
     model.addAttribute("plannedDonations", planned);
 
     // Catálogo de donaciones + mapa id -> DonationItem
-    java.util.List<ong.DonationItem> allDonations;
+    java.util.List<com.empuje.grpc.ong.DonationItem> allDonations;
     try {
-        allDonations = donations.listDonationItems(ong.Empty.getDefaultInstance()).getItemsList();
+        allDonations = donations.listDonationItems(com.empuje.grpc.ong.Empty.getDefaultInstance()).getItemsList();
     } catch (Exception e) {
         allDonations = java.util.List.of();
     }
     var donationsById = allDonations.stream()
-            .collect(java.util.stream.Collectors.toMap(ong.DonationItem::getId, java.util.function.Function.identity()));
+            .collect(java.util.stream.Collectors.toMap(com.empuje.grpc.ong.DonationItem::getId, java.util.function.Function.identity()));
     model.addAttribute("allDonations", allDonations);
     model.addAttribute("donationsById", donationsById);
 

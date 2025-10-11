@@ -2,11 +2,11 @@ package com.empuje.grpc.auth;
 
 import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpSession;
-import ong.UserServiceGrpc;
-import ong.LoginRequest;
-import ong.CreateUserRequest;
-import ong.AuthContext;
-import ong.Role;
+import com.empuje.grpc.ong.UserServiceGrpc;
+import com.empuje.grpc.ong.LoginRequest;
+import com.empuje.grpc.ong.CreateUserRequest;
+import com.empuje.grpc.ong.AuthContext;
+import com.empuje.grpc.ong.Role;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;

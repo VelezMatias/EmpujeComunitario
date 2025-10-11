@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 from typing import List
 
 from app import models
-import ong_pb2 as pb
-import ong_pb2_grpc as rpc
+from app import ong_pb2 as pb
+from app import ong_pb2_grpc as rpc
 
 from app.db import get_conn
 

@@ -2,7 +2,7 @@ package com.empuje.grpc.donaciones;
 
 import com.empuje.grpc.web.DonationGateway;
 import jakarta.servlet.http.HttpSession;
-import ong.*;
+import com.empuje.grpc.ong.*;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
