@@ -1,4 +1,9 @@
 # ServerPython/app/services/event_service.py
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# ahora el import absoluto funciona
+from kafka_bus import publish_baja_evento
+
 from datetime import datetime, timezone
 from typing import List
 
@@ -127,6 +132,17 @@ class EventServiceServicer(rpc.EventServiceServicer):
             rows = models.eliminar_evento(request.id)
             if rows == 0:
                 return pb.ApiResponse(success=False, message="No se pudo eliminar.")
+            
+            # Necesario para la consigna 6 en kafka
+            try:
+                # usamos ORG_ID del entorno como key coherente con el resto del proyecto
+                org_id = int(os.getenv("ORG_ID", "42"))
+                # el helper arma payload con 'evento_id' e 'idempotency_key'
+                publish_baja_evento(org_id=org_id, evento_id=request.id)
+            except Exception as ex:
+                # no se rompe la UX por un fallo de publicación; y deja registro
+                print(f"[KAFKA] Error publicando baja-evento: {ex}")
+
             return pb.ApiResponse(success=True, message="Evento eliminado.")
 
         except (PermissionError) as e:
