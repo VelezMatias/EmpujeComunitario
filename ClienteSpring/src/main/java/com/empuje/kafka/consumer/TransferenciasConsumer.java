@@ -2,10 +2,13 @@ package com.empuje.kafka.consumer;
 
 import com.empuje.kafka.config.OrgConfig;
 import com.empuje.kafka.entity.SolicitudCumplida;
+import com.empuje.kafka.entity.MensajeProcesado;
+import com.empuje.kafka.repo.MensajeProcesadoRepo;
 import com.empuje.kafka.repo.SolicitudCumplidaRepo;
 import com.empuje.kafka.repo.SolicitudExternaRepo;
 import com.empuje.kafka.repo.SolicitudRepository;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -36,20 +39,24 @@ public class TransferenciasConsumer {
   private final SolicitudExternaRepo solicitudesExternas;
   private final SolicitudRepository solicitudesPropias;
   private final SolicitudCumplidaRepo cumplidas;
+  private final MensajeProcesadoRepo procesados; // << idempotencia
 
   public TransferenciasConsumer(
       OrgConfig org,
       DonationServiceGrpc.DonationServiceBlockingStub donationStub,
       SolicitudExternaRepo solicitudesExternas,
       SolicitudRepository solicitudesPropias,
-      SolicitudCumplidaRepo cumplidas
+      SolicitudCumplidaRepo cumplidas,
+      MensajeProcesadoRepo procesados
   ) {
     this.org = org;
     this.donationStub = donationStub;
     this.solicitudesExternas = solicitudesExternas;
     this.solicitudesPropias = solicitudesPropias;
     this.cumplidas = cumplidas;
+    this.procesados = procesados;
   }
+
 
   @KafkaListener(topics = "transferencia-donaciones", groupId = "${ORG_ID:42}-transfer")
   @Transactional
@@ -81,10 +88,10 @@ public class TransferenciasConsumer {
       }
 
       // ---- Auth gRPC: usar un rol permitido por el server Python (PRESIDENTE o VOCAL) ----
-     AuthContext auth = AuthContext.newBuilder()
-      .setActorId(1)            // <-- ID de un usuario que exista en tu tabla usuarios
-      .setActorRole(Role.VOCAL) // (o PRESIDENTE)
-      .build();
+      AuthContext auth = AuthContext.newBuilder()
+          .setActorId(1)            // ID válido en tu tabla usuarios
+          .setActorRole(Role.VOCAL) // o PRESIDENTE
+          .build();
 
       int ok = 0;
       for (var it : items) {
@@ -94,7 +101,6 @@ public class TransferenciasConsumer {
         if (cantidadDbl == null) cantidadDbl = 0.0;
         int cantidad = (int) Math.round(cantidadDbl);   // el proto pide int32
 
-        // Mapear texto -> enum Category del proto
         Category categoriaEnum = toCategoryEnum(categoriaTxt);
 
         CreateDonationRequest req = CreateDonationRequest.newBuilder()
@@ -150,13 +156,50 @@ public class TransferenciasConsumer {
     }
   }
 
+  // =========================================================================================
+  // Listener B: BAJA de solicitudes externas (soft-cancel: estado = "CANCELADA")
+  //    - Topic: "baja-solicitud-donaciones"
+  //    - Key  : solicitud_id  (NO filtramos por ORG_ID)
+  // =========================================================================================
+  @KafkaListener(topics = "baja-solicitud-donaciones", groupId = "${ORG_ID:42}-externas")
+  @Transactional
+  public void onBajaSolicitud(ConsumerRecord<String, String> rec) {
+    // Idempotencia por (topic, partition, offset)
+    if (procesados.existsByTopicAndPartitionNoAndOffsetNo(rec.topic(), rec.partition(), rec.offset())) {
+      return;
+    }
+
+    try {
+      Map<String, Object> m = om.readValue(rec.value(), new TypeReference<>() {});
+      final String solicitudId = str(m.get("solicitud_id"));
+      if (solicitudId.isEmpty()) {
+        log.warn("[BAJA-EXT] payload sin 'solicitud_id'. Ignoro.");
+        marcarProcesado(rec);
+        return;
+      }
+
+      solicitudesExternas.findBySolicitudId(solicitudId).ifPresentOrElse(ext -> {
+        ext.setEstado("CANCELADA");           // << mantiene la tarjeta, oculta Transferir
+        solicitudesExternas.save(ext);
+        log.info("[BAJA-EXT] solicitud externa {} marcada como CANCELADA", solicitudId);
+      }, () -> {
+        log.info("[BAJA-EXT] solicitud externa {} no existe (nada que marcar)", solicitudId);
+      });
+
+      marcarProcesado(rec);
+    } catch (Exception e) {
+      log.error("[BAJA-EXT][ERR] {}", e.getMessage(), e);
+      // No marcar como procesado para que reintente
+      throw new RuntimeException(e);
+    }
+  }
+
   // ===== Helpers =====
   private static String str(Object o) { return o == null ? "" : String.valueOf(o).trim(); }
   private static Double dbl(Object o) {
     try { return o == null ? null : Double.parseDouble(o.toString()); } catch (Exception e) { return null; }
   }
 
-  // Mapeo robusto de nombre de categoría -> enum Category
   private static Category toCategoryEnum(String s) {
     if (s == null) return Category.CATEGORY_UNSPECIFIED;
     String x = s.trim().toUpperCase()
@@ -171,5 +214,14 @@ public class TransferenciasConsumer {
       case "UTILES_ESCOLARES", "UTILES" -> Category.UTILES_ESCOLARES;
       default -> Category.CATEGORY_UNSPECIFIED;
     };
+  }
+
+  private void marcarProcesado(ConsumerRecord<String, String> r) {
+    MensajeProcesado mp = new MensajeProcesado();
+    mp.setTopic(r.topic());
+    mp.setMessageKey(r.key());
+    mp.setPartitionNo(r.partition());
+    mp.setOffsetNo(r.offset());
+    procesados.save(mp);
   }
 }
