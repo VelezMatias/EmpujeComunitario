@@ -92,6 +92,14 @@ def handle_evento(cur, payload):
 def handle_baja_evento(cur, payload):
     org_id = int(payload["org_id"])
     evento_id = str(payload["evento_id"])
+
+     # Ignora bajas propias (no toca "eventos_externos" para nuestra propia org)
+    try:
+        if org_id == int(ORG_ID):
+            return
+    except Exception:
+        pass
+
     cur.execute("""
         UPDATE eventos_externos SET estado='BAJA'
         WHERE org_id=%s AND evento_id=%s
