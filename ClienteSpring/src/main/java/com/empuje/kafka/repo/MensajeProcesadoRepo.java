@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface MensajeProcesadoRepo extends CrudRepository<MensajeProcesado, Long> {
     Optional<MensajeProcesado> findByTopicAndPartitionNoAndOffsetNo(String topic, Integer partitionNo, Long offsetNo);
+    boolean existsByTopicAndPartitionNoAndOffsetNo(String topic, int partitionNo, long offsetNo);
 }
