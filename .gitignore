@@ -72,3 +72,5 @@ infra/kafka/zk-data/
 infra/kafka/zk-txn-logs/
 ClienteSpring/src/main/resources/application.properties
 ServerPython/.env
+.venv312/
+ServerPython/consumers/.venv312/

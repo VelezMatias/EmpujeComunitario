@@ -12,7 +12,7 @@ MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
 MYSQL_DB   = os.getenv("MYSQL_DB", "empujecomunitario")
 MYSQL_USER = os.getenv("MYSQL_USER", "root")   # poner usuario de la DB
-MYSQL_PASS = os.getenv("MYSQL_PASSWORD", "12345")   # Poner contraseña de la BD
+MYSQL_PASS = os.getenv("MYSQL_PASSWORD", "root123")   # Poner contraseña de la BD
 
 cnx_pool = pooling.MySQLConnectionPool(
     pool_name="ec_pool",
