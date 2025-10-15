@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Informe de Donaciones</title>
+</head>
+<body>
+<h1>Informe de Donaciones</h1>
+
+<form id="formDon">
+    <label>Tipo:
+        <select name="tipo">
+            <option value="RECIBIDAS">Recibidas</option>
+            <option value="EFECTUADAS">Efectuadas</option>
+        </select>
+    </label>
+    <label>Categoría: <input name="categoria" /></label>
+    <label>Desde: <input type="date" name="dateFrom" /></label>
+    <label>Hasta: <input type="date" name="dateTo" /></label>
+    <label>Eliminado:
+        <select name="eliminado">
+            <option value="AMBOS">Ambos</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
+        </select>
+    </label>
+    <button type="button" onclick="buscar()">Buscar</button>
+</form>
+
+<h2>Resultado</h2>
+<pre id="resultado"></pre>
+
+<script src="/js/donation-report.js"></script>
+</body>
+</html>

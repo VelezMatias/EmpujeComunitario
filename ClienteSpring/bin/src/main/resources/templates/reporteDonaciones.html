@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Reporte de Donaciones</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<h1>Reporte de Donaciones (GraphQL)</h1>
+
+<table border="1" cellpadding="8">
+    <thead>
+    <tr>
+        <th>Categoría</th>
+        <th>Eliminado</th>
+        <th>Total</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="fila : ${reporte}">
+        <td th:text="${fila.categoria}">Categoría</td>
+        <td th:text="${fila.eliminado}">Eliminado</td>
+        <td th:text="${fila.total}">Total</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

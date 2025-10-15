@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Informe de Donaciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+        form {
+            margin-bottom: 15px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        .accordion {
+            background-color: #eee;
+            cursor: pointer;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            text-align: left;
+            font-weight: bold;
+        }
+        .panel {
+            padding: 0 15px;
+            display: none;
+            background-color: white;
+            overflow: hidden;
+            border-left: 2px solid #999;
+            border-right: 2px solid #999;
+            border-bottom: 2px solid #999;
+        }
+        .btn-informes {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .btn-informes:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Desactivar filtro de roles para pruebas -->
+<!-- <div th:if="${#authorization.expression('hasAnyRole(''PRESIDENTE'', ''VOCAL'')')}"> -->
+    
+    <!-- sin filtro por roles -->
+<div>
+    <a href="/informes/donaciones" class="btn-informes">Informes</a>
+</div>
+
+<h1>Informe de Donaciones</h1>
+
+<form id="formDon">
+   
+    <label>Categoría:
+    <select id="categoriaSelect" name="categoria">
+        <option value="">Todas</option>
+    </select>
+</label>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/categorias")
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById("categoriaSelect");
+            data.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat.nombre;
+                opt.textContent = cat.nombre.replace("_", " ");
+                select.appendChild(opt);
+            });
+        })
+        .catch(err => console.error("Error cargando categorías:", err));
+});
+</script>
+
+    <label>Desde: <input type="date" name="dateFrom" /></label>
+    <label>Hasta: <input type="date" name="dateTo" /></label>
+    <label>Eliminado:
+        <select name="eliminado">
+            <option value="AMBOS">Ambos</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
+        </select>
+    </label>
+    <button type="button" onclick="buscar()">Buscar</button>
+</form>
+
+<h2>Resultado</h2>
+
+<div id="resultado"></div>
+
+<script>
+async function buscar() {
+  const form = document.getElementById('formDon');
+  const params = Object.fromEntries(new FormData(form).entries());
+
+  const categoria = (params.categoria && params.categoria !== 'Todas') ? params.categoria : "";
+  const from = params.dateFrom || "";
+  const to   = params.dateTo   || "";
+  const eliminado = params.eliminado || "AMBOS";
+
+  const query = `
+    query {
+      donationReportGrouped(
+        categoria: "${categoria}",
+        from: "${from}",
+        to: "${to}",
+        eliminado: "${eliminado}"
+      ) {
+        categoria
+        eliminado
+        total
+      }
+    }`;
+
+  const res = await fetch("/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query })
+  });
+
+  const json = await res.json();
+  const data = json.data?.donationReportGrouped || [];
+  mostrarResultados(data, { categoria, from, to, eliminado });
+}
+
+function mostrarResultados(grupos, filtros) {
+  const contenedor = document.getElementById('resultado');
+  contenedor.innerHTML = "";
+
+  if (!grupos.length) {
+    contenedor.innerHTML = "<p>No se encontraron resultados.</p>";
+    return;
+  }
+
+  grupos.forEach(grupo => {
+    const button = document.createElement("button");
+    button.classList.add("accordion");
+    button.textContent = `${grupo.categoria} (${grupo.eliminado}) - Total: ${grupo.total}`;
+
+    const panel = document.createElement("div");
+    panel.classList.add("panel");
+    panel.innerHTML = "<p>Cargando detalles...</p>";
+
+    button.addEventListener("click", async () => {
+      const abierto = button.classList.toggle("active");
+      if (abierto) {
+        const detallesHtml = await obtenerDetalles(
+          grupo.categoria,
+          grupo.eliminado,
+          filtros.from,
+          filtros.to
+        );
+        panel.innerHTML = detallesHtml;
+        panel.style.display = "block";
+      } else {
+        panel.style.display = "none";
+      }
+    });
+
+    contenedor.appendChild(button);
+    contenedor.appendChild(panel);
+  });
+}
+
+async function obtenerDetalles(categoria, eliminado, from, to) {
+  const query = `
+    query {
+      donationDetails(
+        categoria: "${categoria}",
+        eliminado: "${eliminado}",
+        from: "${from}",
+        to: "${to}"
+      ) {
+        descripcion
+        cantidad
+        fecha_alta
+      }
+    }`;
+
+  const res = await fetch("/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query })
+  });
+
+  const json = await res.json();
+  const detalles = json.data?.donationDetails || [];
+  if (!detalles.length) return "<p>Sin registros individuales.</p>";
+
+  let html = "<table><tr><th>Descripción</th><th>Cantidad</th><th>Fecha Alta</th></tr>";
+  detalles.forEach(d => {
+    const fecha = new Date(d.fecha_alta).toLocaleDateString('es-AR');
+    html += `<tr><td>${d.descripcion}</td><td>${d.cantidad}</td><td>${fecha}</td></tr>`;
+  });
+  html += "</table>";
+  return html;
+}
+
+async function obtenerDetalles(categoria, eliminado) {
+  const query = `
+    query {
+      donationDetails(categoria: "${categoria}", eliminado: "${eliminado}") {
+        descripcion
+        cantidad
+        fecha_alta
+      }
+    }`;
+
+  const res = await fetch("/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query })
+  });
+
+  const json = await res.json();
+  console.log("[DEBUG] Respuesta donationDetails:", json); 
+  const detalles = json.data?.donationDetails || [];
+  if (!detalles.length) return "<p>Sin registros individuales.</p>";
+
+  // Generar tabla de resultados
+  let html = "<table><tr><th>Descripción</th><th>Cantidad</th><th>Fecha Alta</th></tr>";
+  detalles.forEach(d => {
+    // 
+    const fechaFormateada = new Date(d.fecha_alta).toLocaleDateString('es-AR');
+    html += `<tr>
+               <td>${d.descripcion}</td>
+               <td>${d.cantidad}</td>
+               <td>${fechaFormateada}</td>
+             </tr>`;
+  });
+  html += "</table>";
+  return html;
+}
+</script>
+
+</body>
+</html>

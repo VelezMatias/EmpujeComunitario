@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="'Solicitud ' + ${solicitud.solicitudId}">Detalle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body{background:#222;color:#eee;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{max-width:900px;margin:40px auto;padding:24px;background:#2b2b2b;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    h1{margin:0 0 12px}
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:10px 8px;border-bottom:1px solid #3a3a3a}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0 6px}
+    .muted{opacity:.8}
+    .pill{padding:6px 10px;border-radius:999px;background:#1f2937;border:1px solid #374151;display:inline-block}
+    .json{white-space:pre-wrap;background:#1f1f1f;border:1px solid #374151;border-radius:12px;padding:10px;margin-top:10px}
+    .toolbar{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .btn{background:#0ea5e9;border:none;color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer;text-decoration:none}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <a class="btn" th:href="@{/ui/solicitudes}">← Volver al listado</a>
+    <a class="btn" th:href="@{/home}">🏠 Inicio</a>
+  </div>
+
+  <h1 th:text="'Solicitud ' + ${solicitud.solicitudId}">Solicitud</h1>
+
+  <div class="grid">
+    <div><b>Fecha:</b> <span th:text="${solicitud.fechaHora != null ? #temporals.format(solicitud.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span></div>
+    <div><b>Org:</b> <span th:text="${solicitud.orgId != null ? solicitud.orgId : '-'}">-</span></div>
+    <div><b>Estado:</b> <span class="pill" th:text="${solicitud.estado}">VIGENTE</span></div>
+    <div><b>Creado:</b> <span class="muted" th:text="${solicitud.createdAt != null ? #temporals.format(solicitud.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">-</span></div>
+  </div>
+
+  <h3>Items</h3>
+  <table>
+    <thead>
+    <tr>
+      <th style="width:160px">Categoría</th>
+      <th>Descripción</th>
+      <th style="width:120px">Cantidad</th>
+      <th style="width:100px">Unidad</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="it : ${items}">
+      <td th:text="${it.categoria}">-</td>
+      <td th:text="${it.descripcion}">-</td>
+      <td th:text="${it.cantidad != null ? it.cantidad : '-'}">-</td>
+      <td th:text="${it.unidad}">-</td>
+    </tr>
+    <tr th:if="${items.isEmpty()}">
+      <td colspan="4" class="muted">Sin ítems.</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h3>Payload JSON</h3>
+  <div class="json" th:text="${solicitud.payloadJson}"></div>
+</div>
+</body>
+</html>
