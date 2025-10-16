@@ -1,34 +1,276 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Informe de Donaciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+        form {
+            margin-bottom: 15px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        .accordion {
+            background-color: #eee;
+            cursor: pointer;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            text-align: left;
+            font-weight: bold;
+        }
+        .panel {
+            padding: 0 15px;
+            display: none;
+            background-color: white;
+            overflow: hidden;
+            border-left: 2px solid #999;
+            border-right: 2px solid #999;
+            border-bottom: 2px solid #999;
+        }
+        .btn-informes {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .btn-informes:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
+
+<div>
+    <a href="/informes/donaciones" class="btn-informes">Informes</a>
+</div>
+
 <h1>Informe de Donaciones</h1>
 
 <form id="formDon">
-    <label>Tipo:
-        <select name="tipo">
-            <option value="RECIBIDAS">Recibidas</option>
-            <option value="EFECTUADAS">Efectuadas</option>
+    <label>Categoría:
+        <select id="categoriaSelect" name="categoria">
+            <option value="">Todas</option>
         </select>
     </label>
-    <label>Categoría: <input name="categoria" /></label>
-    <label>Desde: <input type="date" name="dateFrom" /></label>
-    <label>Hasta: <input type="date" name="dateTo" /></label>
+
+    <label>Desde: <input type="date" name="dateFrom" id="from" /></label>
+    <label>Hasta: <input type="date" name="dateTo" id="to" /></label>
+
     <label>Eliminado:
-        <select name="eliminado">
+        <select name="eliminado" id="eliminado">
             <option value="AMBOS">Ambos</option>
             <option value="SI">Sí</option>
             <option value="NO">No</option>
         </select>
     </label>
+
     <button type="button" onclick="buscar()">Buscar</button>
+    <button type="button" onclick="descargarExcel()">Excel</button>
 </form>
 
 <h2>Resultado</h2>
-<pre id="resultado"></pre>
+<div id="resultado"></div>
 
-<script src="/js/donation-report.js"></script>
+<script>
+// ====== Cargar categorías dinámicamente ======
+document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/categorias")
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById("categoriaSelect");
+            data.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat.nombre;
+                opt.textContent = cat.nombre.replace("_", " ");
+                select.appendChild(opt);
+            });
+        })
+        .catch(err => console.error("Error cargando categorías:", err));
+});
+</script>
+
+<script>
+// ====== Descargar Excel ======
+function descargarExcel() {
+  const form = document.getElementById('formDon');
+  const params = Object.fromEntries(new FormData(form).entries());
+
+  const categoria = (params.categoria && params.categoria !== 'Todas') ? params.categoria : "";
+  const from = params.dateFrom || "";
+  const to   = params.dateTo   || "";
+  const eliminado = params.eliminado || "AMBOS";
+
+  const url = new URL(window.location.origin + "/api/informes/donaciones/excel");
+  if (categoria) url.searchParams.set("categoria", categoria);
+  if (from)      url.searchParams.set("from", from);
+  if (to)        url.searchParams.set("to", to);
+  url.searchParams.set("eliminado", eliminado);
+
+  window.location = url.toString();
+}
+</script>
+
+<script>
+// ====== Función auxiliar: formato sin desfase de zona horaria ======
+function formatISODateToEs(s) {
+  if (!s) return "-";
+  const iso = s.split("T")[0]; // quita la parte de hora si viene
+  const [y, m, d] = iso.split("-");
+  return `${parseInt(d,10)}/${parseInt(m,10)}/${y}`;
+}
+</script>
+
+<script>
+// ====== Obtener detalles por categoría ======
+async function obtenerDetalles(categoria, eliminado, from, to) {
+  console.log("[DEBUG FRONT] Enviando GraphQL con filtros:", { categoria, eliminado, from, to });
+
+  const query = `
+    query($categoria: String, $eliminado: String, $from: String, $to: String) {
+      donationDetails(categoria: $categoria, eliminado: $eliminado, from: $from, to: $to) {
+        descripcion
+        cantidad
+        fecha_alta
+      }
+    }`;
+
+  const res = await fetch("/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query,
+      variables: { categoria, eliminado, from, to }
+    })
+  });
+
+  const json = await res.json();
+  console.log("[DEBUG FRONT] Respuesta donationDetails:", json);
+
+  const detalles = json.data?.donationDetails || [];
+  if (!detalles.length) return "<p>Sin registros individuales.</p>";
+
+  let html = "<table><tr><th>Descripción</th><th>Cantidad</th><th>Fecha Alta</th></tr>";
+  detalles.forEach(d => {
+    const fechaFormateada = formatISODateToEs(d.fecha_alta);
+    html += `<tr>
+               <td>${d.descripcion}</td>
+               <td>${d.cantidad}</td>
+               <td>${fechaFormateada}</td>
+             </tr>`;
+  });
+  html += "</table>";
+  return html;
+}
+</script>
+
+<script>
+// ====== Buscar agrupado (botón principal) ======
+async function buscar() {
+  const form = document.getElementById('formDon');
+  const params = Object.fromEntries(new FormData(form).entries());
+
+  const categoria = (params.categoria && params.categoria !== 'Todas') ? params.categoria : "";
+  const from = params.dateFrom || "";
+  const to   = params.dateTo   || "";
+  const eliminado = params.eliminado || "AMBOS";
+
+  console.log("[DEBUG FRONT] Ejecutando búsqueda:", { categoria, from, to, eliminado });
+
+  const query = `
+    query($categoria: String, $from: String, $to: String, $eliminado: String) {
+      donationReportGrouped(categoria: $categoria, from: $from, to: $to, eliminado: $eliminado) {
+        categoria
+        eliminado
+        total
+      }
+    }`;
+
+  const res = await fetch("/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query,
+      variables: { categoria, from, to, eliminado }
+    })
+  });
+
+  const json = await res.json();
+  console.log("[DEBUG FRONT] Respuesta agrupada:", json);
+
+  const data = json.data?.donationReportGrouped || [];
+  mostrarResultados(data, { categoria, from, to, eliminado });
+}
+
+// ====== Mostrar resultado principal ======
+function mostrarResultados(grupos, filtros) {
+  const contenedor = document.getElementById('resultado');
+  contenedor.innerHTML = "";
+
+  if (!grupos.length) {
+    contenedor.innerHTML = "<p>No se encontraron resultados.</p>";
+    return;
+  }
+
+  grupos.forEach(grupo => {
+    const button = document.createElement("button");
+    button.classList.add("accordion");
+    button.textContent = `${grupo.categoria} (${grupo.eliminado}) - Total: ${grupo.total}`;
+
+    const panel = document.createElement("div");
+    panel.classList.add("panel");
+    panel.innerHTML = "<p>Cargando detalles...</p>";
+
+    button.addEventListener("click", async () => {
+      const abierto = button.classList.toggle("active");
+      if (abierto) {
+        const detallesHtml = await obtenerDetalles(
+          grupo.categoria,
+          grupo.eliminado,
+          filtros.from,
+          filtros.to
+        );
+        panel.innerHTML = detallesHtml;
+        panel.style.display = "block";
+      } else {
+        panel.style.display = "none";
+      }
+    });
+
+    contenedor.appendChild(button);
+    contenedor.appendChild(panel);
+  });
+}
+</script>
+
 </body>
 </html>

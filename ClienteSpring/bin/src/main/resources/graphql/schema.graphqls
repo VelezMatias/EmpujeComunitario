@@ -1,15 +1,27 @@
 type DonationGroup {
   categoria: String
   eliminado: String
-  total: Int
+  total: Float
+}
+
+type DonationDetail {
+  descripcion: String
+  cantidad: Int
+  fecha_alta: String
 }
 
 type Query {
   donationReportGrouped(
-    tipo: String
     categoria: String
-    dateFrom: String
-    dateTo: String
+    from: String
+    to: String
     eliminado: String
   ): [DonationGroup]
+
+  donationDetails(
+    categoria: String
+    eliminado: String
+    from: String
+    to: String
+  ): [DonationDetail]
 }

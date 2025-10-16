@@ -70,10 +70,6 @@
 </head>
 <body>
 
-<!-- Desactivar filtro de roles para pruebas -->
-<!-- <div th:if="${#authorization.expression('hasAnyRole(''PRESIDENTE'', ''VOCAL'')')}"> -->
-    
-    <!-- sin filtro por roles -->
 <div>
     <a href="/informes/donaciones" class="btn-informes">Informes</a>
 </div>
@@ -81,14 +77,32 @@
 <h1>Informe de Donaciones</h1>
 
 <form id="formDon">
-   
     <label>Categoría:
-    <select id="categoriaSelect" name="categoria">
-        <option value="">Todas</option>
-    </select>
-</label>
+        <select id="categoriaSelect" name="categoria">
+            <option value="">Todas</option>
+        </select>
+    </label>
+
+    <label>Desde: <input type="date" name="dateFrom" id="from" /></label>
+    <label>Hasta: <input type="date" name="dateTo" id="to" /></label>
+
+    <label>Eliminado:
+        <select name="eliminado" id="eliminado">
+            <option value="AMBOS">Ambos</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
+        </select>
+    </label>
+
+    <button type="button" onclick="buscar()">Buscar</button>
+    <button type="button" onclick="descargarExcel()">Excel</button>
+</form>
+
+<h2>Resultado</h2>
+<div id="resultado"></div>
 
 <script>
+// ====== Cargar categorías dinámicamente ======
 document.addEventListener("DOMContentLoaded", () => {
     fetch("/api/categorias")
         .then(res => res.json())
@@ -105,23 +119,82 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-    <label>Desde: <input type="date" name="dateFrom" /></label>
-    <label>Hasta: <input type="date" name="dateTo" /></label>
-    <label>Eliminado:
-        <select name="eliminado">
-            <option value="AMBOS">Ambos</option>
-            <option value="SI">Sí</option>
-            <option value="NO">No</option>
-        </select>
-    </label>
-    <button type="button" onclick="buscar()">Buscar</button>
-</form>
+<script>
+// ====== Descargar Excel ======
+function descargarExcel() {
+  const form = document.getElementById('formDon');
+  const params = Object.fromEntries(new FormData(form).entries());
 
-<h2>Resultado</h2>
+  const categoria = (params.categoria && params.categoria !== 'Todas') ? params.categoria : "";
+  const from = params.dateFrom || "";
+  const to   = params.dateTo   || "";
+  const eliminado = params.eliminado || "AMBOS";
 
-<div id="resultado"></div>
+  const url = new URL(window.location.origin + "/api/informes/donaciones/excel");
+  if (categoria) url.searchParams.set("categoria", categoria);
+  if (from)      url.searchParams.set("from", from);
+  if (to)        url.searchParams.set("to", to);
+  url.searchParams.set("eliminado", eliminado);
+
+  window.location = url.toString();
+}
+</script>
 
 <script>
+// ====== Función auxiliar: formato sin desfase de zona horaria ======
+function formatISODateToEs(s) {
+  if (!s) return "-";
+  const iso = s.split("T")[0]; // quita la parte de hora si viene
+  const [y, m, d] = iso.split("-");
+  return `${parseInt(d,10)}/${parseInt(m,10)}/${y}`;
+}
+</script>
+
+<script>
+// ====== Obtener detalles por categoría ======
+async function obtenerDetalles(categoria, eliminado, from, to) {
+  console.log("[DEBUG FRONT] Enviando GraphQL con filtros:", { categoria, eliminado, from, to });
+
+  const query = `
+    query($categoria: String, $eliminado: String, $from: String, $to: String) {
+      donationDetails(categoria: $categoria, eliminado: $eliminado, from: $from, to: $to) {
+        descripcion
+        cantidad
+        fecha_alta
+      }
+    }`;
+
+  const res = await fetch("/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query,
+      variables: { categoria, eliminado, from, to }
+    })
+  });
+
+  const json = await res.json();
+  console.log("[DEBUG FRONT] Respuesta donationDetails:", json);
+
+  const detalles = json.data?.donationDetails || [];
+  if (!detalles.length) return "<p>Sin registros individuales.</p>";
+
+  let html = "<table><tr><th>Descripción</th><th>Cantidad</th><th>Fecha Alta</th></tr>";
+  detalles.forEach(d => {
+    const fechaFormateada = formatISODateToEs(d.fecha_alta);
+    html += `<tr>
+               <td>${d.descripcion}</td>
+               <td>${d.cantidad}</td>
+               <td>${fechaFormateada}</td>
+             </tr>`;
+  });
+  html += "</table>";
+  return html;
+}
+</script>
+
+<script>
+// ====== Buscar agrupado (botón principal) ======
 async function buscar() {
   const form = document.getElementById('formDon');
   const params = Object.fromEntries(new FormData(form).entries());
@@ -131,14 +204,11 @@ async function buscar() {
   const to   = params.dateTo   || "";
   const eliminado = params.eliminado || "AMBOS";
 
+  console.log("[DEBUG FRONT] Ejecutando búsqueda:", { categoria, from, to, eliminado });
+
   const query = `
-    query {
-      donationReportGrouped(
-        categoria: "${categoria}",
-        from: "${from}",
-        to: "${to}",
-        eliminado: "${eliminado}"
-      ) {
+    query($categoria: String, $from: String, $to: String, $eliminado: String) {
+      donationReportGrouped(categoria: $categoria, from: $from, to: $to, eliminado: $eliminado) {
         categoria
         eliminado
         total
@@ -148,14 +218,20 @@ async function buscar() {
   const res = await fetch("/graphql", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query })
+    body: JSON.stringify({
+      query,
+      variables: { categoria, from, to, eliminado }
+    })
   });
 
   const json = await res.json();
+  console.log("[DEBUG FRONT] Respuesta agrupada:", json);
+
   const data = json.data?.donationReportGrouped || [];
   mostrarResultados(data, { categoria, from, to, eliminado });
 }
 
+// ====== Mostrar resultado principal ======
 function mostrarResultados(grupos, filtros) {
   const contenedor = document.getElementById('resultado');
   contenedor.innerHTML = "";
@@ -193,76 +269,6 @@ function mostrarResultados(grupos, filtros) {
     contenedor.appendChild(button);
     contenedor.appendChild(panel);
   });
-}
-
-async function obtenerDetalles(categoria, eliminado, from, to) {
-  const query = `
-    query {
-      donationDetails(
-        categoria: "${categoria}",
-        eliminado: "${eliminado}",
-        from: "${from}",
-        to: "${to}"
-      ) {
-        descripcion
-        cantidad
-        fecha_alta
-      }
-    }`;
-
-  const res = await fetch("/graphql", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query })
-  });
-
-  const json = await res.json();
-  const detalles = json.data?.donationDetails || [];
-  if (!detalles.length) return "<p>Sin registros individuales.</p>";
-
-  let html = "<table><tr><th>Descripción</th><th>Cantidad</th><th>Fecha Alta</th></tr>";
-  detalles.forEach(d => {
-    const fecha = new Date(d.fecha_alta).toLocaleDateString('es-AR');
-    html += `<tr><td>${d.descripcion}</td><td>${d.cantidad}</td><td>${fecha}</td></tr>`;
-  });
-  html += "</table>";
-  return html;
-}
-
-async function obtenerDetalles(categoria, eliminado) {
-  const query = `
-    query {
-      donationDetails(categoria: "${categoria}", eliminado: "${eliminado}") {
-        descripcion
-        cantidad
-        fecha_alta
-      }
-    }`;
-
-  const res = await fetch("/graphql", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query })
-  });
-
-  const json = await res.json();
-  console.log("[DEBUG] Respuesta donationDetails:", json); 
-  const detalles = json.data?.donationDetails || [];
-  if (!detalles.length) return "<p>Sin registros individuales.</p>";
-
-  // Generar tabla de resultados
-  let html = "<table><tr><th>Descripción</th><th>Cantidad</th><th>Fecha Alta</th></tr>";
-  detalles.forEach(d => {
-    // 
-    const fechaFormateada = new Date(d.fecha_alta).toLocaleDateString('es-AR');
-    html += `<tr>
-               <td>${d.descripcion}</td>
-               <td>${d.cantidad}</td>
-               <td>${fechaFormateada}</td>
-             </tr>`;
-  });
-  html += "</table>";
-  return html;
 }
 </script>
 

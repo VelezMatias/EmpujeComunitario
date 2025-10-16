@@ -19,7 +19,7 @@ public class DonationReportResolver {
         this.donationRepo = donationRepo;
     }
 
-    // --- Informe agrupado ---
+    // === AGRUPADO ===
     @QueryMapping
     public List<DonationGroup> donationReportGrouped(
             @Argument String categoria,
@@ -28,12 +28,11 @@ public class DonationReportResolver {
             @Argument String eliminado) {
 
         LocalDate fFrom = parseDate(from);
-        LocalDate fTo   = parseDate(to);
-
+        LocalDate fTo = parseDate(to);
         return donationRepo.findGrouped(categoria, fFrom, fTo, eliminado);
     }
 
-    // --- Detalle individual ---
+    // === DETALLE ===
     @QueryMapping
     public List<Map<String, Object>> donationDetails(
             @Argument String categoria,
@@ -42,14 +41,21 @@ public class DonationReportResolver {
             @Argument String to) {
 
         LocalDate fFrom = parseDate(from);
-        LocalDate fTo   = parseDate(to);
+        LocalDate fTo = parseDate(to);
+
 
         return donationRepo.obtenerDonacionesIndividuales(categoria, eliminado, fFrom, fTo);
     }
 
-    // --- Conversión de String → LocalDate ---
+    // === Parse utilitario ===
     private LocalDate parseDate(String date) {
-        if (date == null || date.isBlank()) return null;
-        return LocalDate.parse(date);
+        if (date == null || date.isBlank())
+            return null;
+        try {
+            return LocalDate.parse(date);
+        } catch (Exception e) {
+            System.err.println("[WARN] Fecha inválida: " + date);
+            return null;
+        }
     }
 }

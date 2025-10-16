@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
         "com.empuje.ui",
         "com.empuje.graphql",
         "com.empuje.repo",
+        "com.empuje.controller",
         "com.empuje.service"
 })
 @EnableJpaRepositories(basePackages = "com.empuje.kafka.repo")
