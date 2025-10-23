@@ -24,4 +24,30 @@ type Query {
     from: String
     to: String
   ): [DonationDetail]
+
+  # Informe de participación en eventos propios
+  eventParticipationReport(
+    usuarioId: Int!,
+    from: String,
+    to: String,
+    repartoDonaciones: String # "SI" | "NO" | "AMBOS"
+  ): [EventMonthGroup]
+}
+
+type EventDonation {
+  descripcion: String
+  cantidad: Int
+}
+
+type EventItem {
+  dia: Int
+  nombre: String
+  descripcion: String
+  donaciones: [EventDonation]
+}
+
+type EventMonthGroup {
+  mes: String
+  year: Int
+  eventos: [EventItem]
 }

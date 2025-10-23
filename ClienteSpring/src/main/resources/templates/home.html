@@ -77,10 +77,13 @@
   </li>
 
 
-  <!-- BOTON DE INFORMES Desactivar filtro de roles para pruebas -->
+  <!-- INFORMES - boton dropdown con enlaces -->
   <li>
-    <!-- <a th:if="${#authorization.expression('hasAnyRole(''PRESIDENTE'',''VOCAL'')')}" th:href="@{/informes/donaciones}">Informes</a> -->
-    <a th:href="@{/informes/donaciones}">Informes</a>
+    <a href="#">Informes<i class="ti-angle-down"></i></a>
+    <ul class="submenu">
+      <li><a th:href="@{/informes/donaciones}">Informes de Donaciones</a></li>
+      <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
+    </ul>
   </li>
   <!-- ====================================================== -->
 

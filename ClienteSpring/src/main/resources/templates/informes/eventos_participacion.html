@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Informe de participación en eventos</title>
+  <script th:src="@{/js/event-report.js}" defer></script>
+</head>
+<body>
+  <h1>Informe de participación en eventos</h1>
+
+  <div>
+    <label>Usuario ID (obligatorio): <input id="usuarioId" type="number"/></label>
+    <label>Desde: <input id="from" type="date"/></label>
+    <label>Hasta: <input id="to" type="date"/></label>
+    <label>Reparto de donaciones:
+      <select id="reparto">
+        <option value="AMBOS">AMBOS</option>
+        <option value="SI">SI</option>
+        <option value="NO">NO</option>
+      </select>
+    </label>
+    <button id="buscar">Buscar</button>
+    <button id="excel">Excel</button>
+  </div>
+
+  <div id="resultado"></div>
+
+</body>
+</html>
