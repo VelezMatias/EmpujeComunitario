@@ -194,101 +194,124 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
     def TransferDonations(self, request: pb.TransferDonationsRequest, context):
         """
         request:
-        solicitud_id: string (ej: "SOL-2025-79D82A3D")
-        org_receptora_id: int32
-        items[]: { categoria: string, descripcion: string, cantidad: double, unidad?: string }
+          - solicitud_id: string
+          - org_receptora_id: int32
+          - items[]: { categoria: string, descripcion: string, cantidad: double, unidad?: string }
+        Reglas:
+          - Debe existir al menos una donación propia con misma (categoria, descripcion) y cantidad > 0
+          - La suma de todas las filas que coinciden debe alcanzar la cantidad solicitada
+          - Descuenta solo sobre filas que coinciden (categoria, descripcion) en orden FIFO
         """
-
-        # (Opcional) permisos:
-        # if hasattr(request, "auth"):
-        #     _require_vocal_o_presidente(request.auth)
 
         if not request.items:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "La transferencia no tiene ítems.")
 
-        # 1) Validar/descontar inventario local (somos donantes)
+        # Opcional: si tenés control de permisos en el request.auth
+        # if hasattr(request, "auth"):
+        #     _require_vocal_o_presidente(request.auth)
+
+        # Fijamos zona horaria de la sesión para auditoría consistente (opcional)
+        try:
+            execute("SET time_zone = '-03:00'")
+        except Exception:
+            pass  # si el helper abre conexiones separadas, no entorpecemos
+
+        # === 1) VALIDACIÓN PREVIA ESTRICTA (cat+desc) ===
         for it in request.items:
             cat_nombre = (it.categoria or "").strip().upper()
             if not cat_nombre:
                 context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Categoría vacía en ítem.")
 
-            cat_id = _categoria_id_from_nombre(cat_nombre)  # por NOMBRE (STRING)
+            cat_id = _categoria_id_from_nombre(cat_nombre)
             if cat_id is None:
                 context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Categoría inexistente: {it.categoria}")
 
             desc = (it.descripcion or "").strip()
             try:
-                cant = float(it.cantidad or 0)
+                req_qty = float(it.cantidad or 0)
             except Exception:
                 context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Cantidad inválida para {cat_nombre} - {desc}")
-            if cant <= 0:
+            if req_qty <= 0:
                 context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Cantidad inválida para {cat_nombre} - {desc}")
 
-            # --- Intento 1: match EXACTO por descripcion ---
-            rc, _ = execute(
+            # Buscar coincidencias EXACTAS (categoria_id + descripcion)
+            row = fetch_one(
                 """
-                UPDATE donaciones
-                SET cantidad = cantidad - %s
-                WHERE categoria_id = %s
-                AND TRIM(descripcion) = %s
-                AND eliminado = 0
-                AND cantidad >= %s
+                SELECT COALESCE(SUM(cantidad),0) AS total
+                  FROM donaciones
+                 WHERE categoria_id = %s
+                   AND TRIM(descripcion) = %s
+                   AND eliminado = 0
+                   AND cantidad > 0
                 """,
-                (cant, int(cat_id), desc, cant)
+                (int(cat_id), desc)
             )
-            if rc == 0:
-                # --- Fallback: por categoría con reparto FIFO (si hay stock suficiente en la categoría) ---
-                row = fetch_one(
-                    """
-                    SELECT COALESCE(SUM(cantidad),0) AS total
-                    FROM donaciones
-                    WHERE categoria_id = %s AND eliminado = 0
-                    """,
-                    (int(cat_id),)
+            total = float(row["total"] if row and row["total"] is not None else 0.0)
+
+            if total <= 0:
+                context.abort(
+                    grpc.StatusCode.FAILED_PRECONDITION,
+                    f"No existe donación que coincida con {cat_nombre} / {desc}."
                 )
-                total = float(row["total"] if row and row["total"] is not None else 0.0)
-                if total < cant:
-                    context.abort(
-                        grpc.StatusCode.FAILED_PRECONDITION,
-                        f"Stock insuficiente: {cat_nombre} - {desc}"
+
+            if total + 1e-9 < req_qty:
+                context.abort(
+                    grpc.StatusCode.FAILED_PRECONDITION,
+                    f"Stock insuficiente para {cat_nombre} / {desc}: requiere {req_qty:g}, hay {total:g}."
+                )
+
+        # === 2) DESCUENTO FIFO sobre coincidencias EXACTAS ===
+        # Nota: si tus helpers no comparten conexión, cada UPDATE será autocommit.
+        # Para alta concurrencia conviene transacción por conexión, pero mantenemos
+        # este enfoque compatible con tus helpers actuales.
+        for it in request.items:
+            cat_nombre = (it.categoria or "").strip().upper()
+            cat_id = _categoria_id_from_nombre(cat_nombre)  # ya validado
+            desc = (it.descripcion or "").strip()
+            restante = float(it.cantidad or 0)
+
+            # Filas que COINCIDEN (cat+desc) con stock, en FIFO
+            filas = fetch_all(
+                """
+                SELECT id, cantidad
+                  FROM donaciones
+                 WHERE categoria_id = %s
+                   AND TRIM(descripcion) = %s
+                   AND eliminado = 0
+                   AND cantidad > 0
+                 ORDER BY fecha_alta ASC, id ASC
+                """,
+                (int(cat_id), desc)
+            ) or []
+
+            for f in filas:
+                if restante <= 1e-9:
+                    break
+                disp = float(f["cantidad"] or 0)
+                if disp <= 0:
+                    continue
+                usar = min(disp, restante)
+                if usar > 0:
+                    execute(
+                        "UPDATE donaciones SET cantidad = cantidad - %s, fecha_modificacion = NOW() WHERE id = %s",
+                        (usar, int(f["id"]))
                     )
+                    restante -= usar
 
-                # Descuento en orden FIFO por fecha_alta, luego id
-                filas = fetch_all(
-                    """
-                    SELECT id, cantidad
-                    FROM donaciones
-                    WHERE categoria_id = %s AND eliminado = 0 AND cantidad > 0
-                    ORDER BY fecha_alta ASC, id ASC
-                    """,
-                    (int(cat_id),)
-                ) or []
+            if restante > 1e-9:
+                # Por robustez: no debería suceder luego de validar SUMA >= requerida.
+                context.abort(
+                    grpc.StatusCode.INTERNAL,
+                    f"Inconsistencia al descontar {cat_nombre} / {desc}. Reintentá."
+                )
 
-                restante = cant
-                for f in filas:
-                    if restante <= 1e-9:
-                        break
-                    si = int(f["id"])
-                    disp = float(f["cantidad"] or 0)
-                    usar = min(disp, restante)
-                    if usar > 0:
-                        execute("UPDATE donaciones SET cantidad = cantidad - %s WHERE id = %s", (usar, si))
-                        restante -= usar
-
-                # por robustez, chequear que realmente se descontó todo
-                if restante > 1e-9:
-                    context.abort(
-                        grpc.StatusCode.INTERNAL,
-                        f"No se pudo completar el descuento por categoría {cat_nombre} (restante={restante})."
-                    )
-
-        # 2) Publicar en Kafka
+        # === 3) Publicar a Kafka (solo si TODO salió bien) ===
         ORG_ID = int(os.getenv("ORG_ID", "42"))
         transfer_uid = str(uuid.uuid4())
 
         payload = {
             "transfer_id": transfer_uid,
-            "solicitud_id": request.solicitud_id,   # string
+            "solicitud_id": request.solicitud_id,
             "org_donante_id": ORG_ID,
             "items": [
                 {
@@ -304,7 +327,7 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
         }
 
         topic = "transferencia-donaciones"
-        key = str(int(request.org_receptora_id))
+        key = str(int(request.org_receptora_id or 0))  # receptor procesa por key
         publish(topic, key=key, payload=payload)
 
         return pb.TransferDonationsResponse(

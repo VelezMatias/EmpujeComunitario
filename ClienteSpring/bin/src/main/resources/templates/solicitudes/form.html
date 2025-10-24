@@ -19,6 +19,8 @@
   <link rel="stylesheet" th:href="@{/charifit/css/slicknav.css}">
   <link rel="stylesheet" th:href="@{/charifit/css/style.css}">
 
+  <title>Nueva solicitud</title>
+
   <style>
     .saludo {
       color: white;
@@ -253,12 +255,10 @@
 
   </style>
 
-  <title>Solicitudes</title>
-
 </head>
 <body>
 
-  <!-- header-start -->
+<!-- header-start -->
   <header>
     <div class="header-area">
       <div id="sticky-header" class="main-header-area">
@@ -322,173 +322,58 @@
   <!-- header-end -->
 
 
-  <main>
+<main style="margin-top: 150px; margin-bottom: 60px;">
+<div class="wrap" >
 
 
-    <div class="wrap"  style="margin-top: 150px; margin-bottom: 60px;">
-      <div class="toolbar">
-        <a class="btn" th:href="@{/home}">← Inicio</a>
-      </div>
+  <h1>Publicar solicitud de donaciones → Kafka</h1>
 
-      <div th:if="${msg}" class="state" style="background:#064e3b;border-color:#065f46;margin-bottom:10px;">
-        <span th:text="${msg}">OK</span>
-      </div>
+  <div th:if="${mensaje}" class="pill ok" th:text="${mensaje}"></div>
+  <div th:if="${error}" class="pill err" th:text="${error}"></div>
 
-      <div th:if="${error}" class="state" style="background:#7f1d1d;border-color:#991b1b;margin-bottom:10px;">
-        <span th:text="${error}">Error</span>
-      </div>
-
-      <div class="cols">
-        <!-- ================== IZQUIERDA: RECIBIDAS (EXTERNAS) ================== -->
-        <section>
-          <div class="col-title">
-            <h1 style="margin:0">Solicitudes recibidas</h1>
-          </div>
-
-          <div th:each="se : ${page.content}" class="card">
-            <div class="row1">
-              <div class="left">
-                <span class="label">Solicitud:</span>
-                <a th:href="@{|/ui/solicitudes/${se.solicitudId}|}" th:text="${se.solicitudId}">SOL-XXXX</a>
-                <span class="label">· Fecha:</span>
-                <span th:text="${se.fechaHora != null ? #temporals.format(se.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
-                <span class="label">· Org:</span>
-                <span th:text="${se.orgId != null ? se.orgId : '-'}">-</span>
-              </div>
-
-              <div style="display:flex; gap:10px; align-items:center;">
-                <span class="state" th:text="${se.estado}">VIGENTE</span>
-
-      
-
-                  <form th:if="${se.estado == 'VIGENTE'}"
-                        th:action="@{|/ui/solicitudes/${se.solicitudId}/transferir|}"
-                        method="post" style="display:inline">
-                  <input type="hidden" th:if="${_csrf != null}"
-                        th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                  <button class="btn" type="submit"
-                          th:disabled="${se.orgId == null}"
-                          style="background:#2563eb;border:1px solid #1e3a8a">
-                    Transferir
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            <!-- Ítems de esta solicitud (externa) -->
-            <table>
-              <thead>
-              <tr>
-                <th style="width:160px">Categoría</th>
-                <th>Descripción</th>
-                <th style="width:120px">Cantidad</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr th:each="it : ${itemsBy[se.solicitudId]}">
-                <td th:text="${it.categoria}">-</td>
-                <td th:text="${it.descripcion}">-</td>
-                <td th:text="${it.cantidad != null ? it.cantidad : '-'}" style="text-align:right">-</td>
-              </tr>
-              <tr th:if="${itemsBy[se.solicitudId] == null or itemsBy[se.solicitudId].isEmpty()}">
-                <td colspan="4" class="muted">Sin ítems.</td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="muted" th:if="${page.content.isEmpty()}">Sin resultados.</div>
-
-          <div class="pager">
-            <a th:if="${!page.first}" th:href="@{|/ui/solicitudes?page=${page.number-1}&size=${page.size}|}">← Anterior</a>
-            <span>Página <span th:text="${page.number + 1}">1</span> / <span th:text="${page.totalPages == 0 ? 1 : page.totalPages}">1</span></span>
-            <a th:if="${!page.last}" th:href="@{|/ui/solicitudes?page=${page.number+1}&size=${page.size}|}">Siguiente →</a>
-          </div>
-        </section>
-
-         <!-- ===================== DERECHA: MIS SOLICITUDES (PROPIAS) ===================== -->
-        <aside>
-
-
-          <div class="col-title">
-            <h1 style="margin:0">Mis solicitudes</h1>
-            <a class="btn" th:href="@{/ui/solicitudes/nueva}">+ Nueva solicitud</a>
-          </div>
-
-          <div th:if="${#lists.isEmpty(propias)}" class="muted">Todavía no creaste solicitudes.</div>
-
-          <div th:each="sp : ${propias}" class="card">
-            <div class="row1">
-              <div class="left">
-                <span class="label">Solicitud:</span>
-                <span th:text="${sp.solicitudId}">SOL-XXXX</span>
-                <span class="label">· Fecha:</span>
-                <span th:text="${sp.fechaHora != null ? #temporals.format(sp.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
-                <span class="label">· Org:</span>
-                <span th:text="${sp.orgId}">42</span>
-              </div>
-               <div style="display:flex; gap:10px; align-items:center;">
-                  <span class="state">PROPIA</span>
-
-                  
-                  <form class="frm-del-sol"
-                        th:if="${cumplidas == null or !#lists.contains(cumplidas, sp.solicitudId)}"
-                        th:action="@{|/ui/solicitudes/${sp.solicitudId}/eliminar|}"
-                        method="post" 
-                        th:attr="onsubmit=|return confirm('¿Anular la solicitud ${sp.solicitudId}? Esta acción también borra sus ítems.');|"> 
-                    <input type="hidden" th:if="${_csrf != null}"
-                          th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button class="btn" type="submit" style="background:#ef4444;border:1px solid #7f1d1d">
-                      Eliminar
-                    </button>
-                  </form>
-
-                  <span class="state success"
-                        th:if="${cumplidas != null and #lists.contains(cumplidas, sp.solicitudId)}">
-                    CUMPLIDA
-                  </span>
-                </div>
-            
-            </div>
-
-            <!-- Si cargaste 'propItemsBy' en el modelo, listamos ítems igual que las externas -->
-            <div th:if="${propItemsBy != null}">
-              <table th:if="${propItemsBy[sp.solicitudId] != null}">
-                <thead>
-                <tr>
-                  <th style="width:160px">Categoría</th>
-                  <th>Descripción</th>
-                  <th style="width:120px">Cantidad</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="it : ${propItemsBy[sp.solicitudId]}">
-                  <td th:text="${it.categoria}">-</td>
-                  <td th:text="${it.descripcion}">-</td>
-                  <td th:text="${it.cantidad != null ? it.cantidad : '-'}" style="text-align:right">-</td>
-                </tr>
-                <tr th:if="${propItemsBy[sp.solicitudId] == null or propItemsBy[sp.solicitudId].isEmpty()}">
-                  <td colspan="4" class="muted">Sin ítems.</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Si no tenés 'propItemsBy', mostramos el JSON como respaldo -->
-            <pre class="small muted" th:if="${propItemsBy == null}" th:text="${sp.payloadJson}"></pre>
-          
-          </div>
-        </aside>
-
-
-      </div>
-    </div>
-   
+  <form th:action="@{/ui/solicitudes}" th:object="${dto}" method="post">
   
-  </main>
+
+    <h3 class="mt">Ítems</h3>
+    <table>
+      <thead>
+      <tr>
+        <th style="width:140px">Categoría</th>
+        <th>Descripción</th>
+        <th style="width:130px">Cantidad</th>
+        <th style="width:110px">Unidad</th>
+        <th style="width:60px"></th>
+      </tr>
+      </thead>
+      <tbody id="items-tbody">
+      <!-- Una fila inicial vacía -->
+      <tr>
+        <td>
+          <select name="items[0].categoria">
+            <option value="ALIMENTOS">ALIMENTOS</option>
+            <option value="ROPA">ROPA</option>
+            <option value="JUGUETES">JUGUETES</option>
+            <option value="UTILES_ESCOLARES">UTILES_ESCOLARES</option>
+          </select>
+        </td>
+        <td><input name="items[0].descripcion" placeholder="Descripción"/></td>
+        <td><input name="items[0].cantidad" type="number" min="1"/></td>
+        <td><input name="items[0].unidad" placeholder="u / kg / l"/></td>
+        <td><button type="button" class="btn danger" onclick="removeRow(this)">-</button></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="toolbar">
+      <button type="button" class="btn secondary" onclick="addRow()">Agregar ítem</button>
+      <button type="submit" class="btn">Publicar en Kafka</button>
+    </div>
+  </form>
+</div>
+</main>
 
 
-  <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+ <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
   <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
   <script th:src="@{/charifit/js/popper.min.js}"></script>
   <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
@@ -514,7 +399,33 @@
   <script th:src="@{/charifit/js/main.js}"></script>
 
 
+<script>
+  function addRow() {
+    const tbody = document.getElementById('items-tbody');
+    const idx = tbody.querySelectorAll('tr').length;
 
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <select name="items[${idx}].categoria">
+          <option value="ALIMENTOS">ALIMENTOS</option>
+          <option value="ROPA">ROPA</option>
+          <option value="JUGUETES">JUGUETES</option>
+          <option value="UTILES_ESCOLARES">UTILES_ESCOLARES</option>
+        </select>
+      </td>
+      <td><input name="items[${idx}].descripcion" placeholder="Descripción"/></td>
+      <td><input name="items[${idx}].cantidad" type="number" min="1"/></td>
+      <td><input name="items[${idx}].unidad" placeholder="u / kg / l"/></td>
+      <td><button type="button" class="btn danger" onclick="removeRow(this)">-</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
 
+  function removeRow(btn) {
+    const tr = btn.closest('tr');
+    tr.parentNode.removeChild(tr);
+  }
+</script>
 </body>
 </html>

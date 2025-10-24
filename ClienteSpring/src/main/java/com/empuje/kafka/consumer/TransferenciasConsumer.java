@@ -2,9 +2,13 @@ package com.empuje.kafka.consumer;
 
 import com.empuje.kafka.config.OrgConfig;
 import com.empuje.kafka.entity.SolicitudCumplida;
+import com.empuje.kafka.entity.MensajeProcesado;
+import com.empuje.kafka.repo.MensajeProcesadoRepo;
 import com.empuje.kafka.repo.SolicitudCumplidaRepo;
 import com.empuje.kafka.repo.SolicitudExternaRepo;
-import com.empuje.kafka.repo.SolicitudRepository; 
+import com.empuje.kafka.repo.SolicitudRepository;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -13,17 +17,16 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-// gRPC
+// ==== gRPC (generado desde tu Proto ong.proto) ====
 import com.empuje.grpc.ong.ApiResponse;
 import com.empuje.grpc.ong.AuthContext;
-import com.empuje.grpc.ong.Category;
 import com.empuje.grpc.ong.CreateDonationRequest;
 import com.empuje.grpc.ong.DonationServiceGrpc;
 import com.empuje.grpc.ong.Role;
+import com.empuje.grpc.ong.Category;
 
 @Component
 public class TransferenciasConsumer {
@@ -34,95 +37,94 @@ public class TransferenciasConsumer {
   private final OrgConfig org;
   private final DonationServiceGrpc.DonationServiceBlockingStub donationStub;
   private final SolicitudExternaRepo solicitudesExternas;
-  private final SolicitudRepository solicitudesPropias;          
+  private final SolicitudRepository solicitudesPropias;
   private final SolicitudCumplidaRepo cumplidas;
+  private final MensajeProcesadoRepo procesados; // << idempotencia
 
   public TransferenciasConsumer(
       OrgConfig org,
       DonationServiceGrpc.DonationServiceBlockingStub donationStub,
       SolicitudExternaRepo solicitudesExternas,
-      SolicitudRepository solicitudesPropias,                    
-      SolicitudCumplidaRepo cumplidas
+      SolicitudRepository solicitudesPropias,
+      SolicitudCumplidaRepo cumplidas,
+      MensajeProcesadoRepo procesados
   ) {
     this.org = org;
     this.donationStub = donationStub;
     this.solicitudesExternas = solicitudesExternas;
-    this.solicitudesPropias = solicitudesPropias;              
+    this.solicitudesPropias = solicitudesPropias;
     this.cumplidas = cumplidas;
+    this.procesados = procesados;
   }
 
-@KafkaListener(topics = "transferencia-donaciones", groupId = "${ORG_ID:42}-transfer")
-@Transactional
-public void onTransfer(ConsumerRecord<String, String> rec) {
-  if (!String.valueOf(org.getOrgId()).equals(rec.key())) return;
 
-  log.info("[TRANSFER] RX topic={} key={} offset={} value={}",
-      rec.topic(), rec.key(), rec.offset(), rec.value());
+  @KafkaListener(topics = "transferencia-donaciones", groupId = "${ORG_ID:42}-transfer")
+  @Transactional
+  public void onTransfer(ConsumerRecord<String, String> rec) {
+    // Solo proceso si la key (org_receptora_id) coincide con mi ORG_ID
+    if (!String.valueOf(org.getOrgId()).equals(rec.key())) return;
 
-  try {
-    Map<?, ?> m = om.readValue(rec.value(), Map.class);
-    final String solicitudId = str(m.get("solicitud_id"));
+    log.info("[TRANSFER] RX topic={} key={} offset={} value={}",
+        rec.topic(), rec.key(), rec.offset(), rec.value());
 
-    Object itemsRaw = m.get("items");
-    @SuppressWarnings("unchecked")
-    List<Map<String, Object>> items = (itemsRaw instanceof List<?> l)
-        ? (List<Map<String, Object>>) (List<?>) l
-        : List.of();
+    try {
+      Map<?, ?> m = om.readValue(rec.value(), Map.class);
 
-    if (solicitudId.isBlank()) {
-      log.warn("[TRANSFER] payload sin 'solicitud_id'. Ignoro.");
-      return;
-    }
-    if (items.isEmpty()) {
-      log.warn("[TRANSFER] payload sin 'items' solicitud_id={}", solicitudId);
-      return;
-    }
-
-    // Auth para gRPC
-    AuthContext auth = AuthContext.newBuilder()
-        .setActorId(org.getOrgId())
-        .setActorRole(Role.COORDINADOR)
-        .build();
-
-    int ok = 0;
-    for (Map<String, Object> it : items) {
-      String categoriaTxt = str(it.get("categoria"));
-      String descripcion  = str(it.get("descripcion"));
-      int cantidad        = (int) Math.max(0, Math.round(num(it.get("cantidad"))));
-
-      Category categoria = toCategoryEnum(categoriaTxt);
-      if (categoria == Category.CATEGORY_UNSPECIFIED) {
-        log.warn("[TRANSFER→gRPC] categoría desconocida='{}' → omito ítem", categoriaTxt);
-        continue;
+      final String solicitudId = str(m.get("solicitud_id"));  // ej. "SOL-2025-XXXX"
+      if (solicitudId.isBlank()) {
+        log.warn("[TRANSFER] payload sin 'solicitud_id'. Ignoro.");
+        return;
       }
 
-      CreateDonationRequest req = CreateDonationRequest.newBuilder()
-          .setAuth(auth)
-          .setCategoria(categoria)
-          .setDescripcion(descripcion)
-          .setCantidad(cantidad)
+      Object itemsRaw = m.get("items");
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> items = (itemsRaw instanceof List<?> l)
+          ? (List<Map<String, Object>>) (List<?>) l
+          : List.of();
+
+      if (items.isEmpty()) {
+        log.warn("[TRANSFER] payload sin 'items' solicitud_id={}", solicitudId);
+        return;
+      }
+
+      // ---- Auth gRPC: usar un rol permitido por el server Python (PRESIDENTE o VOCAL) ----
+      AuthContext auth = AuthContext.newBuilder()
+          .setActorId(1)            // ID válido en tu tabla usuarios
+          .setActorRole(Role.VOCAL) // o PRESIDENTE
           .build();
 
-      ApiResponse resp = donationStub.createDonationItem(req);
-      log.info("[TRANSFER→gRPC] createDonationItem resp: success={} msg='{}'",
-          resp.getSuccess(), resp.getMessage());
+      int ok = 0;
+      for (var it : items) {
+        String categoriaTxt = str(it.get("categoria")); // texto en Kafka
+        String descripcion  = str(it.get("descripcion"));
+        Double cantidadDbl  = dbl(it.get("cantidad"));
+        if (cantidadDbl == null) cantidadDbl = 0.0;
+        int cantidad = (int) Math.round(cantidadDbl);   // el proto pide int32
 
-      if (resp.getSuccess()) ok++;
-    }
+        Category categoriaEnum = toCategoryEnum(categoriaTxt);
 
-    // === Marcar cumplida ===
-    boolean marcarCumplida = ok > 0;
+        CreateDonationRequest req = CreateDonationRequest.newBuilder()
+            .setAuth(auth)
+            .setCategoria(categoriaEnum)          // enum
+            .setDescripcion(descripcion)
+            .setCantidad(cantidad)                // int32
+            .build();
 
+        ApiResponse resp = donationStub.createDonationItem(req);
 
-    if (!marcarCumplida) {
-      log.warn("[TRANSFER] Ningún item creado por gRPC. (¿gRPC caído?) Marcando CUMPLIDA igual para prueba.");
-      marcarCumplida = true;
-    }
+        if (resp.getSuccess()) {
+          ok++;
+          log.info("[TRANSFER→gRPC] OK: {}", resp.getMessage());
+        } else {
+          log.warn("[TRANSFER→gRPC] FALLÓ: msg='{}' cat='{}' desc='{}' cant={}",
+              resp.getMessage(), categoriaTxt, descripcion, cantidad);
+        }
+      }
 
-    if (marcarCumplida) {
+      // === Marcado de solicitud como CUMPLIDA (igual que venías haciendo) ===
       boolean marcada = false;
 
-   
+      // 1) Si es una solicitud EXTERNA local, marcar estado
       var ext = solicitudesExternas.findBySolicitudId(solicitudId);
       if (ext.isPresent()) {
         ext.get().setEstado("CUMPLIDA");
@@ -131,41 +133,95 @@ public void onTransfer(ConsumerRecord<String, String> rec) {
         marcada = true;
       }
 
-   
+      // 2) Si es PROPIA, registrar en solicitudes_cumplidas (idempotente)
       if (!marcada && solicitudesPropias.findBySolicitudId(solicitudId).isPresent()) {
         if (!cumplidas.existsBySolicitudId(solicitudId)) {
-          cumplidas.save(new SolicitudCumplida(solicitudId)); 
+          cumplidas.save(new SolicitudCumplida(solicitudId));
           log.info("[TRANSFER] Marcada PROPIA como CUMPLIDA: {}", solicitudId);
         } else {
           log.info("[TRANSFER] PROPIA ya estaba CUMPLIDA: {}", solicitudId);
         }
       }
+
+      if (ok == 0) {
+        log.warn("[TRANSFER] Atención: gRPC no registró ninguna donación para solicitud={}. "
+            + "Revisá nombre de categorías válidas y el rol/actorId.", solicitudId);
+      }
+
+      log.info("[TRANSFER] Fin solicitud={} items_ok={} items_total={}", solicitudId, ok, items.size());
+
+    } catch (Exception e) {
+      log.error("[TRANSFER][ERR] {}", e.getMessage(), e);
+      throw new RuntimeException(e);
+    }
+  }
+
+  // =========================================================================================
+  // Listener B: BAJA de solicitudes externas (soft-cancel: estado = "CANCELADA")
+  //    - Topic: "baja-solicitud-donaciones"
+  //    - Key  : solicitud_id  (NO filtramos por ORG_ID)
+  // =========================================================================================
+  @KafkaListener(topics = "baja-solicitud-donaciones", groupId = "${ORG_ID:42}-externas")
+  @Transactional
+  public void onBajaSolicitud(ConsumerRecord<String, String> rec) {
+    // Idempotencia por (topic, partition, offset)
+    if (procesados.existsByTopicAndPartitionNoAndOffsetNo(rec.topic(), rec.partition(), rec.offset())) {
+      return;
     }
 
-    log.info("[TRANSFER] Fin solicitud={} items_ok={} items_total={}", solicitudId, ok, items.size());
+    try {
+      Map<String, Object> m = om.readValue(rec.value(), new TypeReference<>() {});
+      final String solicitudId = str(m.get("solicitud_id"));
+      if (solicitudId.isEmpty()) {
+        log.warn("[BAJA-EXT] payload sin 'solicitud_id'. Ignoro.");
+        marcarProcesado(rec);
+        return;
+      }
 
-  } catch (Exception e) {
-    log.error("[TRANSFER][ERR] {}", e.getMessage(), e);
+      solicitudesExternas.findBySolicitudId(solicitudId).ifPresentOrElse(ext -> {
+        ext.setEstado("CANCELADA");           // << mantiene la tarjeta, oculta Transferir
+        solicitudesExternas.save(ext);
+        log.info("[BAJA-EXT] solicitud externa {} marcada como CANCELADA", solicitudId);
+      }, () -> {
+        log.info("[BAJA-EXT] solicitud externa {} no existe (nada que marcar)", solicitudId);
+      });
+
+      marcarProcesado(rec);
+    } catch (Exception e) {
+      log.error("[BAJA-EXT][ERR] {}", e.getMessage(), e);
+      // No marcar como procesado para que reintente
+      throw new RuntimeException(e);
+    }
   }
-}
 
-
-  // helpers
-  private static String str(Object o) { return o == null ? "" : o.toString(); }
-  private static double num(Object o) {
-    if (o == null) return 0d;
-    if (o instanceof Number n) return n.doubleValue();
-    try { return Double.parseDouble(o.toString()); } catch (Exception e) { return 0d; }
+  // ===== Helpers =====
+  private static String str(Object o) { return o == null ? "" : String.valueOf(o).trim(); }
+  private static Double dbl(Object o) {
+    try { return o == null ? null : Double.parseDouble(o.toString()); } catch (Exception e) { return null; }
   }
+
   private static Category toCategoryEnum(String s) {
     if (s == null) return Category.CATEGORY_UNSPECIFIED;
-    String x = s.trim().toUpperCase().replace(' ', '_');
+    String x = s.trim().toUpperCase()
+        .replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U')
+        .replace('Ü','U')
+        .replace(' ', '_').replace('-', '_');
+
     return switch (x) {
-      case "ROPA" -> Category.ROPA;
       case "ALIMENTOS", "COMIDA" -> Category.ALIMENTOS;
+      case "ROPA" -> Category.ROPA;
       case "JUGUETES", "JUGUETE" -> Category.JUGUETES;
-      case "UTILES_ESCOLARES", "ÚTILES_ESCOLARES", "UTILES", "UTILES-ESCOLARES" -> Category.UTILES_ESCOLARES;
+      case "UTILES_ESCOLARES", "UTILES" -> Category.UTILES_ESCOLARES;
       default -> Category.CATEGORY_UNSPECIFIED;
     };
+  }
+
+  private void marcarProcesado(ConsumerRecord<String, String> r) {
+    MensajeProcesado mp = new MensajeProcesado();
+    mp.setTopic(r.topic());
+    mp.setMessageKey(r.key());
+    mp.setPartitionNo(r.partition());
+    mp.setOffsetNo(r.offset());
+    procesados.save(mp);
   }
 }

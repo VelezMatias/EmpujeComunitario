@@ -1,10 +1,16 @@
-import json, os, time
+import json, os, time, sys
 from datetime import datetime
 import pymysql
 from confluent_kafka import Consumer, KafkaException, KafkaError
 from dotenv import load_dotenv
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 load_dotenv()
+
+from app.emailer import send_adhesion_notification
 
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = int(os.getenv("DB_PORT", "3306"))
@@ -92,6 +98,14 @@ def handle_evento(cur, payload):
 def handle_baja_evento(cur, payload):
     org_id = int(payload["org_id"])
     evento_id = str(payload["evento_id"])
+
+     # Ignora bajas propias (no toca "eventos_externos" para nuestra propia org)
+    try:
+        if org_id == int(ORG_ID):
+            return
+    except Exception:
+        pass
+
     cur.execute("""
         UPDATE eventos_externos SET estado='BAJA'
         WHERE org_id=%s AND evento_id=%s
@@ -150,6 +164,28 @@ def handle_adhesion(cur, payload):
             json.dumps(payload, ensure_ascii=False),
         ),
     )
+
+    # Intentar notificar por email al organizador; si no hay email, pasamos None y el emailer hará el fallback
+    try:
+        to_email = None
+        try:
+            cur.execute("SELECT email FROM usuarios WHERE id = %s LIMIT 1", (org_id_org,))
+            row = cur.fetchone()
+            to_email = row.get("email") if row else None
+        except Exception as e:
+            print(f"[NOTIFY] Error buscando email de organizador id={org_id_org}: {e}")
+
+        # Logs útiles para depuración
+        print(f"[NOTIFY] Payload recibido: {json.dumps(payload, ensure_ascii=False)}")
+        print(f"[NOTIFY] Email organizador encontrado: {to_email}")
+
+        try:
+            send_adhesion_notification(to_email, evento_id, org_id_adh, fecha_dt)
+            print(f"[NOTIFY] Intentada notificación de adhesión para evento {evento_id} (destino: {to_email or 'EMAIL_USER (fallback)'})")
+        except Exception as e:
+            print(f"[NOTIFY ERROR] Fallo al enviar notificación a {to_email or 'EMAIL_USER'}: {e}")
+    except Exception:
+        pass
 
 HANDLERS = {
     "solicitud-donaciones": handle_solicitud,
