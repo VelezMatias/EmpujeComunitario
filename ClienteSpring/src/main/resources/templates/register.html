@@ -72,90 +72,81 @@
   </head>
   <body>
 
-      <!-- header-start -->
-    <header>
-        <div class="header-area ">
-            <div class="header-top_area">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-xl-6 col-md-12 col-lg-8">
-                            <div class="short_contact_list">
-                                <ul>
-                                    <li><a href="#"> <i class="fa fa-phone"></i> +1 (234) 567-8910</a></li>
-                                    <li><a href="#"> <i class="fa fa-envelope"></i>EmpujeComunitario@email.com</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-xl-6 col-md-6 col-lg-4">
-                            <div class="social_media_links d-none d-lg-block">
-                                <a href="#">
-                                    <i class="fa fa-facebook"></i>
-                                </a>
-                                <a href="#">
-                                    <i class="fa fa-pinterest-p"></i>
-                                </a>
-                                <a href="#">
-                                    <i class="fa fa-linkedin"></i>
-                                </a>
-                                <a href="#">
-                                    <i class="fa fa-twitter"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+   <!-- header-start -->
+<header>
+  <div class="header-area">
+    <div id="sticky-header" class="main-header-area">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-xl-3 col-lg-3">
+            <th:block th:if="${session.username} != null">
+              <p class="saludo">
+                ¡Hola <b th:text="${session.username}"></b>! 
+                (rol: <span th:text="${session.rol}"></span>)
+              </p>
+            </th:block>
+          </div>
+          <div class="col-xl-9 col-lg-9">
+            <div class="main-menu">
+              <nav>
+              <ul id="navigation">
+  <li><a th:href="@{/home}">Inicio</a></li>
+
+  <!-- según rol -->
+  <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+    <ul class="submenu">
+      <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+      <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+    </ul>
+  </li>
+
+  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+    <ul class="submenu">
+      <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+      <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+    </ul>
+  </li>
+
+  <li th:if="${session.rol} == 'PRESIDENTE'">
+    <a th:href="@{/eventos}">Eventos</a>
+  </li>
+
+  <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+    <a th:href="@{/donaciones}">Donaciones</a>
+  </li>
+
+
+  <!-- INFORMES - boton dropdown con enlaces -->
+  <li>
+    <a href="#">Informes<i class="ti-angle-down"></i></a>
+    <ul class="submenu">
+      <li><a th:href="@{/informes/donaciones}">Informes de Donaciones</a></li>
+      <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
+    </ul>
+  </li>
+  <!-- ====================================================== -->
+
+  <!-- login/logout -->
+  <li th:if="${session.username} == null">
+    <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+  </li>
+  <li th:if="${session.username} != null">
+    <a th:href="@{/auth/logout}">Salir</a>
+  </li>
+</ul>
+
+              </nav>
             </div>
-            <div id="sticky-header" class="main-header-area">
-                <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-xl-3 col-lg-3">
-                            <th:block th:if="${session.username} != null">
-                                <p class="saludo">¡Hola <b th:text="${session.username}"></b>! (rol: <span th:text="${session.rol}"></span>)</p>
-                            </th:block>
-                        </div>
-                        <div class="col-xl-9 col-lg-9">
-                            <div class="main-menu">
-                                <nav>
-                                    <ul id="navigation">
-                                         <li><a th:href="@{/home}">Inicio</a></li>
-
-                                         <li th:if="${session.username} == null">
-                                            <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
-                                         </li>
-                                    
-                                          <!-- Links según el rol -->
-                                          <li th:if="${session.rol} == 'PRESIDENTE'">
-                                              <a th:href="@{/admin/users}">Usuarios</a>
-                                          </li>
-
-                                           <li th:if="${session.rol} == 'PRESIDENTE'">
-                                              <a th:href="@{/auth/eventos}">Eventos</a>
-                                          </li>
-
-                                          <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
-                                            <a th:href="@{/donaciones}">Donaciones</a>
-                                          </li>
-
-                                          <li th:if="${session.username} != null">
-                                              <a th:href="@{/auth/logout}">Salir</a>
-                                          </li>
-                                    </ul>
-                                  
-                                        
-                                </nav>
-                                
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="mobile_menu d-block d-lg-none"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
+          <div class="col-12">
+            <div class="mobile_menu d-block d-lg-none"></div>
+          </div>
         </div>
-    </header>
-    <!-- header-end -->
-
+      </div>
+    </div>
+  </div>
+</header>
+<!-- header-end -->
 
 
     <main>
