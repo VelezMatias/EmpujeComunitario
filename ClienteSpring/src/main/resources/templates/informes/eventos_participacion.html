@@ -1,29 +1,676 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="shortcut icon" type="image/x-icon" th:href="@{/charifit/img/favicon.png}">
+  <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
+  <link rel="stylesheet" th:href="@{/charifit/css/owl.carousel.min.css}" />
+  <link rel="stylesheet" th:href="@{/charifit/css/magnific-popup.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/font-awesome.min.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/themify-icons.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/nice-select.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/flaticon.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/gijgo.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/animate.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/slicknav.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/style.css}">
+
+  <style>
+    .saludo {
+      color: white;
+      margin: 0;
+      font-weight: 500;
+    }
+    .saludo b {
+      color: white;
+    }
+
+    body {
+      background: white;
+      color: black;
+      font-family: 'Inter', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+    }
+    
+    .wrap {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      border: 1px solid #3CC78F;
+    }
+    
+    h1 {
+      margin: 0 0 12px;
+      color: black;
+      font-weight: 700;
+    }
+    
+    a {
+      color: #60a5fa;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    a:hover {
+      color: #93c5fd;
+      text-decoration: underline;
+    }
+    
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn {
+      background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
+      border: none;
+      color: black;
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      color: #fff;
+      text-decoration: none;
+    }
+    
+    .card {
+      background: #b4debd42;
+      border: 1px solid #3CC78F;
+      border-radius: 14px;
+      padding: 18px;
+      margin: 16px 0;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      border-color: #3CC78F;
+    }
+    
+    .row1 {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    
+    .row1 .left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .label {
+      opacity: 0.7;
+      font-size: 0.9em;
+    }
+    
+    .state {
+      background: linear-gradient(to right, #374151, #4b5563);
+      border: 1px solid #6b7280;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #f3f4f6;
+    }
+    
+    /* Tablas mejoradas */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    thead {
+      background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
+    }
+    
+    th {
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 700;
+      color: white;
+      border-bottom: 2px solid #3CC78F;
+    }
+    
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+      color: black;
+    }
+    
+    tbody tr {
+      transition: background-color 0.3s;
+    }
+    
+    tbody tr:nth-child(even) {
+      background: rgba(30, 41, 59, 0.5);
+    }
+    
+    tbody tr:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+    
+    .muted {
+      opacity: 0.7;
+      font-style: italic;
+    }
+    
+    .pager {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    /* Grid de columnas */
+    .cols {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    
+    @media (min-width: 992px) {
+      .cols {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .col-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .state.success {
+      background: linear-gradient(to right, #065f46, #10b981);
+      border-color: #34d399;
+    }
+    
+    .state.danger {
+      background: linear-gradient(to right, #7f1d1d, #ef4444);
+      border-color: #f87171;
+    }
+    
+    .state.warning {
+      background: linear-gradient(to right, #92400e, #f59e0b);
+      border-color: #fbbf24;
+    }
+    
+    /* Estados de mensajes */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    
+    .alert-success {
+      background: rgba(6, 78, 59, 0.3);
+      border: 1px solid #065f46;
+      color: #6ee7b7;
+    }
+    
+    .alert-error {
+      background: rgba(127, 29, 29, 0.3);
+      border: 1px solid #991b1b;
+      color: #fca5a5;
+    }
+
+  </style>
   <title>Informe de participación en eventos</title>
-  <script th:src="@{/js/event-report.js}" defer></script>
+  
 </head>
 <body>
+
+
+  <!-- header-start -->
+<header>
+  <div class="header-area">
+    <div id="sticky-header" class="main-header-area">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-xl-3 col-lg-3">
+            <th:block th:if="${session.username} != null">
+              <p class="saludo">
+                ¡Hola <b th:text="${session.username}"></b>! 
+                (rol: <span th:text="${session.rol}"></span>)
+              </p>
+            </th:block>
+          </div>
+          <div class="col-xl-9 col-lg-9">
+            <div class="main-menu">
+              <nav>
+              <ul id="navigation">
+  <li><a th:href="@{/home}">Inicio</a></li>
+
+  <!-- según rol -->
+  <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+    <ul class="submenu">
+      <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+      <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+    </ul>
+  </li>
+
+  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+    <ul class="submenu">
+      <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+      <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+    </ul>
+  </li>
+
+  <li th:if="${session.rol} == 'PRESIDENTE'">
+    <a th:href="@{/eventos}">Eventos</a>
+  </li>
+
+  <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+    <a th:href="@{/donaciones}">Donaciones</a>
+  </li>
+
+
+  <!-- INFORMES - boton dropdown con enlaces -->
+  <li>
+    <a href="#">Informes<i class="ti-angle-down"></i></a>
+    <ul class="submenu">
+      <li><a th:href="@{/informes/donaciones}">Informes de Donaciones</a></li>
+      <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
+    </ul>
+  </li>
+  <!-- ====================================================== -->
+
+  <!-- login/logout -->
+  <li th:if="${session.username} == null">
+    <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+  </li>
+  <li th:if="${session.username} != null">
+    <a th:href="@{/auth/logout}">Salir</a>
+  </li>
+</ul>
+
+              </nav>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="mobile_menu d-block d-lg-none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- header-end -->
+
+<main style="margin-top: 150px; margin-bottom: 60px; padding-left: 100px; padding-right: 100px;">
   <h1>Informe de participación en eventos</h1>
 
   <div>
-    <label>Usuario ID (obligatorio): <input id="usuarioId" type="number"/></label>
-    <label>Desde: <input id="from" type="date"/></label>
-    <label>Hasta: <input id="to" type="date"/></label>
+    <label>Usuario ID (obligatorio):
+      <input id="usuarioId" name="usuarioId" type="number"/>
+    </label>
+    <label>Desde:
+      <input id="from" name="from" type="date"/>
+    </label>
+    <label>Hasta:
+      <input id="to" name="to" type="date"/>
+    </label>
     <label>Reparto de donaciones:
-      <select id="reparto">
+      <select id="reparto" name="reparto">
         <option value="AMBOS">AMBOS</option>
         <option value="SI">SI</option>
         <option value="NO">NO</option>
       </select>
     </label>
-    <button id="buscar">Buscar</button>
-    <button id="excel">Excel</button>
+
+    <!-- espejos de compatibilidad (no molestan y ayudan si algún código viejo lee estos names) -->
+    <input type="hidden" id="usuario"     name="usuario">
+    <input type="hidden" id="fechaDesde"  name="fechaDesde">
+    <input type="hidden" id="fechaHasta"  name="fechaHasta">
+
+    <button id="buscar" class="btn btn-secondary">Buscar</button>
+    <button id="excel" class="btn btn-secondary">Excel</button>
   </div>
 
   <div id="resultado"></div>
+
+  <div class="card p-3 mb-3">
+    <div class="d-flex gap-2 align-items-end">
+      <select id="filtroGuardado" class="form-select" style="max-width:320px;">
+        <option value="">(Mis filtros guardados…)</option>
+      </select>
+
+      <button type="button" id="btnAplicarFiltro" class="btn btn-secondary">Aplicar</button>
+      <button type="button" id="btnGuardarFiltro" class="btn btn-primary" style="margin-left:5px;">Guardar</button>
+      <button type="button" id="btnEditarFiltro" class="btn btn-outline-primary" disabled style="margin-left:5px;">Editar</button>
+      <button type="button" id="btnBorrarFiltro" class="btn btn-outline-danger" disabled style="margin-left:5px;">Borrar</button>
+    </div>
+  </div>
+
+  <!-- Editor inline de Filtro (oculto por defecto) -->
+<div id="editorFiltro" class="card p-3 mt-2" style="display:none;">
+  <div class="row g-2">
+    <div class="col-12">
+      <label class="form-label">Nombre del filtro</label>
+      <input id="edNombre" class="form-control" maxlength="120" />
+    </div>
+    <div class="col-sm-4">
+      <label class="form-label">Desde</label>
+      <input id="edDesde" type="date" class="form-control" />
+    </div>
+    <div class="col-sm-4">
+      <label class="form-label">Hasta</label>
+      <input id="edHasta" type="date" class="form-control" />
+    </div>
+    <div class="col-sm-4">
+      <label class="form-label">Reparto de donaciones</label>
+      <select id="edReparto" class="form-select">
+        <option value="AMBOS">AMBOS</option>
+        <option value="SI">SI</option>
+        <option value="NO">NO</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mt-3 d-flex gap-2">
+    <button type="button" id="edCancelar" class="btn btn-outline-secondary">Cancelar</button>
+    <button type="button" id="edGuardar"  class="btn btn-primary">Guardar</button>
+  </div>
+
+  <!-- línea de estado opcional -->
+  <div id="edEstado" class="mt-2" style="font-size:12px; opacity:.85;"></div>
+</div>
+
+  
+</main>
+
+<script>
+(function () {
+  // Evitar doble-disparo cuando "Aplicar" llama a doSearchWith y también hay listener en "Buscar".
+  if (typeof window.__searchLock === 'undefined') window.__searchLock = false;
+
+  // DOM ----------------------------------------------------------------------
+  const $  = (s) => document.querySelector(s);
+  const dd = $('#filtroGuardado');
+
+  const btnAplicar = $('#btnAplicarFiltro');
+  const btnGuardar = $('#btnGuardarFiltro');   // Crear (abre editor inline con valores actuales)
+  const btnEditar  = $('#btnEditarFiltro');    // Editar filtro seleccionado (abre editor inline)
+  const btnBorrar  = $('#btnBorrarFiltro');
+
+  // Inputs superiores (los que se ven)
+  const inUsuario = $('#usuarioId');
+  const inDesde   = $('#from');
+  const inHasta   = $('#to');
+  const inRep     = $('#reparto');
+
+  // Editor inline -------------------------------------------------------------
+  const box       = $('#editorFiltro');
+  const edNombre  = $('#edNombre');
+  const edDesde   = $('#edDesde');
+  const edHasta   = $('#edHasta');
+  const edReparto = $('#edReparto');
+  const edGuardar = $('#edGuardar');
+  const edCancel  = $('#edCancelar');
+  const edEstado  = $('#edEstado');
+
+  // Estado --------------------------------------------------------------------
+  let filtros = [];
+  let editId  = null; // null => crear; número => editar
+
+  // Utils ---------------------------------------------------------------------
+  const read = (...sels) => {
+    for (const s of sels) {
+      const el = $(s);
+      if (el && el.value != null && String(el.value).trim() !== '') return String(el.value).trim();
+    }
+    return '';
+  };
+  const uiEnable = () => {
+    const sel = !!dd.value;
+    if (btnEditar) btnEditar.disabled = !sel;
+    if (btnBorrar) btnBorrar.disabled = !sel;
+  };
+  const showEd = (msg='', danger=false) => {
+    if (edEstado) {
+      edEstado.textContent = msg;
+      edEstado.style.color = danger ? '#b91c1c' : '#374151';
+    }
+    if (box) box.style.display = 'block';
+  };
+  const hideEd = () => { if (box) box.style.display = 'none'; if (edEstado) edEstado.textContent=''; };
+
+  // Cargar lista de filtros ---------------------------------------------------
+  async function cargar() {
+    try {
+      const res = await fetch('/api/informes/eventos/filtros', { credentials: 'include' });
+      filtros = await res.json();
+    } catch (e) {
+      console.error('Error cargando filtros', e);
+      filtros = [];
+    }
+
+    // Repoblar <select>
+    dd.innerHTML = '<option value="">(Mis filtros guardados…)</option>';
+    for (const f of (filtros || [])) {
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = f.nombre;
+      dd.appendChild(opt);
+    }
+    uiEnable();
+  }
+
+  // Aplicar filtro ------------------------------------------------------------
+  btnAplicar?.addEventListener('click', () => {
+    if (!dd.value) return;
+    const f = filtros.find(x => String(x.id) === dd.value);
+    if (!f) return;
+
+    // Normalizar nombres (snake/camel)
+    const usuarioRaw =
+      f.usuarioObjetivoId ?? f.usuario_objetivo_id ??
+      f.usuarioId ?? f.usuario ?? f.userId ?? f.user_id ?? null;
+
+    const fromRaw = f.fechaDesde ?? f.fecha_desde ?? f.from ?? f.desde ?? null;
+    const toRaw   = f.fechaHasta ?? f.fecha_hasta ?? f.to   ?? f.hasta ?? null;
+    const repRaw  = (f.reparto ?? f.repartoDonaciones ?? f.reparto_donaciones ?? 'AMBOS') + '';
+
+    const uidNum = Number(usuarioRaw);
+    if (!Number.isFinite(uidNum) || uidNum <= 0) {
+      alert('Este filtro no tiene “Usuario ID” válido. Editalo y guardalo nuevamente.');
+      return;
+    }
+
+    // Reflejar en inputs para que el usuario lo vea (no dependemos del DOM para buscar)
+    if (inUsuario) inUsuario.value = String(uidNum);
+    if (inDesde)   inDesde.value   = fromRaw || '';
+    if (inHasta)   inHasta.value   = toRaw   || '';
+    if (inRep)     inRep.value     = repRaw.toUpperCase();
+
+    // Lock y ejecutar con los valores del filtro
+    window.__searchLock = true;
+    setTimeout(() => { window.__searchLock = false; }, 250);
+
+    if (typeof window.doSearchWith === 'function') {
+      window.doSearchWith({
+        usuarioId: uidNum,
+        from: fromRaw || null,
+        to:   toRaw   || null,
+        reparto: repRaw.toUpperCase()
+      });
+    } else if ($('#buscar')) {
+      // Fallback si no está event-report.js
+      $('#buscar').click();
+    }
+  });
+
+  // CREAR (abre editor inline con valores actuales de arriba) -----------------
+  btnGuardar?.addEventListener('click', () => {
+    editId = null;
+    if (edNombre)  edNombre.value  = '';
+    if (edDesde)   edDesde.value   = read('#from','[name="from"]','#fechaDesde','[name="fechaDesde"]') || '';
+    if (edHasta)   edHasta.value   = read('#to','[name="to"]','#fechaHasta','[name="fechaHasta"]')     || '';
+    if (edReparto) edReparto.value = (read('#reparto','[name="reparto"]') || 'AMBOS').toUpperCase();
+    showEd('Completá los datos y guardá');
+  });
+
+  // EDITAR (abre editor inline con valores del filtro seleccionado) -----------
+  btnEditar?.addEventListener('click', () => {
+    if (!dd.value) return;
+    const f = filtros.find(x => String(x.id) === dd.value);
+    if (!f) return;
+
+    editId = f.id;
+    if (edNombre) edNombre.value = f.nombre || '';
+
+    const d = (f.fechaDesde ?? f.fecha_desde ?? f.from  ?? f.desde) || '';
+    const h = (f.fechaHasta ?? f.fecha_hasta ?? f.to    ?? f.hasta) || '';
+    const r = ((f.reparto ?? f.repartoDonaciones ?? f.reparto_donaciones) || 'AMBOS') + '';
+
+    if (edDesde)   edDesde.value   = d;
+    if (edHasta)   edHasta.value   = h;
+    if (edReparto) edReparto.value = r.toUpperCase();
+
+    showEd('Editá y guardá los cambios');
+  });
+
+  // CANCELAR editor -----------------------------------------------------------
+  edCancel?.addEventListener('click', hideEd);
+
+  // GUARDAR (POST/PUT) -------------------------------------------------------
+  edGuardar?.addEventListener('click', async () => {
+    const usuarioStr = read('#usuarioId','[name="usuarioId"]','#usuario','[name="usuario"]');
+    const usuarioNum = usuarioStr ? Number(usuarioStr) : null;
+    if (!Number.isFinite(usuarioNum) || usuarioNum <= 0) {
+      showEd('El filtro debe tener un Usuario ID válido en el formulario superior.', true);
+      return;
+    }
+    const nombre = (edNombre?.value || '').trim();
+    if (!nombre) { showEd('Elegí un nombre para el filtro.', true); return; }
+
+    const body = {
+      nombre,
+      usuarioObjetivoId: usuarioNum,
+      fechaDesde: edDesde?.value || null,
+      fechaHasta: edHasta?.value || null,
+      reparto: (edReparto?.value || 'AMBOS').toUpperCase()
+    };
+
+    const url    = editId ? `/api/informes/eventos/filtros/${editId}` : '/api/informes/eventos/filtros';
+    const method = editId ? 'PUT' : 'POST';
+
+    edGuardar.disabled = true;
+    showEd(editId ? 'Guardando cambios…' : 'Creando filtro…');
+
+    try {
+      const r = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body)
+      });
+      const text = await r.text();
+      if (!r.ok) throw new Error(text || `${r.status} ${r.statusText}`);
+
+      await cargar(); // refrescar lista
+      // Seleccionar el recién creado por nombre/usuario si está en la lista
+      if (!editId) {
+        const created = filtros.find(x => x.nombre === nombre && (x.usuarioObjetivoId ?? x.usuario_objetivo_id) == usuarioNum);
+        if (created) dd.value = created.id;
+      }
+      uiEnable();
+      showEd('Listo ✅'); setTimeout(hideEd, 600);
+    } catch (e) {
+      console.error(e);
+      showEd('Error al guardar: ' + (e?.message || e), true);
+    } finally {
+      edGuardar.disabled = false;
+    }
+  });
+
+  // BORRAR --------------------------------------------------------------------
+  btnBorrar?.addEventListener('click', async () => {
+    if (!dd.value) return;
+    if (!confirm('¿Borrar el filtro seleccionado?')) return;
+    try {
+      const r = await fetch(`/api/informes/eventos/filtros/${dd.value}`, { method: 'DELETE', credentials: 'include' });
+      if (!r.ok) throw new Error('No se pudo borrar');
+      dd.value = '';
+      await cargar();
+      hideEd();
+    } catch (e) {
+      alert(e.message || 'No se pudo borrar');
+    }
+  });
+
+  // Eventos secundarios -------------------------------------------------------
+  dd?.addEventListener('change', uiEnable);
+
+  // Primera carga -------------------------------------------------------------
+  cargar();
+})();
+</script>
+
+
+
+<script th:src="@{/js/event-report.js(v=${#dates.createNow().time})}" defer></script>
+ <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+  <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+  <script th:src="@{/charifit/js/popper.min.js}"></script>
+  <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+  <script th:src="@{/charifit/js/owl.carousel.min.js}"></script>
+  <script th:src="@{/charifit/js/isotope.pkgd.min.js}"></script>
+  <script th:src="@{/charifit/js/ajax-form.js}"></script>
+  <script th:src="@{/charifit/js/waypoints.min.js}"></script>
+  <script th:src="@{/charifit/js/jquery.counterup.min.js}"></script>
+  <script th:src="@{/charifit/js/imagesloaded.pkgd.min.js}"></script>
+  <script th:src="@{/charifit/js/scrollIt.js}"></script>
+  <script th:src="@{/charifit/js/jquery.scrollUp.min.js}"></script>
+  <script th:src="@{/charifit/js/wow.min.js}"></script>
+  <script th:src="@{/charifit/js/nice-select.min.js}"></script>
+  <script th:src="@{/charifit/js/jquery.slicknav.min.js}"></script>
+  <script th:src="@{/charifit/js/jquery.magnific-popup.min.js}"></script>
+  <script th:src="@{/charifit/js/plugins.js}"></script>
+  <script th:src="@{/charifit/js/gijgo.min.js}"></script>
+  <script th:src="@{/charifit/js/contact.js}"></script>
+  <script th:src="@{/charifit/js/jquery.ajaxchimp.min.js}"></script>
+  <script th:src="@{/charifit/js/jquery.form.js}"></script>
+  <script th:src="@{/charifit/js/jquery.validate.min.js}"></script>
+  <script th:src="@{/charifit/js/mail-script.js}"></script>
+  <script th:src="@{/charifit/js/main.js}"></script>
 
 </body>
 </html>
