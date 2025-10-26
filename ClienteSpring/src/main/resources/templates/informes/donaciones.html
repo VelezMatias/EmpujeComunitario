@@ -74,8 +74,8 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    .btn {
-      background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
+     .btn { 
+      background: linear-gradient(to right, #3CC78F, #3cc7c0ff); 
       border: none;
       color: black;
       padding: 10px 18px;
@@ -87,13 +87,18 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
-    .btn:hover {
+    .btn:hover { 
       transform: translateY(-2px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
       color: #fff;
       text-decoration: none;
     }
-    
+
+    .btn-outline-primary{ background: transparent; border:1px solid #3CC78F; color:#065f46; }
+    .btn-outline-primary:hover{ background: linear-gradient(to right, #3CC78F, #3cc7c0ff); color:#fff; }
+    .btn-outline-danger{ background: transparent; border:1px solid #ef4444; color:#7f1d1d; }
+    .btn-outline-danger:hover{ background: linear-gradient(to right, #ef4444, #f87171); color:#fff; }
+
     .card {
       background: #b4debd42;
       border: 1px solid #3CC78F;
@@ -255,8 +260,22 @@
 
     #resultado .accordion {
       display: block;
-      width: fit-content;      /* mantiene el ancho al contenido (no 100%) */
+      width: fit-content;      /* mantiene tu ancho al contenido */
       margin: 8px 0;
+      background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
+      color: #111827;
+      font-weight: 600;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    
+    #resultado .accordion:hover {
+      transform: translateY(-1px);
+      color: #fff;
     }
 
     #resultado .panel {
@@ -373,6 +392,67 @@
 
 <h2>Resultado</h2>
 <div id="resultado"></div>
+
+ <!-- ======================= Mis filtros (Donaciones / GraphQL) ======================= -->
+  <div class="card p-3 mb-3">
+    <div class="d-flex gap-2 align-items-end flex-wrap">
+      <label class="mb-0"><strong>Mis filtros:</strong></label>
+      <select id="filtrosGuardados" class="form-select" style="min-width:320px;">
+        <option value="">(Mis filtros guardados…)</option>
+      </select>
+
+      <button type="button" id="btnAplicarFiltroDon" class="btn">Aplicar</button>
+
+      <!-- Solo PRESIDENTE/VOCAL pueden crear/editar/borrar -->
+      <span th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+        <button type="button" id="btnGuardarFiltroDon" class="btn" style="margin-left:5px;">Guardar</button>
+        <button type="button" id="btnEditarFiltroDon"  class="btn btn-outline-primary" style="margin-left:5px;" disabled>Editar</button>
+        <button type="button" id="btnBorrarFiltroDon"  class="btn btn-outline-danger"  style="margin-left:5px;" disabled>Borrar</button>
+      </span>
+    </div>
+  </div>
+
+  <!-- Editor inline de filtros guardados -->
+  <div id="editorFiltroDon" class="card p-3 mt-2" style="display:none;">
+    <div class="row g-2">
+      <div class="col-12">
+        <label class="form-label">Nombre del filtro</label>
+        <input id="dfNombre" class="form-control" maxlength="120" />
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Categoría</label>
+        <select id="dfCategoria" class="form-select">
+          <option value="">Todas</option>
+          <option value="ALIMENTOS">ALIMENTOS</option>
+          <option value="ROPA">ROPA</option>
+          <option value="JUGUETES">JUGUETES</option>
+          <option value="UTILES_ESCOLARES">UTILES_ESCOLARES</option>
+        </select>
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Desde</label>
+        <input id="dfDesde" type="date" class="form-control" />
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Hasta</label>
+        <input id="dfHasta" type="date" class="form-control" />
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Eliminado</label>
+        <select id="dfEliminado" class="form-select">
+          <option value="AMBOS">AMBOS</option>
+          <option value="NO">NO</option>
+          <option value="SI">SI</option>
+        </select>
+      </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+      <button type="button" id="dfCancelar" class="btn btn-outline-secondary">Cancelar</button>
+      <button type="button" id="dfGuardar"  class="btn">Guardar</button>
+    </div>
+    <div id="dfEstado" class="mt-2" style="font-size:12px; opacity:.85;"></div>
+  </div>
+  
 
 </main>
 
@@ -562,6 +642,185 @@ function mostrarResultados(grupos, filtros) {
   });
 }
 </script>
+
+<!-- ======================= Lógica GraphQL “Mis filtros” ======================= -->
+<script>
+(function () {
+  const FILTERS_ENDPOINT = '/graphql';
+
+  const $  = (s) => document.querySelector(s);
+  const sel = $('#filtrosGuardados');
+  const btnAplicar = $('#btnAplicarFiltroDon');
+  const btnGuardar = $('#btnGuardarFiltroDon');
+  const btnEditar  = $('#btnEditarFiltroDon');
+  const btnBorrar  = $('#btnBorrarFiltroDon');
+
+  const box         = $('#editorFiltroDon');
+  const dfNombre    = $('#dfNombre');
+  const dfCategoria = $('#dfCategoria');
+  const dfDesde     = $('#dfDesde');
+  const dfHasta     = $('#dfHasta');
+  const dfEliminado = $('#dfEliminado');
+  const dfGuardar   = $('#dfGuardar');
+  const dfCancel    = $('#dfCancelar');
+  const dfEstado    = $('#dfEstado');
+
+  // Inputs reales del informe
+  const inCategoria = $('#categoriaSelect');
+  const inDesde     = $('#from');
+  const inHasta     = $('#to');
+  const inEliminado = $('#eliminado');
+
+  let filtros = [];
+  let editId  = null;
+
+  function gqlFetch(query, variables) {
+    return fetch(FILTERS_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ query, variables })
+    })
+    .then(r => r.json())
+    .then(j => {
+      if (j.errors && j.errors.length) throw new Error(j.errors[0].message || 'GraphQL error');
+      return j.data;
+    });
+  }
+
+  function uiEnable() {
+    const hasSel = !!(sel && sel.value);
+    if (btnEditar) btnEditar.disabled = !hasSel;
+    if (btnBorrar) btnBorrar.disabled = !hasSel;
+  }
+
+  function showMsg(msg='', danger=false) {
+    if (!dfEstado) return;
+    dfEstado.textContent = msg;
+    dfEstado.style.color = danger ? '#b91c1c' : '#374151';
+  }
+  function showEditor(msg='') { if (box) box.style.display = 'block'; showMsg(msg); }
+  function hideEditor() { if (box) box.style.display = 'none'; showMsg(''); editId = null; }
+
+  async function cargar() {
+    try {
+      const data = await gqlFetch(`query { myFilters { id nombre categoria from to eliminado } }`, {});
+      filtros = data?.myFilters || [];
+    } catch (e) {
+      console.error(e); filtros = [];
+    }
+    // Repoblar select
+    sel.innerHTML = '<option value="">(Mis filtros guardados…)</option>';
+    for (const f of filtros) {
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = f.nombre;
+      opt.dataset.categoria = f.categoria || '';
+      opt.dataset.from      = f.from || '';
+      opt.dataset.to        = f.to || '';
+      opt.dataset.eliminado = f.eliminado || 'AMBOS';
+      sel.appendChild(opt);
+    }
+    uiEnable();
+  }
+
+  // Aplicar -> setea inputs y llama a buscar()
+  btnAplicar?.addEventListener('click', () => {
+    if (!sel.value) return;
+    const opt = sel.selectedOptions[0];
+    if (inCategoria) inCategoria.value = opt.dataset.categoria || '';
+    if (inDesde)     inDesde.value     = opt.dataset.from || '';
+    if (inHasta)     inHasta.value     = opt.dataset.to || '';
+    if (inEliminado) inEliminado.value = opt.dataset.eliminado || 'AMBOS';
+    if (typeof window.buscar === 'function') buscar();
+  });
+
+  // Guardar -> abre editor con valores actuales del form
+  btnGuardar?.addEventListener('click', () => {
+    editId = null;
+    if (dfNombre)    dfNombre.value    = '';
+    if (dfCategoria) dfCategoria.value = inCategoria?.value || '';
+    if (dfDesde)     dfDesde.value     = inDesde?.value || '';
+    if (dfHasta)     dfHasta.value     = inHasta?.value || '';
+    if (dfEliminado) dfEliminado.value = inEliminado?.value || 'AMBOS';
+    showEditor('Completá los datos y guardá');
+  });
+
+  // Editar -> carga valores del filtro seleccionado
+  btnEditar?.addEventListener('click', () => {
+    if (!sel.value) return;
+    const f = filtros.find(x => String(x.id) === sel.value);
+    if (!f) return;
+    editId = f.id;
+    if (dfNombre)    dfNombre.value    = f.nombre || '';
+    if (dfCategoria) dfCategoria.value = f.categoria || '';
+    if (dfDesde)     dfDesde.value     = f.from || '';
+    if (dfHasta)     dfHasta.value     = f.to   || '';
+    if (dfEliminado) dfEliminado.value = f.eliminado || 'AMBOS';
+    showEditor('Editá y guardá los cambios');
+  });
+
+  dfCancel?.addEventListener('click', hideEditor);
+
+  // Guardar/Actualizar (GraphQL)
+  dfGuardar?.addEventListener('click', async () => {
+    const nombre = (dfNombre?.value || '').trim();
+    if (!nombre) { showMsg('Elegí un nombre.', true); return; }
+    const payload = {
+      nombre,
+      categoria: dfCategoria?.value || '',
+      from:      dfDesde?.value     || '',
+      to:        dfHasta?.value     || '',
+      eliminado: (dfEliminado?.value || 'AMBOS')
+    };
+
+    dfGuardar.disabled = true;
+    showMsg(editId ? 'Guardando cambios…' : 'Creando filtro…');
+
+    try {
+      if (editId) {
+        const q = `mutation($id:ID!,$input:FilterInput!){
+                     updateFilter(id:$id,input:$input){ id nombre categoria from to eliminado }
+                   }`;
+        await gqlFetch(q, { id: editId, input: payload });
+      } else {
+        const q = `mutation($input:FilterInput!){
+                     saveFilter(input:$input){ id nombre categoria from to eliminado }
+                   }`;
+        await gqlFetch(q, { input: payload });
+      }
+      await cargar();
+      const pick = filtros.find(x => x.nombre === nombre);
+      if (pick) sel.value = pick.id;
+      uiEnable();
+      showMsg('Listo ✅'); setTimeout(hideEditor, 600);
+    } catch (e) {
+      alert(e.message || 'No se pudo guardar');
+      showMsg('Error al guardar', true);
+    } finally {
+      dfGuardar.disabled = false;
+    }
+  });
+
+  // Borrar
+  btnBorrar?.addEventListener('click', async () => {
+    if (!sel.value) return;
+    if (!confirm('¿Borrar el filtro seleccionado?')) return;
+    try {
+      await gqlFetch(`mutation($id:ID!){ deleteFilter(id:$id) }`, { id: sel.value });
+      sel.value = '';
+      await cargar();
+      hideEditor();
+    } catch (e) {
+      alert(e.message || 'No se pudo borrar');
+    }
+  });
+
+  sel?.addEventListener('change', uiEnable);
+  document.addEventListener('DOMContentLoaded', cargar);
+})();
+</script>
+
+
  <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
   <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
   <script th:src="@{/charifit/js/popper.min.js}"></script>
