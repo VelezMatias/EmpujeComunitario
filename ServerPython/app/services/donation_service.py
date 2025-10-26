@@ -66,8 +66,8 @@ def _row_to_pb(r: dict) -> pb.DonationItem:
         eliminado=bool(r.get("eliminado") or 0),
         created_at=_to_iso_local(r.get("fecha_alta")),
         created_by=int(r.get("usuario_alta") or 0),
-        updated_at=_to_iso_local(r.get("fecha_modificacion")),
-        updated_by=int(r.get("usuario_modificacion") or 0),
+        ## updated_at=_to_iso_local(r.get("fecha_modificacion")),
+        ## updated_by=int(r.get("usuario_modificacion") or 0),
     )
 
 
@@ -124,17 +124,20 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             if not row:
                 return pb.ApiResponse(success=False, message="Donación no encontrada.")
 
+
             # fecha_modificacion es TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
             # Forzamos NOW() (local) y usuario_modificacion
+            ## dentro de la query sql, abajo cantidad:
+            ## fecha_modificacion=NOW(),
+            ## usuario_modificacion=%s
             sql = """
                 UPDATE donaciones
-                   SET descripcion=%s,
-                       cantidad=%s,
-                       fecha_modificacion=NOW(),
-                       usuario_modificacion=%s
-                 WHERE id=%s
+                SET descripcion=%s,
+                    cantidad=%s
+                    
+                WHERE id=%s
             """
-            rc, _ = execute(sql, (request.descripcion.strip(), int(request.cantidad), int(request.auth.actor_id), int(request.id)))
+            rc, _ = execute(sql, (request.descripcion.strip(), int(request.cantidad), int(request.id)))
             ok = rc > 0
             return pb.ApiResponse(success=ok, message="Donación actualizada." if ok else "Sin cambios.")
         except (PermissionError, ValueError) as e:
@@ -142,6 +145,7 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
         except Exception as e:
             print("[DONACIONES][Update][ERR]", e)
             return pb.ApiResponse(success=False, message="Error interno al actualizar.")
+
 
     # Baja lógica + auditoría
     def SoftDeleteDonationItem(self, request: pb.SoftDeleteDonationRequest, context):
@@ -154,14 +158,8 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             if not row:
                 return pb.ApiResponse(success=False, message="Donación no encontrada.")
 
-            sql = """
-                UPDATE donaciones
-                   SET eliminado=1,
-                       fecha_modificacion=NOW(),
-                       usuario_modificacion=%s
-                 WHERE id=%s
-            """
-            rc, _ = execute(sql, (int(request.auth.actor_id), int(request.id)))
+            sql = "UPDATE donaciones SET eliminado=1 WHERE id=%s"
+            rc, _ = execute(sql, (int(request.id),))
             ok = rc > 0
             return pb.ApiResponse(success=ok, message="Donación eliminada lógicamente." if ok else "Sin cambios.")
         except (PermissionError,) as e:
@@ -170,23 +168,24 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             print("[DONACIONES][Delete][ERR]", e)
             return pb.ApiResponse(success=False, message="Error interno al eliminar.")
 
+
     # Listado
     def ListDonationItems(self, request: pb.Empty, context):
         try:
             execute("SET time_zone = '-03:00'")
             rows = fetch_all("""
                 SELECT d.id, d.categoria_id, d.descripcion, d.cantidad, d.eliminado,
-                    d.fecha_alta, d.usuario_alta, d.fecha_modificacion, d.usuario_modificacion
+                    d.fecha_alta, d.usuario_alta
                 FROM donaciones d
                 ORDER BY d.eliminado ASC, d.categoria_id, d.descripcion
             """)
-            print("[SRV] ListDonationItems count:", len(rows or []))  # <- LOG
+            print("[SRV] ListDonationItems count:", len(rows or []))
             items = [_row_to_pb(r) for r in (rows or [])]
             return pb.ListDonationsResponse(items=items)
         except Exception as e:
             print("[DONACIONES][List][ERR]", e)
             return pb.ListDonationsResponse(items=[])
-            
+
 
 
    
@@ -261,9 +260,9 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
                 )
 
         # === 2) DESCUENTO FIFO sobre coincidencias EXACTAS ===
-        # Nota: si tus helpers no comparten conexión, cada UPDATE será autocommit.
-        # Para alta concurrencia conviene transacción por conexión, pero mantenemos
-        # este enfoque compatible con tus helpers actuales.
+        # Nota: si los helpers no comparten conexión, cada UPDATE será autocommit.
+        # Para alta concurrencia conviene transacción por conexión, pero se mantiene
+        # este enfoque compatible con los helpers actuales.
         for it in request.items:
             cat_nombre = (it.categoria or "").strip().upper()
             cat_id = _categoria_id_from_nombre(cat_nombre)  # ya validado

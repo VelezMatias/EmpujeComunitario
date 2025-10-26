@@ -38,6 +38,8 @@ public class DonationController {
 
     private int userId(HttpSession s) {
         Object v = s.getAttribute("userId");
+        //if (v == null) v = s.getAttribute("id"); 
+        //if (v == null) v = s.getAttribute("user_id");
         if (v instanceof Integer) return (Integer) v;
         if (v instanceof Long) return ((Long) v).intValue();
         if (v instanceof String) { try { return Integer.parseInt((String) v); } catch (Exception ignore) {} }
@@ -46,63 +48,69 @@ public class DonationController {
 
     // LIST
     @GetMapping
+    
     public String list(HttpSession s, Model model) {
         if (!canManage(s)) return "redirect:/home";
+        //var items = gateway.list().getItemsList();
         List<DonationItem> items = gateway.list().getItemsList();
-        model.addAttribute("items", items);
+        model.addAttribute("items", items);      // la vista itera "items"
         return "donaciones/list";
-    }
+}
+
 
     // NUEVO (form)
-@GetMapping("/nuevo")
-public String newForm(HttpSession s, Model model) {
-    if (!canManage(s)) return "redirect:/donaciones";
-    model.addAttribute("isEdit", false);
-    // 👇 Necesario para que form.html pueda leer ${item.descripcion} y ${item.cantidad}
-    model.addAttribute("item", DonationItem.getDefaultInstance());
-    model.addAttribute("categorias", Category.values());
-    return "donaciones/form";
-}
+    @GetMapping("/nueva")
+    public String newForm(HttpSession s, Model model) {
+        if (!canManage(s)) return "redirect:/donaciones";
+        model.addAttribute("isEdit", false);
+        model.addAttribute("item", DonationItem.getDefaultInstance());
+        model.addAttribute("categorias", Category.values());
+       // model.addAttribute("session", s);
+        return "donaciones/form";
+    }
 
 
     // CREAR
-@PostMapping
-public String create(@RequestParam("categoria") Category categoria,
-                     @RequestParam("descripcion") String descripcion,
-                     @RequestParam("cantidad") int cantidad,
-                     HttpSession s, Model model) {
-    if (!canManage(s)) return "redirect:/donaciones";
+    @PostMapping
+    public String create(@RequestParam("categoria") Category categoria,
+                        @RequestParam("descripcion") String descripcion,
+                        @RequestParam("cantidad") int cantidad,
+                        HttpSession s, Model model) {
+        if (!canManage(s)) return "redirect:/donaciones";
 
-    if (categoria == Category.CATEGORY_UNSPECIFIED || descripcion == null || descripcion.isBlank() || cantidad < 0) {
-        model.addAttribute("error", "Complete categoría, descripción y cantidad >= 0");
-        model.addAttribute("isEdit", false);
-        model.addAttribute("categorias", Category.values());
-        // 👇 repinto el form con lo ingresado
-        DonationItem item = DonationItem.newBuilder()
-                .setCategoria(categoria)
-                .setDescripcion(descripcion == null ? "" : descripcion)
-                .setCantidad(Math.max(0, cantidad))
-                .build();
-        model.addAttribute("item", item);
-        return "donaciones/form";
+        if (categoria == Category.CATEGORY_UNSPECIFIED || descripcion == null || descripcion.isBlank() || cantidad < 0) {
+            model.addAttribute("error", "Complete categoría, descripción y cantidad >= 0");
+            model.addAttribute("isEdit", false);
+            model.addAttribute("categorias", Category.values());
+           // model.addAttribute("session", s);
+
+            DonationItem item = DonationItem.newBuilder()
+                    .setCategoria(categoria)
+                    .setDescripcion(descripcion == null ? "" : descripcion)
+                    .setCantidad(Math.max(0, cantidad))
+                    .build();
+            model.addAttribute("item", item);
+            return "donaciones/form";
+        }
+
+        ApiResponse res = gateway.create(categoria, descripcion.trim(), cantidad, userId(s), role(s));
+        if (!res.getSuccess()) {
+            model.addAttribute("error", res.getMessage());
+            model.addAttribute("isEdit", false);
+            model.addAttribute("categorias", Category.values());
+           // model.addAttribute("session", s);
+
+            DonationItem item = DonationItem.newBuilder()
+                    .setCategoria(categoria)
+                    .setDescripcion(descripcion == null ? "" : descripcion)
+                    .setCantidad(Math.max(0, cantidad))
+                    .build();
+            model.addAttribute("item", item);
+            return "donaciones/form";
+        }
+
+        return "redirect:/donaciones";
     }
-
-    ApiResponse res = gateway.create(categoria, descripcion.trim(), cantidad, userId(s), role(s));
-    if (!res.getSuccess()) {
-        model.addAttribute("error", res.getMessage());
-        model.addAttribute("isEdit", false);
-        model.addAttribute("categorias", Category.values());
-        DonationItem item = DonationItem.newBuilder()
-                .setCategoria(categoria)
-                .setDescripcion(descripcion == null ? "" : descripcion)
-                .setCantidad(Math.max(0, cantidad))
-                .build();
-        model.addAttribute("item", item);
-        return "donaciones/form";
-    }
-
-    return "redirect:/donaciones";
-}
 
 
     // EDIT (form)
@@ -115,6 +123,8 @@ public String create(@RequestParam("categoria") Category categoria,
         model.addAttribute("isEdit", true);
         model.addAttribute("item", item);
         model.addAttribute("categorias", Category.values());
+       // model.addAttribute("session", s);
+
         return "donaciones/form";
     }
 
@@ -127,11 +137,13 @@ public String create(@RequestParam("categoria") Category categoria,
         if (!canManage(s)) return "redirect:/donaciones";
         if (descripcion == null || descripcion.isBlank() || cantidad < 0) {
             model.addAttribute("error", "Descripción requerida y cantidad >= 0");
+           // model.addAttribute("session", s);
             return editForm(id, s, model);
         }
         ApiResponse res = gateway.update(id, descripcion.trim(), cantidad, userId(s), role(s));
         if (!res.getSuccess()) {
             model.addAttribute("error", res.getMessage());
+          //  model.addAttribute("session", s);
             return editForm(id, s, model);
         }
         return "redirect:/donaciones";
@@ -145,6 +157,14 @@ public String create(@RequestParam("categoria") Category categoria,
         return "redirect:/donaciones";
     }
 
+
+    @GetMapping("/check")
+    @ResponseBody
+    public String check(HttpSession s) {
+        var resp = gateway.list(); // list() SIN argumentos
+        int size = (resp != null) ? resp.getItemsCount() : -1;
+        return "gateway.list() => items=" + size;
+    }
 
 
 }
