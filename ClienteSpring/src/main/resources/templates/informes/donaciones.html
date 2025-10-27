@@ -149,10 +149,10 @@
         <option value="">(Mis filtros guardados…)</option>
       </select>
 
-      <button type="button" id="btnAplicarFiltroDon" class="btn">Aplicar</button>
+      <button type="button" id="btnAplicarFiltroDon" class="btn">Aplicar Filtro</button>
       <!-- Solo PRESIDENTE/VOCAL pueden crear/editar/borrar -->
       <span th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
-        <button type="button" id="btnGuardarFiltroDon" class="btn" style="margin-left:5px;">Guardar</button>
+        <button type="button" id="btnGuardarFiltroDon" class="btn" style="margin-left:5px;">Crear</button>
         <button type="button" id="btnEditarFiltroDon"  class="btn btn-outline-primary" style="margin-left:5px;" disabled>Editar</button>
         <button type="button" id="btnBorrarFiltroDon"  class="btn btn-outline-danger"  style="margin-left:5px;" disabled>Borrar</button>
       </span>
