@@ -14,7 +14,6 @@ from app import ong_pb2_grpc
 from app.services.user_service import UserServiceServicer
 from app.services.event_service import EventServiceServicer
 from app.services.donation_service import DonationServiceServicer
-from app.db import get_conn  # para testear conexión
 from app.services.externals_service import ExternalsService
 
 # Conexión a MySQL (para testeo rápido al inicio)

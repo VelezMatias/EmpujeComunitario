@@ -2,10 +2,26 @@ package com.empuje.grpc.web;
 
 import com.empuje.grpc.ong.*;
 import com.empuje.grpc.ong.Empty;
+
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DonationGateway {
+
+   /*  private final DonationServiceGrpc.DonationServiceBlockingStub stub;
+
+    // Opcional: id de organización (no rompe si no está definido)
+    private final int orgId;
+
+    public DonationGateway(DonationServiceGrpc.DonationServiceBlockingStub stub,
+                           @Value("${empuje.grpc.org-id:0}") int orgId) {
+        this.stub = stub;
+        this.orgId = orgId;
+    }  */
 
     private final DonationServiceGrpc.DonationServiceBlockingStub stub;
 
@@ -19,6 +35,7 @@ public class DonationGateway {
                 .setActorRole(role)
                 .build();
     }
+
 
     // ----- RPCs -----
 
