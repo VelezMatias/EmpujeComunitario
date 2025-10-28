@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,6 +26,7 @@
       margin: 0;
       font-weight: 500;
     }
+
     .saludo b {
       color: white;
     }
@@ -35,7 +37,7 @@
       font-family: 'Inter', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.6;
     }
-    
+
     .wrap {
       max-width: 1200px;
       margin: 40px auto;
@@ -46,24 +48,24 @@
       backdrop-filter: blur(10px);
       border: 1px solid #3CC78F;
     }
-    
+
     h1 {
       margin: 0 0 12px;
       color: black;
       font-weight: 700;
     }
-    
+
     a {
       color: #60a5fa;
       text-decoration: none;
       transition: color 0.3s;
     }
-    
+
     a:hover {
       color: #93c5fd;
       text-decoration: underline;
     }
-    
+
     .toolbar {
       display: flex;
       gap: 10px;
@@ -73,7 +75,7 @@
       padding-bottom: 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
+
     .btn {
       background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
       border: none;
@@ -86,14 +88,14 @@
       transition: all 0.3s;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
       color: #fff;
       text-decoration: none;
     }
-    
+
     .card {
       background: #b4debd42;
       border: 1px solid #3CC78F;
@@ -103,13 +105,13 @@
       transition: all 0.3s;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .card:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       border-color: #3CC78F;
     }
-    
+
     .row1 {
       display: flex;
       gap: 14px;
@@ -118,19 +120,19 @@
       flex-wrap: wrap;
       margin-bottom: 10px;
     }
-    
+
     .row1 .left {
       display: flex;
       gap: 12px;
       align-items: center;
       flex-wrap: wrap;
     }
-    
+
     .label {
       opacity: 0.7;
       font-size: 0.9em;
     }
-    
+
     .state {
       background: linear-gradient(to right, #374151, #4b5563);
       border: 1px solid #6b7280;
@@ -140,7 +142,7 @@
       font-weight: 600;
       color: #f3f4f6;
     }
-    
+
     /* Tablas mejoradas */
     table {
       width: 100%;
@@ -150,11 +152,11 @@
       overflow: hidden;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     thead {
       background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
     }
-    
+
     th {
       padding: 14px 12px;
       text-align: left;
@@ -162,37 +164,37 @@
       color: white;
       border-bottom: 2px solid #3CC78F;
     }
-    
+
     td {
       padding: 12px;
       border-bottom: 1px solid rgba(71, 85, 105, 0.5);
       color: black;
     }
-    
+
     tbody tr {
       transition: background-color 0.3s;
     }
-    
+
     tbody tr:nth-child(even) {
       background: rgba(30, 41, 59, 0.5);
     }
-    
+
     tbody tr:hover {
       background: rgba(56, 189, 248, 0.1);
     }
-    
+
     .muted {
       opacity: 0.7;
       font-style: italic;
     }
-    
+
     .pager {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
       margin-top: 20px;
     }
-    
+
     /* Grid de columnas */
     .cols {
       width: 100%;
@@ -200,13 +202,13 @@
       grid-template-columns: 1fr;
       gap: 24px;
     }
-    
+
     @media (min-width: 992px) {
       .cols {
         grid-template-columns: 1fr 1fr;
       }
     }
-    
+
     .col-title {
       display: flex;
       justify-content: space-between;
@@ -215,22 +217,22 @@
       padding-bottom: 12px;
       border-bottom: 2px solid rgba(59, 130, 246, 0.3);
     }
-    
+
     .state.success {
       background: linear-gradient(to right, #065f46, #10b981);
       border-color: #34d399;
     }
-    
+
     .state.danger {
       background: linear-gradient(to right, #7f1d1d, #ef4444);
       border-color: #f87171;
     }
-    
+
     .state.warning {
       background: linear-gradient(to right, #92400e, #f59e0b);
       border-color: #fbbf24;
     }
-    
+
     /* Estados de mensajes */
     .alert {
       padding: 12px 16px;
@@ -238,106 +240,111 @@
       margin-bottom: 16px;
       font-weight: 500;
     }
-    
+
     .alert-success {
       background: rgba(6, 78, 59, 0.3);
       border: 1px solid #065f46;
       color: #6ee7b7;
     }
-    
+
     .alert-error {
       background: rgba(127, 29, 29, 0.3);
       border: 1px solid #991b1b;
       color: #fca5a5;
     }
-
   </style>
 
   <title>Solicitudes</title>
 
 </head>
+
 <body>
 
   <!-- header-start -->
-<header>
-  <div class="header-area">
-    <div id="sticky-header" class="main-header-area">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-xl-3 col-lg-3">
-            <th:block th:if="${session.username} != null">
-              <p class="saludo">
-                ¡Hola <b th:text="${session.username}"></b>! 
-                (rol: <span th:text="${session.rol}"></span>)
-              </p>
-            </th:block>
-          </div>
-          <div class="col-xl-9 col-lg-9">
-            <div class="main-menu">
-              <nav>
-              <ul id="navigation">
-  <li><a th:href="@{/home}">Inicio</a></li>
-
-  <!-- según rol -->
-  <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
-      <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
-    </ul>
-  </li>
-
-  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
-      <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
-    </ul>
-  </li>
-
-  <li th:if="${session.rol} == 'PRESIDENTE'">
-    <a th:href="@{/eventos}">Eventos</a>
-  </li>
-
-  <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
-    <a th:href="@{/donaciones}">Donaciones</a>
-  </li>
-
-
-  <!-- INFORMES - boton dropdown con enlaces -->
-  <li>
-    <a href="#">Informes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/informes/donaciones}">Informes de Donaciones</a></li>
-      <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
-    </ul>
-  </li>
-  <!-- ====================================================== -->
-
-  <!-- login/logout -->
-  <li th:if="${session.username} == null">
-    <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
-  </li>
-  <li th:if="${session.username} != null">
-    <a th:href="@{/auth/logout}">Salir</a>
-  </li>
-</ul>
-
-              </nav>
+  <header>
+    <div class="header-area">
+      <div id="sticky-header" class="main-header-area">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-xl-3 col-lg-3">
+              <th:block th:if="${session.username} != null">
+                <p class="saludo">
+                  ¡Hola <b th:text="${session.username}"></b>!
+                  (rol: <span th:text="${session.rol}"></span>)
+                </p>
+              </th:block>
             </div>
-          </div>
-          <div class="col-12">
-            <div class="mobile_menu d-block d-lg-none"></div>
+            <div class="col-xl-9 col-lg-9">
+              <div class="main-menu">
+                <nav>
+                  <ul id="navigation">
+                    <li><a th:href="@{/home}">Inicio</a></li>
+
+                    <!-- según rol -->
+                    <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+                        <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+                      </ul>
+                    </li>
+
+                    <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+                        <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+                      </ul>
+                    </li>
+
+                    <li th:if="${session.rol} == 'PRESIDENTE'">
+                      <a th:href="@{/eventos}">Eventos</a>
+                    </li>
+
+                    <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+                      <a th:href="@{/donaciones}">Donaciones</a>
+                    </li>
+
+
+                    <!-- INFORMES - boton dropdown con enlaces -->
+                    <li>
+                      <a href="#">Informes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <<!-- visible solo para PRESIDENTE o VOCAL -->
+                          <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'VOCAL'}">
+                            <a th:href="@{/informes/donaciones}">Informe de donaciones</a>
+                          </li>
+
+                          <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a>
+                          </li>
+                      </ul>
+                    </li>
+                    <!-- ====================================================== -->
+
+                    <!-- login/logout -->
+                    <li th:if="${session.username} == null">
+                      <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                    </li>
+                    <li th:if="${session.username} != null">
+                      <a th:href="@{/auth/logout}">Salir</a>
+                    </li>
+                  </ul>
+
+                </nav>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mobile_menu d-block d-lg-none"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</header>
-<!-- header-end -->
+  </header>
+  <!-- header-end -->
 
   <main>
 
 
-    <div class="wrap"  style="margin-top: 150px; margin-bottom: 60px;">
+    <div class="wrap" style="margin-top: 150px; margin-bottom: 60px;">
       <div class="toolbar">
         <a class="btn" th:href="@{/home}">← Inicio</a>
       </div>
@@ -363,7 +370,8 @@
                 <span class="label">Solicitud:</span>
                 <a th:href="@{|/ui/solicitudes/${se.solicitudId}|}" th:text="${se.solicitudId}">SOL-XXXX</a>
                 <span class="label">· Fecha:</span>
-                <span th:text="${se.fechaHora != null ? #temporals.format(se.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+                <span
+                  th:text="${se.fechaHora != null ? #temporals.format(se.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
                 <span class="label">· Org:</span>
                 <span th:text="${se.orgId != null ? se.orgId : '-'}">-</span>
               </div>
@@ -371,16 +379,14 @@
               <div style="display:flex; gap:10px; align-items:center;">
                 <span class="state" th:text="${se.estado}">VIGENTE</span>
 
-      
 
-                  <form th:if="${se.estado == 'VIGENTE'}"
-                        th:action="@{|/ui/solicitudes/${se.solicitudId}/transferir|}"
-                        method="post" style="display:inline">
-                  <input type="hidden" th:if="${_csrf != null}"
-                        th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                  <button class="btn" type="submit"
-                          th:disabled="${se.orgId == null}"
-                          style="background:#2563eb;border:1px solid #1e3a8a">
+
+                <form th:if="${se.estado == 'VIGENTE'}" th:action="@{|/ui/solicitudes/${se.solicitudId}/transferir|}"
+                  method="post" style="display:inline">
+                  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                    th:value="${_csrf.token}" />
+                  <button class="btn" type="submit" th:disabled="${se.orgId == null}"
+                    style="background:#2563eb;border:1px solid #1e3a8a">
                     Transferir
                   </button>
                 </form>
@@ -390,21 +396,21 @@
             <!-- Ítems de esta solicitud (externa) -->
             <table>
               <thead>
-              <tr>
-                <th style="width:160px">Categoría</th>
-                <th>Descripción</th>
-                <th style="width:120px">Cantidad</th>
-              </tr>
+                <tr>
+                  <th style="width:160px">Categoría</th>
+                  <th>Descripción</th>
+                  <th style="width:120px">Cantidad</th>
+                </tr>
               </thead>
               <tbody>
-              <tr th:each="it : ${itemsBy[se.solicitudId]}">
-                <td th:text="${it.categoria}">-</td>
-                <td th:text="${it.descripcion}">-</td>
-                <td th:text="${it.cantidad != null ? it.cantidad : '-'}" style="text-align:right">-</td>
-              </tr>
-              <tr th:if="${itemsBy[se.solicitudId] == null or itemsBy[se.solicitudId].isEmpty()}">
-                <td colspan="4" class="muted">Sin ítems.</td>
-              </tr>
+                <tr th:each="it : ${itemsBy[se.solicitudId]}">
+                  <td th:text="${it.categoria}">-</td>
+                  <td th:text="${it.descripcion}">-</td>
+                  <td th:text="${it.cantidad != null ? it.cantidad : '-'}" style="text-align:right">-</td>
+                </tr>
+                <tr th:if="${itemsBy[se.solicitudId] == null or itemsBy[se.solicitudId].isEmpty()}">
+                  <td colspan="4" class="muted">Sin ítems.</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -412,13 +418,16 @@
           <div class="muted" th:if="${page.content.isEmpty()}">Sin resultados.</div>
 
           <div class="pager">
-            <a th:if="${!page.first}" th:href="@{|/ui/solicitudes?page=${page.number-1}&size=${page.size}|}">← Anterior</a>
-            <span>Página <span th:text="${page.number + 1}">1</span> / <span th:text="${page.totalPages == 0 ? 1 : page.totalPages}">1</span></span>
-            <a th:if="${!page.last}" th:href="@{|/ui/solicitudes?page=${page.number+1}&size=${page.size}|}">Siguiente →</a>
+            <a th:if="${!page.first}" th:href="@{|/ui/solicitudes?page=${page.number-1}&size=${page.size}|}">←
+              Anterior</a>
+            <span>Página <span th:text="${page.number + 1}">1</span> / <span
+                th:text="${page.totalPages == 0 ? 1 : page.totalPages}">1</span></span>
+            <a th:if="${!page.last}" th:href="@{|/ui/solicitudes?page=${page.number+1}&size=${page.size}|}">Siguiente
+              →</a>
           </div>
         </section>
 
-         <!-- ===================== DERECHA: MIS SOLICITUDES (PROPIAS) ===================== -->
+        <!-- ===================== DERECHA: MIS SOLICITUDES (PROPIAS) ===================== -->
         <aside>
 
 
@@ -435,68 +444,66 @@
                 <span class="label">Solicitud:</span>
                 <span th:text="${sp.solicitudId}">SOL-XXXX</span>
                 <span class="label">· Fecha:</span>
-                <span th:text="${sp.fechaHora != null ? #temporals.format(sp.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+                <span
+                  th:text="${sp.fechaHora != null ? #temporals.format(sp.fechaHora, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
                 <span class="label">· Org:</span>
                 <span th:text="${sp.orgId}">42</span>
               </div>
-               <div style="display:flex; gap:10px; align-items:center;">
-                  <span class="state">PROPIA</span>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <span class="state">PROPIA</span>
 
-                  
-                  <form class="frm-del-sol"
-                        th:if="${cumplidas == null or !#lists.contains(cumplidas, sp.solicitudId)}"
-                        th:action="@{|/ui/solicitudes/${sp.solicitudId}/eliminar|}"
-                        method="post" 
-                        th:attr="onsubmit=|return confirm('¿Anular la solicitud ${sp.solicitudId}? Esta acción también borra sus ítems.');|"> 
-                    <input type="hidden" th:if="${_csrf != null}"
-                          th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button class="btn" type="submit" style="background:#ef4444;border:1px solid #7f1d1d">
-                      Eliminar
-                    </button>
-                  </form>
 
-                  <span class="state success"
-                        th:if="${cumplidas != null and #lists.contains(cumplidas, sp.solicitudId)}">
-                    CUMPLIDA
-                  </span>
-                </div>
-            
+                <form class="frm-del-sol" th:if="${cumplidas == null or !#lists.contains(cumplidas, sp.solicitudId)}"
+                  th:action="@{|/ui/solicitudes/${sp.solicitudId}/eliminar|}" method="post"
+                  th:attr="onsubmit=|return confirm('¿Anular la solicitud ${sp.solicitudId}? Esta acción también borra sus ítems.');|">
+                  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                    th:value="${_csrf.token}" />
+                  <button class="btn" type="submit" style="background:#ef4444;border:1px solid #7f1d1d">
+                    Eliminar
+                  </button>
+                </form>
+
+                <span class="state success" th:if="${cumplidas != null and #lists.contains(cumplidas, sp.solicitudId)}">
+                  CUMPLIDA
+                </span>
+              </div>
+
             </div>
 
             <!-- Si cargaste 'propItemsBy' en el modelo, listamos ítems igual que las externas -->
             <div th:if="${propItemsBy != null}">
               <table th:if="${propItemsBy[sp.solicitudId] != null}">
                 <thead>
-                <tr>
-                  <th style="width:160px">Categoría</th>
-                  <th>Descripción</th>
-                  <th style="width:120px">Cantidad</th>
-                </tr>
+                  <tr>
+                    <th style="width:160px">Categoría</th>
+                    <th>Descripción</th>
+                    <th style="width:120px">Cantidad</th>
+                  </tr>
                 </thead>
                 <tbody>
-                <tr th:each="it : ${propItemsBy[sp.solicitudId]}">
-                  <td th:text="${it.categoria}">-</td>
-                  <td th:text="${it.descripcion}">-</td>
-                  <td th:text="${it.cantidad != null ? it.cantidad : '-'}" style="text-align:right">-</td>
-                </tr>
-                <tr th:if="${propItemsBy[sp.solicitudId] == null or propItemsBy[sp.solicitudId].isEmpty()}">
-                  <td colspan="4" class="muted">Sin ítems.</td>
-                </tr>
+                  <tr th:each="it : ${propItemsBy[sp.solicitudId]}">
+                    <td th:text="${it.categoria}">-</td>
+                    <td th:text="${it.descripcion}">-</td>
+                    <td th:text="${it.cantidad != null ? it.cantidad : '-'}" style="text-align:right">-</td>
+                  </tr>
+                  <tr th:if="${propItemsBy[sp.solicitudId] == null or propItemsBy[sp.solicitudId].isEmpty()}">
+                    <td colspan="4" class="muted">Sin ítems.</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
 
             <!-- Si no tenés 'propItemsBy', mostramos el JSON como respaldo -->
             <pre class="small muted" th:if="${propItemsBy == null}" th:text="${sp.payloadJson}"></pre>
-          
+
           </div>
         </aside>
 
 
       </div>
     </div>
-   
-  
+
+
   </main>
 
 
@@ -529,4 +536,5 @@
 
 
 </body>
+
 </html>
