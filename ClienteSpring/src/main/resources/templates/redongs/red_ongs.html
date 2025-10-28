@@ -87,9 +87,16 @@
         </div>
 
         <div class="alert alert-light border">
-          <strong>Fuente:</strong> SOAP <code th:text="${@environment.getProperty('redongs.endpoint')}">endpoint</code>
-          &nbsp;|&nbsp; Acción: <code>list_associations</code> + <code>list_presidents</code>
+          <div><strong>Fuente:</strong> SOAP</div>
+          <div>
+            <code th:text="${@environment.getProperty('redongs.endpoint')}">https://soap-app-latest.onrender.com/</code>
+          </div>
+          <div class="mt-1">
+            <strong>Acción:</strong>
+            <code>list_associations</code> + <code>list_presidents</code>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
