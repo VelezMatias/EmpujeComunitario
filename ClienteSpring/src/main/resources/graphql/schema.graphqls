@@ -1,31 +1,81 @@
+# =============================================================
+#   EmpujeComunitario - GraphQL
+#   Schema para Informes de Donaciones + Filtros Persistentes
+# =============================================================
+
+"""
+Grupo agregado del informe de donaciones.
+"""
 type DonationGroup {
   categoria: String
   eliminado: String
   total: Float
 }
 
+"""
+Detalle por donación (para la vista detalle del informe).
+"""
 type DonationDetail {
   descripcion: String
   cantidad: Int
   fecha_alta: String
 }
 
+# =============================================================
+#   Filtros guardados (Donaciones)
+# =============================================================
+
+"""
+Filtro guardado por el usuario (persistente).
+"""
+type DonationSavedFilter {
+  id: ID!
+  nombre: String!
+  categoria: String
+  from: String
+  to: String
+  eliminado: String
+}
+
+"""
+Input para crear/actualizar un filtro guardado.
+"""
+input FilterInput {
+  nombre: String!
+  categoria: String
+  from: String
+  to: String
+  eliminado: String
+}
+
+# =============================================================
+#   Consultas
+# =============================================================
+
 type Query {
+  """
+  Informe agrupado por categoría/estado (para la tabla principal).
+  """
   donationReportGrouped(
     categoria: String
     from: String
     to: String
     eliminado: String
-  ): [DonationGroup]
+  ): [DonationGroup!]!
 
+  """
+  Informe detalle (para tabla detallada/descarga).
+  """
   donationDetails(
     categoria: String
-    eliminado: String
     from: String
     to: String
-  ): [DonationDetail]
+    eliminado: String
+  ): [DonationDetail!]! 
+  
+  # [DonationDetail!]! lista no nula de elementos no nulos.
 
-  # Informe de participación en eventos propios
+   # Informe de participación en eventos propios
   eventParticipationReport(
     usuarioId: Int!,
     from: String,
@@ -33,10 +83,16 @@ type Query {
     repartoDonaciones: String # "SI" | "NO" | "AMBOS"
   ): [EventMonthGroup]
 
-
-  # Devuelve los filtros guardados del usuario autenticado (Donaciones)
-  myFilters: [DonationSavedFilter]
+  """
+  Devuelve los filtros de donaciones guardados por el usuario logueado.
+  La UI (donaciones.html) usa esta query para poblar el <select>.
+  """
+  myFilters: [DonationSavedFilter!]!
 }
+
+# =============================================================
+#   Eventos
+# =============================================================
 
 type EventDonation {
   descripcion: String
@@ -56,35 +112,23 @@ type EventMonthGroup {
   eventos: [EventItem]
 }
 
+# =============================================================
+#   Mutations
+# =============================================================
 
-# ==================== (Donaciones - Filtros) ====================
-# Objeto que representa un filtro guardado
-type DonationSavedFilter {
-  id: ID!
-  nombre: String!
-  categoria: String
-  from: String
-  to: String
-  eliminado: String
-}
-
-# Input para crear/actualizar filtros
-input FilterInput {
-  nombre: String!
-  categoria: String
-  from: String
-  to: String
-  eliminado: String
-}
-
-# Nota: definir el base type Mutation (no usar extend si no existe el base)
 type Mutation {
-  # Crea un filtro de donaciones
-  saveFilter(input: FilterInput!): DonationSavedFilter
+  """
+  Crea un filtro de donaciones persistente.
+  """
+  saveFilter(input: FilterInput!): DonationSavedFilter!
 
-  # Actualiza un filtro existente
-  updateFilter(id: ID!, input: FilterInput!): DonationSavedFilter
+  """
+  Actualiza un filtro de donaciones existente (debe ser del usuario actual).
+  """
+  updateFilter(id: ID!, input: FilterInput!): DonationSavedFilter!
 
-  # Elimina un filtro y retorna true si se eliminó
-  deleteFilter(id: ID!): Boolean
+  """
+  Elimina un filtro de donaciones (retorna true si se eliminó).
+  """
+  deleteFilter(id: ID!): Boolean!
 }
