@@ -140,11 +140,11 @@ public class JdbcDonationReportRepository {
             LocalDate from,
             LocalDate to,
             String eliminado) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT DATE(d.fecha_alta) AS fecha_alta, d.descripcion, d.cantidad " +
-                        "FROM donaciones d " +
-                        "INNER JOIN categorias c ON d.categoria_id = c.id " +
-                        "WHERE 1=1 ");
+            StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT c.nombre AS categoria " +
+                "FROM donaciones d " +
+                "INNER JOIN categorias c ON d.categoria_id = c.id " +
+                "WHERE 1=1 ");
 
         List<Object> params = new ArrayList<>();
 
@@ -169,6 +169,8 @@ public class JdbcDonationReportRepository {
 
         sql.append(" ORDER BY c.nombre ");
 
+        // Ahora sí devolvemos una lista de Strings (una sola columna) con los
+        // nombres de categorías.
         return jdbcTemplate.queryForList(sql.toString(), params.toArray(), String.class);
     }
 

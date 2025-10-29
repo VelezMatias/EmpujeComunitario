@@ -10,6 +10,7 @@ from typing import List
 from app import models
 from app import ong_pb2 as pb
 from app import ong_pb2_grpc as rpc
+import grpc
 
 from app.db import get_conn
 
@@ -275,22 +276,22 @@ class EventServiceServicer(rpc.EventServiceServicer):
 
     def ListDonationsByEvent(self, request, context):
         try:
-            rows = models.list_donations_by_event(request.event_id)  # <-- SOLO un arg
+            rows = models.list_donations_by_event(request.event_id) 
             items = [
-                ong_pb2.EventDonationLink(
+                pb.EventDonationLink(
                     donation_id=row["donation_id"],
                     cantidad=row["cantidad"],
                 )
                 for row in rows
             ]
-            return ong_pb2.ListDonationsByEventResponse(items=items)
+            return pb.ListDonationsByEventResponse(items=items)
         except Exception as e:
             # log server-side y superficie error gRPC razonable
             import traceback, sys
             traceback.print_exc(file=sys.stderr)
-            context.set_code(ong_pb2_grpc.grpc.StatusCode.UNKNOWN)
+            context.set_code(grpc.StatusCode.UNKNOWN)
             context.set_details(f"ListDonationsByEvent failed: {e}")
-            return ong_pb2.ListDonationsByEventResponse()
+            return pb.ListDonationsByEventResponse()
 
 
 

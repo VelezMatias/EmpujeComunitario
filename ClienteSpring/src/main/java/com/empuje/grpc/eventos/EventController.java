@@ -35,7 +35,7 @@ public class EventController {
 
     private final EventGateway gateway;
     private final UserServiceGrpc.UserServiceBlockingStub users;
-    private final DonationServiceGrpc.DonationServiceBlockingStub donations; // <-- NUEVO
+    private final DonationServiceGrpc.DonationServiceBlockingStub donations; 
 
     public EventController(EventGateway gateway, UserServiceGrpc.UserServiceBlockingStub users, DonationServiceGrpc.DonationServiceBlockingStub donations ) {
         this.gateway = gateway;
@@ -244,6 +244,48 @@ public String editForm(@PathVariable int id,
         gateway.delete(id, userId(s), role(s));
         return "redirect:/eventos";
     }
+
+
+
+    @PostMapping("/{id}/assign")
+        public String assignMember(@PathVariable int id,
+                                @RequestParam("userId") int userId, // <-- name del select/input en la vista
+                                HttpSession s,
+                                RedirectAttributes ra) {
+            if (!canManage(s)) {
+                ra.addFlashAttribute("error", "No autorizado");
+                return "redirect:/eventos/" + id + "/edit";
+            }
+            try {
+                var resp = gateway.assignMember(id, userId, userId(s), role(s));
+                ra.addFlashAttribute(resp.getSuccess() ? "ok" : "error", resp.getMessage());
+            } catch (Exception e) {
+                ra.addFlashAttribute("error", e.getMessage());
+            }
+            return "redirect:/eventos/" + id + "/edit";
+        }
+
+
+    @PostMapping("/{id}/unassign")
+        public String removeMember(@PathVariable int id,
+                                @RequestParam("userId") int userId,
+                                HttpSession s,
+                                RedirectAttributes ra) {
+            if (!canManage(s)) {
+                ra.addFlashAttribute("error", "No autorizado");
+                return "redirect:/eventos/" + id + "/edit";
+            }
+            try {
+                var resp = gateway.removeMember(id, userId, userId(s), role(s));
+                ra.addFlashAttribute(resp.getSuccess() ? "ok" : "error", resp.getMessage());
+            } catch (Exception e) {
+                ra.addFlashAttribute("error", e.getMessage());
+            }
+            return "redirect:/eventos/" + id + "/edit";
+        }
+
+
+
 
 
     @GetMapping("/debug")
