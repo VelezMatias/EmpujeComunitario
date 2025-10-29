@@ -284,8 +284,8 @@
                                     <td th:text="${u.rol}">ROL</td>
                                     <td>
                                         <!-- Mostrar 'Agregar' solo si NO es miembro -->
-                                        <form th:if="${!memberIds.contains(u.id)}"
-                                            th:action="@{|/eventos/${ev.id}/assign|}" method="post" style="display:inline">
+                                        <form th:if="${!memberIds.contains(u.id)} and ${u.activo}"
+                                            th:action="@{/eventos/{id}/assign(id=${ev.id})}" method="post" style="display:inline">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                         <input type="hidden" name="userId" th:value="${u.id}"/>
                                         <input type="hidden" name="q" th:value="${q}"/>
@@ -312,7 +312,7 @@
                                     <td th:text="${u.email}">correo@ejemplo.com</td>
                                     <td th:text="${u.rol}">VOLUNTARIO</td>
                                     <td>
-                                        <form th:action="@{|/eventos/${ev.id}/remove|}" method="post" style="display:inline">
+                                        <form th:action="@{/eventos/{id}/unassign(id=${ev.id})}" method="post" style="display:inline">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                         <input type="hidden" name="userId" th:value="${u.id}"/>
                                         <input type="hidden" name="q" th:value="${q}"/>
