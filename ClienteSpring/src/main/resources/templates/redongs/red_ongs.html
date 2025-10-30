@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>RED ONGs – Presidentes y Asociaciones</title>
+
+  <link rel="shortcut icon" type="image/x-icon" th:href="@{/charifit/img/favicon.png}">
+  <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
+  <link rel="stylesheet" th:href="@{/charifit/css/font-awesome.min.css}">
+  <link rel="stylesheet" th:href="@{/charifit/css/style.css}">
+  <style>
+    .wrap { max-width: 1100px; margin: 30px auto; }
+    .card { border-radius: 14px; box-shadow: 0 8px 22px rgba(0,0,0,.06); }
+    .ids-help { font-size: .9rem; color: #666; }
+    .table thead th { white-space: nowrap; }
+    .badge-id { background: #e8f0fe; color: #1a73e8; border-radius: 1rem; padding: .15rem .5rem; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="card-body">
+      <h3 class="mb-3">Consulta SOAP – Presidentes y ONGs</h3>
+      <p class="ids-help">Ingresá los <strong>IDs de organizaciones</strong> (separados por coma, espacio o salto de línea). Ej: <span class="badge-id">6</span> <span class="badge-id">5</span> <span class="badge-id">8</span> <span class="badge-id">10</span></p>
+
+      <form th:action="@{/ui/red-ongs}" method="post" class="mb-4">
+        <div class="mb-3">
+          <textarea name="ids" class="form-control" rows="3" placeholder="6, 5, 8, 10"
+                    th:text="${idsRaw}">6, 5, 8, 10</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Consultar</button>
+      </form>
+
+      <div th:if="${result != null}">
+        <div class="row">
+          <div class="col-lg-6 mb-4">
+            <h5>Asociaciones (ONGs)</h5>
+            <div class="table-responsive">
+              <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                  <th>ID</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="o : ${result.organizations}">
+                  <td th:text="${o.id}">6</td>
+                  <td th:text="${o.name}">Nombre ONG</td>
+                  <td th:text="${o.address}">Calle X</td>
+                  <td th:text="${o.phone}">+00 000</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(result.organizations)}">
+                  <td colspan="4" class="text-muted">Sin resultados</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-lg-6 mb-4">
+            <h5>Presidentes</h5>
+            <div class="table-responsive">
+              <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                  <th>ID</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Org ID</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${result.presidents}">
+                  <td th:text="${p.id}">52</td>
+                  <td th:text="${p.name}">John Doe</td>
+                  <td th:text="${p.address}">Av X</td>
+                  <td th:text="${p.phone}">+00</td>
+                  <td th:text="${p.organizationId}">6</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(result.presidents)}">
+                  <td colspan="5" class="text-muted">Sin resultados</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-light border">
+          <div><strong>Fuente:</strong> SOAP</div>
+          <div>
+            <code th:text="${@environment.getProperty('redongs.endpoint')}">https://soap-app-latest.onrender.com/</code>
+          </div>
+          <div class="mt-1">
+            <strong>Acción:</strong>
+            <code>list_associations</code> + <code>list_presidents</code>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+<script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+<script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+</body>
+</html>

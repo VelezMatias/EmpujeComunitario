@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,6 +26,7 @@
       margin: 0;
       font-weight: 500;
     }
+
     .saludo b {
       color: white;
     }
@@ -35,45 +37,20 @@
       font-family: 'Inter', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.6;
     }
-    
-    .wrap {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 30px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      border: 1px solid #3CC78F;
+
+    main {
+      margin-top: 150px;
+      margin-bottom: 60px;
+      padding-left: 100px;
+      padding-right: 100px;
     }
-    
+
     h1 {
       margin: 0 0 12px;
       color: black;
       font-weight: 700;
     }
-    
-    a {
-      color: #60a5fa;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    
-    a:hover {
-      color: #93c5fd;
-      text-decoration: underline;
-    }
-    
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
+
     .btn {
       background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
       border: none;
@@ -83,79 +60,69 @@
       cursor: pointer;
       text-decoration: none;
       font-weight: 600;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all .3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
     }
-    
+
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, .15);
       color: #fff;
       text-decoration: none;
     }
-    
+
+    .btn-outline-primary {
+      background: transparent;
+      border: 1px solid #3CC78F;
+      color: #065f46;
+    }
+
+    .btn-outline-primary:hover {
+      background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
+      color: #fff;
+    }
+
+    .btn-outline-danger {
+      background: transparent;
+      border: 1px solid #ef4444;
+      color: #7f1d1d;
+    }
+
+    .btn-outline-danger:hover {
+      background: linear-gradient(to right, #ef4444, #f87171);
+      color: #fff;
+    }
+
     .card {
       background: #b4debd42;
       border: 1px solid #3CC78F;
       border-radius: 14px;
       padding: 18px;
       margin: 16px 0;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all .3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
     }
-    
+
     .card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, .2);
       border-color: #3CC78F;
     }
-    
-    .row1 {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-    
-    .row1 .left {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    
-    .label {
-      opacity: 0.7;
-      font-size: 0.9em;
-    }
-    
-    .state {
-      background: linear-gradient(to right, #374151, #4b5563);
-      border: 1px solid #6b7280;
-      border-radius: 999px;
-      padding: 6px 14px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #f3f4f6;
-    }
-    
-    /* Tablas mejoradas */
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 12px;
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
       margin-bottom: 24px;
     }
-    
+
     thead {
       background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
     }
-    
+
     th {
       padding: 14px 12px;
       text-align: center;
@@ -163,274 +130,278 @@
       color: white;
       border-bottom: 2px solid #3CC78F;
     }
-    
+
     td {
       padding: 12px;
-      border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+      border-bottom: 1px solid rgba(71, 85, 105, .5);
       color: black;
       text-align: center;
     }
-    
+
     tbody tr {
-      transition: background-color 0.3s;
+      transition: background-color .3s;
     }
-    
+
     tbody tr:nth-child(even) {
-      background: rgba(178, 183, 192, 0.66);
+      background: rgba(178, 183, 192, .66);
     }
-    
+
     tbody tr:hover {
       background: #80ddb8ff;
     }
-    
-    .muted {
-      opacity: 0.7;
-      font-style: italic;
-    }
-    
-    .pager {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-    
-    /* Grid de columnas */
-    .cols {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-    }
-    
-    @media (min-width: 992px) {
-      .cols {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    
-    .col-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0 16px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid rgba(59, 130, 246, 0.3);
-    }
-    
-    .state.success {
-      background: linear-gradient(to right, #065f46, #10b981);
-      border-color: #34d399;
-    }
-    
-    .state.danger {
-      background: linear-gradient(to right, #7f1d1d, #ef4444);
-      border-color: #f87171;
-    }
-    
-    .state.warning {
-      background: linear-gradient(to right, #92400e, #f59e0b);
-      border-color: #fbbf24;
-    }
-    
-    /* Estados de mensajes */
+
     .alert {
       padding: 12px 16px;
       border-radius: 10px;
       margin-bottom: 16px;
       font-weight: 500;
     }
-    
-    .alert-success {
-      background: rgba(6, 78, 59, 0.3);
-      border: 1px solid #065f46;
-      color: #6ee7b7;
-    }
-    
+
     .alert-error {
-      background: rgba(127, 29, 29, 0.3);
+      background: rgba(127, 29, 29, .3);
       border: 1px solid #991b1b;
       color: #fca5a5;
     }
 
     #resultado .accordion {
       display: block;
-      width: fit-content;      /* mantiene el ancho al contenido (no 100%) */
+      width: fit-content;
       margin: 8px 0;
+      background: linear-gradient(to right, #3CC78F, #3cc7c0ff);
+      color: #111827;
+      font-weight: 600;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
+      cursor: pointer;
+    }
+
+    #resultado .accordion:hover {
+      transform: translateY(-1px);
+      color: #fff;
     }
 
     #resultado .panel {
       display: none;
       margin-bottom: 12px;
     }
-
   </style>
+  <title>Informes de Donaciones</title>
 </head>
+
 <body>
 
-   <!-- header-start -->
-<header>
-  <div class="header-area">
-    <div id="sticky-header" class="main-header-area">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-xl-3 col-lg-3">
-            <th:block th:if="${session.username} != null">
-              <p class="saludo">
-                ¡Hola <b th:text="${session.username}"></b>! 
-                (rol: <span th:text="${session.rol}"></span>)
-              </p>
-            </th:block>
-          </div>
-          <div class="col-xl-9 col-lg-9">
-            <div class="main-menu">
-              <nav>
-              <ul id="navigation">
-  <li><a th:href="@{/home}">Inicio</a></li>
-
-  <!-- según rol -->
-  <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
-      <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
-    </ul>
-  </li>
-
-  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
-      <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
-    </ul>
-  </li>
-
-  <li th:if="${session.rol} == 'PRESIDENTE'">
-    <a th:href="@{/eventos}">Eventos</a>
-  </li>
-
-  <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
-    <a th:href="@{/donaciones}">Donaciones</a>
-  </li>
-
-
-  <!-- INFORMES - boton dropdown con enlaces -->
-  <li>
-    <a href="#">Informes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/informes/donaciones}">Informes de Donaciones</a></li>
-      <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
-    </ul>
-  </li>
-  <!-- ====================================================== -->
-
-  <!-- login/logout -->
-  <li th:if="${session.username} == null">
-    <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
-  </li>
-  <li th:if="${session.username} != null">
-    <a th:href="@{/auth/logout}">Salir</a>
-  </li>
-</ul>
-
-              </nav>
+  <header>
+    <div class="header-area">
+      <div id="sticky-header" class="main-header-area">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-xl-3 col-lg-3">
+              <th:block th:if="${session.username} != null">
+                <p class="saludo">¡Hola <b th:text="${session.username}"></b>!
+                  (rol: <span th:text="${session.rol}"></span>)
+                </p>
+              </th:block>
             </div>
-          </div>
-          <div class="col-12">
-            <div class="mobile_menu d-block d-lg-none"></div>
+            <div class="col-xl-9 col-lg-9">
+              <div class="main-menu">
+                <nav>
+                  <ul id="navigation">
+                    <li><a th:href="@{/home}">Inicio</a></li>
+                    <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+                        <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+                      </ul>
+                    </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+                        <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+                      </ul>
+                    </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE'"><a th:href="@{/eventos}">Eventos</a></li>
+                    <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'"><a
+                        th:href="@{/donaciones}">Donaciones</a></li>
+                    <li>
+                      <a href="#">Informes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <!-- visible solo para PRESIDENTE o VOCAL -->
+                        <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'VOCAL'}">
+                          <a th:href="@{/informes/donaciones}">Informe de donaciones</a>
+                        </li>
+
+                        <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
+                      </ul>
+                    </li>
+                    <li th:if="${session.username} == null">
+                      <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                    </li>
+                    <li th:if="${session.username} != null">
+                      <a th:href="@{/auth/logout}">Salir</a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mobile_menu d-block d-lg-none"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</header>
-<!-- header-end -->
+  </header>
 
+  <main>
+    <h1>Informe de Donaciones</h1>
 
-<main style="margin-top: 150px; margin-bottom: 60px; padding-left: 100px; padding-right: 100px;">
-
-<h1>Informe de Donaciones</h1>
-
-<form id="formDon">
-    <label>Categoría:
+    <form id="formDon">
+      <label>Categoría:
         <select id="categoriaSelect" name="categoria">
-            <option value="">Todas</option>
+          <option value="">Todas</option>
         </select>
-    </label>
+      </label>
 
-    <label>Desde: <input type="date" name="dateFrom" id="from" /></label>
-    <label>Hasta: <input type="date" name="dateTo" id="to" /></label>
+      <label>Desde: <input type="date" name="dateFrom" id="from" /></label>
+      <label>Hasta: <input type="date" name="dateTo" id="to" /></label>
 
-    <label>Eliminado:
+      <label>Eliminado:
         <select name="eliminado" id="eliminado">
-            <option value="AMBOS">Ambos</option>
-            <option value="SI">Sí</option>
-            <option value="NO">No</option>
+          <option value="AMBOS">Ambos</option>
+          <option value="SI">Sí</option>
+          <option value="NO">No</option>
         </select>
-    </label>
+      </label>
 
-    <button type="button" onclick="buscar()" class="btn btn-secondary">Buscar</button>
-    <button type="button" onclick="descargarExcel()" class="btn btn-secondary">Excel</button>
-</form>
+      <button type="button" onclick="buscar()" class="btn">Buscar</button>
+      <button type="button" onclick="descargarExcel()" class="btn">Excel</button>
+    </form>
 
-<h2>Resultado</h2>
-<div id="resultado"></div>
+    <h2>Resultado</h2>
+    <div id="resultado"></div>
 
-</main>
+    <!-- ======================= Mis filtros (Donaciones / GraphQL) ======================= -->
+    <div class="card p-3 mb-3">
+      <div class="d-flex gap-2 align-items-end flex-wrap">
+        <label class="mb-0"><strong>Mis filtros:</strong></label>
+        <select id="filtrosGuardados" class="form-select" style="min-width:320px;">
+          <option value="">(Mis filtros guardados…)</option>
+        </select>
 
-<script>
-// ====== Cargar categorías dinámicamente ======
-document.addEventListener("DOMContentLoaded", () => {
-    fetch("/api/categorias")
-        .then(res => res.json())
-        .then(data => {
-            const select = document.getElementById("categoriaSelect");
-            data.forEach(cat => {
-                const opt = document.createElement("option");
-                opt.value = cat.nombre;
-                opt.textContent = cat.nombre.replace("_", " ");
-                select.appendChild(opt);
-            });
-        })
-        .catch(err => console.error("Error cargando categorías:", err));
-});
-</script>
+        <button type="button" id="btnAplicarFiltroDon" class="btn">Aplicar Filtro</button>
+        <!-- Solo PRESIDENTE/VOCAL pueden crear/editar/borrar -->
+        <span th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+          <button type="button" id="btnGuardarFiltroDon" class="btn" style="margin-left:5px;">Crear</button>
+          <button type="button" id="btnEditarFiltroDon" class="btn btn-outline-primary" style="margin-left:5px;"
+            disabled>Editar</button>
+          <button type="button" id="btnBorrarFiltroDon" class="btn btn-outline-danger" style="margin-left:5px;"
+            disabled>Borrar</button>
+        </span>
+      </div>
+    </div>
 
-<script>
-// ====== Descargar Excel ======
-function descargarExcel() {
-  const form = document.getElementById('formDon');
-  const params = Object.fromEntries(new FormData(form).entries());
+    <!-- Editor inline de filtros guardados -->
+    <div id="editorFiltroDon" class="card p-3 mt-2" style="display:none;">
+      <div class="row g-2">
+        <div class="col-12">
+          <label class="form-label">Nombre del filtro</label>
+          <input id="dfNombre" class="form-control" maxlength="120" />
+        </div>
+        <div class="col-sm-4">
+          <label class="form-label">Categoría</label>
+          <select id="dfCategoria" class="form-select">
+            <option value="">Todas</option>
+            <option value="ALIMENTOS">ALIMENTOS</option>
+            <option value="ROPA">ROPA</option>
+            <option value="JUGUETES">JUGUETES</option>
+            <option value="UTILES_ESCOLARES">UTILES_ESCOLARES</option>
+          </select>
+        </div>
+        <div class="col-sm-4">
+          <label class="form-label">Desde</label>
+          <input id="dfDesde" type="date" class="form-control" />
+        </div>
+        <div class="col-sm-4">
+          <label class="form-label">Hasta</label>
+          <input id="dfHasta" type="date" class="form-control" />
+        </div>
+        <div class="col-sm-4">
+          <label class="form-label">Eliminado</label>
+          <select id="dfEliminado" class="form-select">
+            <option value="AMBOS">AMBOS</option>
+            <option value="NO">NO</option>
+            <option value="SI">SI</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-3 d-flex gap-2">
+        <button type="button" id="dfCancelar" class="btn btn-outline-secondary">Cancelar</button>
+        <button type="button" id="dfGuardar" class="btn">Guardar</button>
+      </div>
+      <div id="dfEstado" class="mt-2" style="font-size:12px; opacity:.85;"></div>
+    </div>
+  </main>
 
-  const categoria = (params.categoria && params.categoria !== 'Todas') ? params.categoria : "";
-  const from = params.dateFrom || "";
-  const to   = params.dateTo   || "";
-  const eliminado = params.eliminado || "AMBOS";
+  <script>
+    // Helpers para leer parámetros
+    function getManualParams() {
+      const form = document.getElementById('formDon');
+      const params = Object.fromEntries(new FormData(form).entries());
+      return {
+        categoria: (params.categoria && params.categoria !== 'Todas') ? params.categoria : "",
+        from: params.dateFrom || "",
+        to: params.dateTo || "",
+        eliminado: params.eliminado || "AMBOS"
+      };
+    }
 
-  const url = new URL(window.location.origin + "/api/informes/donaciones/excel");
-  if (categoria) url.searchParams.set("categoria", categoria);
-  if (from)      url.searchParams.set("from", from);
-  if (to)        url.searchParams.set("to", to);
-  url.searchParams.set("eliminado", eliminado);
+    function getSavedParams() {
+      const sel = document.querySelector('#filtrosGuardados');
+      const opt = sel?.selectedOptions?.[0];
+      if (!opt) return getManualParams(); // fallback
+      return {
+        categoria: opt.dataset.categoria || "",
+        from: opt.dataset.from || "",
+        to: opt.dataset.to || "",
+        eliminado: opt.dataset.eliminado || "AMBOS"
+      };
+    }
 
-  window.location = url.toString();
-}
-</script>
+    // Excel: usa el ÚLTIMO ORIGEN aplicado
+    function descargarExcel() {
+      // exportSource está definido en el otro bloque <script>
+      const sel = document.querySelector('#filtrosGuardados');
+      const useSaved = (typeof exportSource !== 'undefined') && exportSource === 'saved' && sel && sel.value;
+      const p = useSaved ? getSavedParams() : getManualParams();
 
-<script>
-// ====== Función auxiliar: formato sin desfase de zona horaria ======
-function formatISODateToEs(s) {
-  if (!s) return "-";
-  const iso = s.split("T")[0]; // quita la parte de hora si viene
-  const [y, m, d] = iso.split("-");
-  return `${parseInt(d,10)}/${parseInt(m,10)}/${y}`;
-}
-</script>
+      const url = new URL(window.location.origin + "/api/informes/donaciones/excel");
+      if (p.categoria) url.searchParams.set("categoria", p.categoria);
+      if (p.from) url.searchParams.set("from", p.from);
+      if (p.to) url.searchParams.set("to", p.to);
+      url.searchParams.set("eliminado", p.eliminado || "AMBOS");
 
-<script>
-// ====== Obtener detalles por categoría ======
-async function obtenerDetalles(categoria, eliminado, from, to) {
-  console.log("[DEBUG FRONT] Enviando GraphQL con filtros:", { categoria, eliminado, from, to });
+      window.location = url.toString();
+    }
+  </script>
 
-  const query = `
+
+
+  <script>
+    function formatISODateToEs(s) {
+      if (!s) return "-";
+      const iso = s.split("T")[0];
+      const [y, m, d] = iso.split("-");
+      return `${parseInt(d, 10)}/${parseInt(m, 10)}/${y}`;
+    }
+    function norm(v) { if (v === undefined || v === null) return null; const s = String(v).trim(); return s === '' ? null : s; }
+    function normEliminado(v) { const s = (v || '').toUpperCase().trim(); return (s === '' || s === 'AMBOS') ? null : s; }
+  </script>
+
+  <script>
+    async function obtenerDetalles(categoria, eliminado, from, to) {
+      const query = `
     query($categoria: String, $eliminado: String, $from: String, $to: String) {
       donationDetails(categoria: $categoria, eliminado: $eliminado, from: $from, to: $to) {
         descripcion
@@ -438,34 +409,36 @@ async function obtenerDetalles(categoria, eliminado, from, to) {
         fecha_alta
       }
     }`;
-
-  const res = await fetch("/graphql", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables: { categoria, eliminado, from, to } })
-  });
-
-  const json = await res.json();
-  console.log("[DEBUG FRONT] Respuesta donationDetails:", json);
-
-  const detalles = json.data?.donationDetails || [];
-  if (!detalles.length) return "<p>Sin registros individuales.</p>";
-
-  // Mostrar el nombre legible de la categoría (si viene)
-  const catLabel = (categoria || "").replace(/_/g, " ");
-
-  const rows = detalles.map(d => {
-    const fecha = formatISODateToEs(d.fecha_alta);
-    return `
+      const variables = {
+        categoria: norm(categoria),
+        eliminado: normEliminado(eliminado),
+        from: norm(from),
+        to: norm(to)
+      };
+      const res = await fetch("/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables })
+      });
+      const json = await res.json();
+      if (json.errors && json.errors.length) {
+        console.error("GraphQL errors (donationDetails):", json.errors);
+        return `<div class="alert alert-error">Error: ${json.errors[0].message || 'GraphQL error'}</div>`;
+      }
+      const detalles = json.data?.donationDetails || [];
+      if (!detalles.length) return "<p>Sin registros individuales.</p>";
+      const catLabel = (variables.categoria || categoria || "").replace(/_/g, " ");
+      const rows = detalles.map(d => {
+        const fecha = formatISODateToEs(d.fecha_alta);
+        return `
       <tr>
-        <td>${catLabel || "-"}</td>
-        <td>${d.descripcion}</td>
-        <td style="text-align:right;">${d.cantidad}</td>
+        <td>${(catLabel?.trim() || '-')}</td>
+        <td>${(d.descripcion?.trim() || '-')}</td>
+        <td>${d.cantidad ?? 0}</td>
         <td>${fecha}</td>
       </tr>`;
-  }).join("");
-
-  return `
+      }).join("");
+      return `
     <table>
       <thead>
         <tr>
@@ -479,90 +452,273 @@ async function obtenerDetalles(categoria, eliminado, from, to) {
         ${rows}
       </tbody>
     </table>`;
-}
+    }
+  </script>
 
-</script>
+  <script>
+    async function buscar() {
+      exportSource = 'manual'; //si el usuario buscó manual, Excel usa inputs
 
-<script>
-// ====== Buscar agrupado (botón principal) ======
-async function buscar() {
-  const form = document.getElementById('formDon');
-  const params = Object.fromEntries(new FormData(form).entries());
+      const form = document.getElementById('formDon');
+      const params = Object.fromEntries(new FormData(form).entries());
+      const categoria = norm(params.categoria && params.categoria !== 'Todas' ? params.categoria : '');
+      const from = norm(params.dateFrom);
+      const to = norm(params.dateTo);
+      const eliminado = normEliminado(params.eliminado);
 
-  const categoria = (params.categoria && params.categoria !== 'Todas') ? params.categoria : "";
-  const from = params.dateFrom || "";
-  const to   = params.dateTo   || "";
-  const eliminado = params.eliminado || "AMBOS";
-
-  console.log("[DEBUG FRONT] Ejecutando búsqueda:", { categoria, from, to, eliminado });
-
-  const query = `
-    query($categoria: String, $from: String, $to: String, $eliminado: String) {
-      donationReportGrouped(categoria: $categoria, from: $from, to: $to, eliminado: $eliminado) {
+      const query = `
+    query($categoria:String,$from:String,$to:String,$eliminado:String){
+      donationReportGrouped(categoria:$categoria, from:$from, to:$to, eliminado:$eliminado){
         categoria
         eliminado
         total
       }
     }`;
-
-  const res = await fetch("/graphql", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query,
-      variables: { categoria, from, to, eliminado }
-    })
-  });
-
-  const json = await res.json();
-  console.log("[DEBUG FRONT] Respuesta agrupada:", json);
-
-  const data = json.data?.donationReportGrouped || [];
-  mostrarResultados(data, { categoria, from, to, eliminado });
-}
-
-// ====== Mostrar resultado principal ======
-function mostrarResultados(grupos, filtros) {
-  const contenedor = document.getElementById('resultado');
-  contenedor.innerHTML = "";
-
-  if (!grupos.length) {
-    contenedor.innerHTML = "<p>No se encontraron resultados.</p>";
-    return;
-  }
-
-  grupos.forEach(grupo => {
-    const button = document.createElement("button");
-    button.classList.add("accordion");
-    button.textContent = `${grupo.categoria} (${grupo.eliminado}) - Total: ${grupo.total}`;
-
-    const panel = document.createElement("div");
-    panel.classList.add("panel");
-    panel.style.display = "none";
-    panel.innerHTML = "<p>Cargando detalles...</p>";
-
-    button.addEventListener("click", async () => {
-      const abierto = button.classList.toggle("active");
-      if (abierto) {
-        const detallesHtml = await obtenerDetalles(
-          grupo.categoria,
-          grupo.eliminado,
-          filtros.from,
-          filtros.to
-        );
-        panel.innerHTML = detallesHtml;
-        panel.style.display = "block";
-      } else {
-        panel.style.display = "none";
+      const res = await fetch("/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables: { categoria, from, to, eliminado } })
+      });
+      const json = await res.json();
+      const contenedor = document.getElementById('resultado');
+      if (json.errors && json.errors.length) {
+        console.error("GraphQL errors (donationReportGrouped):", json.errors);
+        contenedor.innerHTML = `<div class="alert alert-error">Error: ${json.errors[0].message || 'GraphQL error'}</div>`;
+        return;
       }
-    });
+      const data = json.data?.donationReportGrouped || [];
+      mostrarResultados(data, {
+        categoria: categoria ?? '',
+        from: from ?? '',
+        to: to ?? '',
+        eliminado: (eliminado ?? 'AMBOS')
+      });
+    }
+    function mostrarResultados(grupos, filtros) {
+      const contenedor = document.getElementById('resultado');
+      contenedor.innerHTML = "";
+      if (!grupos.length) { contenedor.innerHTML = "<p>No se encontraron resultados.</p>"; return; }
+      grupos.forEach(grupo => {
+        const button = document.createElement("button");
+        button.classList.add("accordion");
+        button.textContent = `${grupo.categoria} (${grupo.eliminado}) - Total: ${grupo.total}`;
+        const panel = document.createElement("div");
+        panel.classList.add("panel");
+        panel.style.display = "none";
+        panel.innerHTML = "<p>Cargando detalles...</p>";
+        button.addEventListener("click", async () => {
+          const abierto = button.classList.toggle("active");
+          if (abierto) {
+            const detallesHtml = await obtenerDetalles(
+              grupo.categoria,
+              grupo.eliminado,
+              filtros.from,
+              filtros.to
+            );
+            panel.innerHTML = detallesHtml;
+            panel.style.display = "block";
+          } else {
+            panel.style.display = "none";
+          }
+        });
+        contenedor.appendChild(button);
+        contenedor.appendChild(panel);
+      });
+    }
+  </script>
 
-    contenedor.appendChild(button);
-    contenedor.appendChild(panel);
-  });
-}
-</script>
- <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+  <!-- ======================= Lógica GraphQL “Mis filtros” ======================= -->
+  <script>
+    (function () {
+      const FILTERS_ENDPOINT = '/graphql';
+      const $ = (s) => document.querySelector(s);
+      const sel = $('#filtrosGuardados');
+      const btnAplicar = $('#btnAplicarFiltroDon');
+      const btnGuardar = $('#btnGuardarFiltroDon');
+      const btnEditar = $('#btnEditarFiltroDon');
+      const btnBorrar = $('#btnBorrarFiltroDon');
+      const box = $('#editorFiltroDon');
+      const dfNombre = $('#dfNombre');
+      const dfCategoria = $('#dfCategoria');
+      const dfDesde = $('#dfDesde');
+      const dfHasta = $('#dfHasta');
+      const dfEliminado = $('#dfEliminado');
+      const dfGuardar = $('#dfGuardar');
+      const dfCancel = $('#dfCancelar');
+      const dfEstado = $('#dfEstado');
+      const inCategoria = $('#categoriaSelect');
+      const inDesde = $('#from');
+      const inHasta = $('#to');
+      const inEliminado = $('#eliminado');
+      let filtros = [];
+      let editId = null;
+      let exportSource = 'manual'; // 'manual' = usar inputs; 'saved' = usar filtro guardado aplicado
+
+
+      function gqlFetch(query, variables) {
+        return fetch(FILTERS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, variables })
+        })
+          .then(r => r.json())
+          .then(j => {
+            if (j.errors && j.errors.length) throw new Error(j.errors[0].message || 'GraphQL error');
+            return j.data;
+          });
+      }
+
+      function uiEnable() {
+        const hasSel = !!(sel && sel.value);
+        if (btnEditar) btnEditar.disabled = !hasSel;
+        if (btnBorrar) btnBorrar.disabled = !hasSel;
+      }
+
+      function showMsg(msg = '', danger = false) {
+        if (!dfEstado) return;
+        dfEstado.textContent = msg;
+        dfEstado.style.color = danger ? '#b91c1c' : '#374151';
+      }
+      function showEditor(msg = '') { if (box) box.style.display = 'block'; showMsg(msg); }
+      function hideEditor() { if (box) box.style.display = 'none'; showMsg(''); editId = null; }
+
+      async function cargar() {
+        try {
+          const data = await gqlFetch(`query { myFilters { id nombre categoria from to eliminado } }`, {});
+          filtros = data?.myFilters || [];
+        } catch (e) {
+          console.error(e); filtros = [];
+        }
+        sel.innerHTML = '<option value="">(Mis filtros guardados…)</option>';
+        for (const f of filtros) {
+          const opt = document.createElement('option');
+          opt.value = f.id;
+          opt.textContent = f.nombre;
+          opt.dataset.categoria = f.categoria || '';
+          opt.dataset.from = f.from || '';
+          opt.dataset.to = f.to || '';
+          opt.dataset.eliminado = f.eliminado || 'AMBOS';
+          sel.appendChild(opt);
+        }
+        uiEnable();
+      }
+
+      // Aplicar -> setea inputs y llama a buscar()
+      btnAplicar?.addEventListener('click', () => {
+        if (!sel.value) return;
+        const opt = sel.selectedOptions[0];
+        if (inCategoria) inCategoria.value = opt.dataset.categoria || '';
+        if (inDesde) inDesde.value = opt.dataset.from || '';
+        if (inHasta) inHasta.value = opt.dataset.to || '';
+        if (inEliminado) inEliminado.value = opt.dataset.eliminado || 'AMBOS';
+        exportSource = 'saved'; //quedó aplicado un filtro guardado
+
+        if (typeof window.buscar === 'function') buscar();
+      });
+
+      // Guardar -> abre editor con valores actuales del form
+      btnGuardar?.addEventListener('click', () => {
+        editId = null;
+        if (dfNombre) dfNombre.value = '';
+        if (dfCategoria) dfCategoria.value = inCategoria?.value || '';
+        if (dfDesde) dfDesde.value = inDesde?.value || '';
+        if (dfHasta) dfHasta.value = inHasta?.value || '';
+        if (dfEliminado) dfEliminado.value = inEliminado?.value || 'AMBOS';
+        showEditor('Completá los datos y guardá');
+      });
+
+      // Editar -> carga valores del filtro seleccionado
+      btnEditar?.addEventListener('click', () => {
+        if (!sel.value) return;
+        const f = filtros.find(x => String(x.id) === sel.value);
+        if (!f) return;
+        editId = f.id;
+
+        if (dfNombre) dfNombre.value = f.nombre || '';
+        if (dfCategoria) dfCategoria.value = f.categoria || '';
+        if (dfDesde) dfDesde.value = f.from || '';
+        if (dfHasta) dfHasta.value = f.to || '';
+        if (dfEliminado) dfEliminado.value = f.eliminado || 'AMBOS';
+        showEditor('Editá y guardá los cambios');
+      });
+
+      dfCancel?.addEventListener('click', hideEditor);
+
+      // Guardar/Actualizar (GraphQL)
+      dfGuardar?.addEventListener('click', async () => {
+        const nombre = (dfNombre?.value || '').trim();
+        if (!nombre) { showMsg('Elegí un nombre.', true); return; }
+        const payload = {
+          nombre,
+          categoria: dfCategoria?.value || '',
+          from: dfDesde?.value || '',
+          to: dfHasta?.value || '',
+          eliminado: (dfEliminado?.value || 'AMBOS')
+        };
+        dfGuardar.disabled = true;
+        showMsg(editId ? 'Guardando cambios…' : 'Creando filtro…');
+        try {
+          if (editId) {
+            const q = `mutation($id:ID!,$input:FilterInput!){
+                   updateFilter(id:$id,input:$input){ id nombre categoria from to eliminado }
+                 }`;
+            await gqlFetch(q, { id: editId, input: payload });
+          } else {
+            const q = `mutation($input:FilterInput!){
+                   saveFilter(input:$input){ id nombre categoria from to eliminado }
+                 }`;
+            await gqlFetch(q, { input: payload });
+          }
+          await cargar();
+          const pick = filtros.find(x => x.nombre === nombre);
+          if (pick) sel.value = pick.id;
+          uiEnable();
+          showMsg('Listo ✅'); setTimeout(hideEditor, 600);
+        } catch (e) {
+          alert(e.message || 'No se pudo guardar');
+          showMsg('Error al guardar', true);
+        } finally {
+          dfGuardar.disabled = false;
+        }
+      });
+
+      btnBorrar?.addEventListener('click', async () => {
+        if (!sel.value) return;
+        if (!confirm('¿Desea borrar el filtro seleccionado?')) return;
+        try {
+          await gqlFetch(`mutation($id:ID!){ deleteFilter(id:$id) }`, { id: sel.value });
+          sel.value = '';
+          await cargar();
+          hideEditor();
+        } catch (e) {
+          alert(e.message || 'No se pudo borrar');
+        }
+      });
+
+      sel?.addEventListener('change', uiEnable);
+
+      document.addEventListener("DOMContentLoaded", () => {
+        // Cargar categorías dinámicamente y ejecutar primera búsqueda
+        fetch("/api/categorias")
+          .then(res => res.json())
+          .then(data => {
+            const select = document.getElementById("categoriaSelect");
+            data.forEach(cat => {
+              const opt = document.createElement("option");
+              opt.value = cat.nombre;
+              opt.textContent = cat.nombre.replace("_", " ");
+              select.appendChild(opt);
+            });
+          })
+          .catch(err => console.error("Error cargando categorías:", err))
+          .finally(() => { buscar(); });
+
+        cargar(); // mis filtros
+      });
+    })();
+  </script>
+
+  <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
   <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
   <script th:src="@{/charifit/js/popper.min.js}"></script>
   <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
@@ -586,7 +742,6 @@ function mostrarResultados(grupos, filtros) {
   <script th:src="@{/charifit/js/jquery.validate.min.js}"></script>
   <script th:src="@{/charifit/js/mail-script.js}"></script>
   <script th:src="@{/charifit/js/main.js}"></script>
-
-
 </body>
+
 </html>

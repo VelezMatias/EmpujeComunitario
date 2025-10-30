@@ -79,8 +79,7 @@
 
   <!-- BOTON DE INFORMES Desactivar filtro de roles para pruebas -->
   <li>
-    <!-- <a th:if="${#authorization.expression('hasAnyRole(''PRESIDENTE'',''VOCAL'')')}" th:href="@{/informes/donaciones}">Informes</a> -->
-    <a th:href="@{/informes/donaciones}">Informes</a>
+    <a th:if="${#authorization.expression('hasAnyRole(''PRESIDENTE'',''VOCAL'')')}" th:href="@{/informes/donaciones}">Informes</a>
   </li>
   <!-- ====================================================== -->
 

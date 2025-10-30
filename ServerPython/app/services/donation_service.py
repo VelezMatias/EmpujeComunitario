@@ -124,8 +124,10 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             if not row:
                 return pb.ApiResponse(success=False, message="Donación no encontrada.")
 
+
             # fecha_modificacion es TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
             # Forzamos NOW() (local) y usuario_modificacion
+
             sql = """
                 UPDATE donaciones
                    SET descripcion=%s,
@@ -142,6 +144,7 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
         except Exception as e:
             print("[DONACIONES][Update][ERR]", e)
             return pb.ApiResponse(success=False, message="Error interno al actualizar.")
+
 
     # Baja lógica + auditoría
     def SoftDeleteDonationItem(self, request: pb.SoftDeleteDonationRequest, context):
@@ -170,6 +173,7 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             print("[DONACIONES][Delete][ERR]", e)
             return pb.ApiResponse(success=False, message="Error interno al eliminar.")
 
+
     # Listado
     def ListDonationItems(self, request: pb.Empty, context):
         try:
@@ -189,7 +193,7 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             
 
 
-   
+
         # Transferencia
     def TransferDonations(self, request: pb.TransferDonationsRequest, context):
         """
@@ -261,9 +265,9 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
                 )
 
         # === 2) DESCUENTO FIFO sobre coincidencias EXACTAS ===
-        # Nota: si tus helpers no comparten conexión, cada UPDATE será autocommit.
-        # Para alta concurrencia conviene transacción por conexión, pero mantenemos
-        # este enfoque compatible con tus helpers actuales.
+        # Nota: si los helpers no comparten conexión, cada UPDATE será autocommit.
+        # Para alta concurrencia conviene transacción por conexión, pero se mantiene
+        # este enfoque compatible con los helpers actuales.
         for it in request.items:
             cat_nombre = (it.categoria or "").strip().upper()
             cat_id = _categoria_id_from_nombre(cat_nombre)  # ya validado
@@ -334,3 +338,4 @@ class DonationServiceServicer(rpc.DonationServiceServicer):
             transfer_uid=transfer_uid,
             status="PUBLICADA"
         )
+    

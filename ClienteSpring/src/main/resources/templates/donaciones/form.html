@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -10,148 +11,158 @@
   <link rel="stylesheet" th:href="@{/charifit/css/style.css}" />
   <title th:text="${isEdit} ? 'Editar Donación' : 'Nueva Donación'">Donación</title>
   <style>
-    .greeting-pill{
-      background:#2cc185; color:#fff; font-weight:600;
-      padding:12px 18px; border-radius:12px; display:inline-block;
-      box-shadow:0 2px 6px rgba(0,0,0,.08);
+    .greeting-pill {
+      background: #2cc185;
+      color: #fff;
+      font-weight: 600;
+      padding: 12px 18px;
+      border-radius: 12px;
+      display: inline-block;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
     }
 
     .saludo {
-        color: white;
-      }
+      color: white;
+    }
 
-      .saludo b{
-        color: white;
-      }
-
+    .saludo b {
+      color: white;
+    }
   </style>
 </head>
+
 <body>
 
-<!-- header-start -->
-<header>
-  <div class="header-area">
-    <div id="sticky-header" class="main-header-area">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-xl-3 col-lg-3">
-            <th:block th:if="${session.username} != null">
-              <p class="saludo">
-                ¡Hola <b th:text="${session.username}"></b>! 
-                (rol: <span th:text="${session.rol}"></span>)
-              </p>
-            </th:block>
-          </div>
-          <div class="col-xl-9 col-lg-9">
-            <div class="main-menu">
-              <nav>
-              <ul id="navigation">
-  <li><a th:href="@{/home}">Inicio</a></li>
+  <!-- header-start -->
+  <header>
+    <div class="header-area">
+      <div id="sticky-header" class="main-header-area">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-xl-3 col-lg-3">
+              <th:block th:if="${session.username} != null">
+                <p class="saludo">
+                  ¡Hola <b th:text="${session.username}"></b>!
+                  (rol: <span th:text="${session.rol}"></span>)
+                </p>
+              </th:block>
+            </div>
+            <div class="col-xl-9 col-lg-9">
+              <div class="main-menu">
+                <nav>
+                  <ul id="navigation">
+                    <li><a th:href="@{/home}">Inicio</a></li>
 
-  <!-- según rol -->
-  <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
-      <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
-    </ul>
-  </li>
+                    <!-- según rol -->
+                    <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+                        <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+                      </ul>
+                    </li>
 
-  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
-      <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
-    </ul>
-  </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+                        <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+                      </ul>
+                    </li>
 
-  <li th:if="${session.rol} == 'PRESIDENTE'">
-    <a th:href="@{/eventos}">Eventos</a>
-  </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE'">
+                      <a th:href="@{/eventos}">Eventos</a>
+                    </li>
 
-  <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
-    <a th:href="@{/donaciones}">Donaciones</a>
-  </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+                      <a th:href="@{/donaciones}">Donaciones</a>
+                    </li>
 
 
-  <!-- INFORMES - boton dropdown con enlaces -->
-  <li>
-    <a href="#">Informes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/informes/donaciones}">Informes de Donaciones</a></li>
-      <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
-    </ul>
-  </li>
-  <!-- ====================================================== -->
+                    <!-- INFORMES - boton dropdown con enlaces -->
+                    <li>
+                      <a href="#">Informes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <!-- visible solo para PRESIDENTE o VOCAL -->
+                        <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'VOCAL'}">
+                          <a th:href="@{/informes/donaciones}">Informe de donaciones</a>
+                        </li>
 
-  <!-- login/logout -->
-  <li th:if="${session.username} == null">
-    <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
-  </li>
-  <li th:if="${session.username} != null">
-    <a th:href="@{/auth/logout}">Salir</a>
-  </li>
-</ul>
+                        <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
+                      </ul>
+                    </li>
+                    <!-- ====================================================== -->
 
-              </nav>
+                    <!-- login/logout -->
+                    <li th:if="${session.username} == null">
+                      <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                    </li>
+                    <li th:if="${session.username} != null">
+                      <a th:href="@{/auth/logout}">Salir</a>
+                    </li>
+                  </ul>
+
+                </nav>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mobile_menu d-block d-lg-none"></div>
             </div>
           </div>
-          <div class="col-12">
-            <div class="mobile_menu d-block d-lg-none"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- header-end -->
+
+  <!-- Hero -->
+  <div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-12">
+          <div class="bradcam_text text-center">
+            <h3 th:text="${isEdit} ? 'Editar Donación' : 'Nueva Donación'">Donación</h3>
           </div>
         </div>
       </div>
     </div>
   </div>
-</header>
-<!-- header-end -->
 
-<!-- Hero -->
-<div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
-  <div class="container">
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="bradcam_text text-center">
-                <h3 th:text="${isEdit} ? 'Editar Donación' : 'Nueva Donación'">Donación</h3>
-            </div>
-        </div>
-    </div>
+  <!-- Contenido -->
+  <div class="container" style="margin-top: 40px; margin-bottom: 60px; max-width: 760px;">
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="${isEdit} ? @{|/donaciones/${item.id}|} : @{/donaciones}" method="post" class="needs-validation"
+      novalidate>
+      <div class="form-group mb-3">
+        <label class="form-label">Categoría</label>
+        <select class="form-select" name="categoria" th:if="${!isEdit}" required>
+          <option th:each="c : ${categorias}" th:if="${c.name() != 'CATEGORY_UNSPECIFIED'}" th:value="${c}"
+            th:text="${c}"></option>
+        </select>
+        <input class="form-control" type="text" th:if="${isEdit}" th:value="${item.categoria}" disabled />
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Descripción</label>
+        <input class="form-control" type="text" name="descripcion" th:value="${item.descripcion}" required />
+      </div>
+
+      <div class="form-group mb-4">
+        <label class="form-label">Cantidad</label>
+        <input class="form-control" type="number" name="cantidad" min="0" th:value="${item.cantidad}" required />
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="boxed-btn3" th:text="${isEdit} ? 'Guardar cambios' : 'Crear'">Guardar</button>
+        <a class="boxed-btn" th:href="@{/donaciones}">Volver</a>
+      </div>
+    </form>
   </div>
-</div>
 
-<!-- Contenido -->
-<div class="container" style="margin-top: 40px; margin-bottom: 60px; max-width: 760px;">
-  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-  <form th:action="${isEdit} ? @{|/donaciones/${item.id}|} : @{/donaciones}" method="post" class="needs-validation" novalidate>
-    <div class="form-group mb-3">
-      <label class="form-label">Categoría</label>
-      <select class="form-select" name="categoria" th:if="${!isEdit}" required>
-        <option th:each="c : ${categorias}" th:if="${c.name() != 'CATEGORY_UNSPECIFIED'}"
-                th:value="${c}" th:text="${c}"></option>
-      </select>
-      <input class="form-control" type="text" th:if="${isEdit}" th:value="${item.categoria}" disabled />
-    </div>
-
-    <div class="form-group mb-3">
-      <label class="form-label">Descripción</label>
-      <input class="form-control" type="text" name="descripcion" th:value="${item.descripcion}" required />
-    </div>
-
-    <div class="form-group mb-4">
-      <label class="form-label">Cantidad</label>
-      <input class="form-control" type="number" name="cantidad" min="0" th:value="${item.cantidad}" required />
-    </div>
-
-    <div class="d-flex gap-2">
-      <button type="submit" class="boxed-btn3" th:text="${isEdit} ? 'Guardar cambios' : 'Crear'">Guardar</button>
-      <a class="boxed-btn" th:href="@{/donaciones}">Volver</a>
-    </div>
-  </form>
-</div>
-
-<!-- JS -->
-<script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
-<script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
-<script th:src="@{/charifit/js/bootstrap.min.js}"></script>
-<script th:src="@{/charifit/js/main.js}"></script>
+  <!-- JS -->
+  <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+  <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+  <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+  <script th:src="@{/charifit/js/main.js}"></script>
 </body>
+
 </html>

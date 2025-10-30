@@ -21,8 +21,13 @@ public class DonationExcelService {
 
     public byte[] generarExcel(String categoriaFiltro, LocalDate from, LocalDate to, String eliminado)
             throws Exception {
-        // 1) Traer categorías que matchean filtros
-        List<String> categorias = repo.findCategoriasFiltradas(categoriaFiltro, from, to, eliminado);
+
+        // Incluye el inicio, Excluye el final.: [from, toExclusive)
+        //ejemplo: todas las filas del 31/08 (00:00:00 → 23:59:59.999…) y excluye las del 01/09.
+        LocalDate toExclusive = (to == null) ? null : to.plusDays(1);
+
+        // 1) Traer categorías que coinciden con los filtros (usa toExclusive)
+        List<String> categorias = repo.findCategoriasFiltradas(categoriaFiltro, from, toExclusive, eliminado);
 
         try (Workbook wb = new XSSFWorkbook(); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
@@ -50,8 +55,8 @@ public class DonationExcelService {
                     c.setCellStyle(headerStyle);
                 }
 
-                // Datos
-                List<Map<String, Object>> rows = repo.findDetallesParaExcel(cat, from, to, eliminado);
+                // Datos (usa toExclusive)
+                List<Map<String, Object>> rows = repo.findDetallesParaExcel(cat, from, toExclusive, eliminado);
 
                 int r = 1;
                 for (Map<String, Object> row : rows) {
@@ -98,11 +103,10 @@ public class DonationExcelService {
         }
     }
 
-
     private static String sanitizeSheetName(String name) {
         if (name == null || name.isBlank())
             return "Hoja";
-        // Excel: no permite []:*?/\
+        // Excel: no permite []:*?/\ 
         String cleaned = name.replaceAll("[\\[\\]\\:\\*\\?/\\\\]", " ");
         return cleaned.length() > 31 ? cleaned.substring(0, 31) : cleaned;
     }

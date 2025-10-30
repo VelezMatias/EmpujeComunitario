@@ -66,13 +66,19 @@ CREATE TABLE `donaciones` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+-- Se agregan columnas en tabla `donaciones` para Auditoria de Modificacion
+--
+ALTER TABLE `donaciones`
+  ADD COLUMN `fecha_modificacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN `usuario_modificacion` int DEFAULT NULL,
+  ADD CONSTRAINT `donaciones_ibfk_3` FOREIGN KEY (`usuario_modificacion`) REFERENCES `usuarios`(`id`);
 --
 -- Dumping data for table `donaciones`
 --
 
 LOCK TABLES `donaciones` WRITE;
 /*!40000 ALTER TABLE `donaciones` DISABLE KEYS */;
-INSERT INTO `donaciones` VALUES (1,1,'Pantalones y remeras',50,0,'2025-08-31 18:47:26',1),(2,2,'Arroz y fideos',100,0,'2025-08-31 18:47:26',2),(3,3,'Ositos de peluche',20,0,'2025-08-31 18:47:26',4),(4,1,'1',1,0,'2025-09-21 19:57:57',11),(5,1,'ropa',1,0,'2025-09-21 19:58:06',11);
+INSERT INTO `donaciones` VALUES (1,1,'Pantalones y remeras',50,0,'2025-08-31 18:47:26',1,NULL,NULL),(2,2,'Arroz y fideos',100,0,'2025-08-31 18:47:26',2,NULL,NULL),(3,3,'Ositos de peluche',20,0,'2025-08-31 18:47:26',4,NULL,NULL);
 /*!40000 ALTER TABLE `donaciones` ENABLE KEYS */;
 UNLOCK TABLES;
 

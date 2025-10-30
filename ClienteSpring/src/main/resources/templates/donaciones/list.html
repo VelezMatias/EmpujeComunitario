@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -11,198 +12,235 @@
   <title>ABM De Donaciones</title>
   <style>
     /* pill de saludo: */
-    .greeting-pill{
-      background:#2cc185; color:#fff; font-weight:600;
-      padding:12px 18px; border-radius:12px; display:inline-block;
-      box-shadow:0 2px 6px rgba(0,0,0,.08);
+    .greeting-pill {
+      background: #2cc185;
+      color: #fff;
+      font-weight: 600;
+      padding: 12px 18px;
+      border-radius: 12px;
+      display: inline-block;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
     }
 
     .saludo {
-        color: white;
-      }
+      color: white;
+    }
 
-      .saludo b{
-        color: white;
-      }
+    .saludo b {
+      color: white;
+    }
 
     /* acciones prolijas */
-    td.actions-cell { white-space: nowrap; }
-    .actions-cell .btn-group { gap:8px; }
-    .actions-cell .btn-group .genric-btn{ margin:0; }
-    .badge-state{
-      display:inline-block; padding:6px 10px; border-radius:6px; font-size:.85rem; font-weight:600;
+    td.actions-cell {
+      white-space: nowrap;
     }
-    .badge-active{ background:#28a745; color:#fff; }
-    .badge-deleted{ background:#dc3545; color:#fff; }
+
+    .actions-cell .btn-group {
+      gap: 8px;
+    }
+
+    .actions-cell .btn-group .genric-btn {
+      margin: 0;
+    }
+
+    .badge-state {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 600;
+
+    }
+
+    .badge-active {
+      background: #28a745;
+      color: #fff;
+    }
+
+    .badge-deleted {
+      background: #dc3545;
+      color: #fff;
+    }
 
 
+    /* Botón "+ Nuevo ítem" — verde sólido y oscuro en hover */
+    .btn-new-item.boxed-btn3 {
+      background: #2cc185;
+      border: 1px solid #2cc185;
+      color: #fff !important;
+      border-radius: 8px;
+      padding: 12px 22px;
+      font-weight: 600;
+      transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
 
-  /* Botón "+ Nuevo ítem" — verde sólido y oscuro en hover */
-  .btn-new-item.boxed-btn3{
-    background: #2cc185;
-    border: 1px solid #2cc185;
-    color:#fff !important;
-    border-radius: 8px;
-    padding: 12px 22px;
-    font-weight: 600;
-    transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
-  }
-  .btn-new-item.boxed-btn3:hover{
-    background:#24a871;      /* un tono más oscuro */
-    border-color:#24a871;
-    box-shadow:0 2px 10px rgba(0,0,0,.12);
-    text-decoration:none;
-  }
-  .btn-new-item.boxed-btn3:active{
-    filter: brightness(0.95);
-  }
+    .btn-new-item.boxed-btn3:hover {
+      background: #24a871;
+      /* un tono más oscuro */
+      border-color: #24a871;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
+      text-decoration: none;
+    }
 
+    .btn-new-item.boxed-btn3:active {
+      filter: brightness(0.95);
+    }
   </style>
+
 </head>
+
 <body>
 
-<!-- header-start -->
-<header>
-  <div class="header-area">
-    <div id="sticky-header" class="main-header-area">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-xl-3 col-lg-3">
-            <th:block th:if="${session.username} != null">
-              <p class="saludo">
-                ¡Hola <b th:text="${session.username}"></b>! 
-                (rol: <span th:text="${session.rol}"></span>)
-              </p>
-            </th:block>
-          </div>
-          <div class="col-xl-9 col-lg-9">
-            <div class="main-menu">
-              <nav>
-              <ul id="navigation">
-  <li><a th:href="@{/home}">Inicio</a></li>
+  <!-- header-start -->
+  <header>
+    <div class="header-area">
+      <div id="sticky-header" class="main-header-area">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-xl-3 col-lg-3">
+              <th:block th:if="${session.username} != null">
+                <p class="saludo">
+                  ¡Hola <b th:text="${session.username}"></b>!
+                  (rol: <span th:text="${session.rol}"></span>)
+                </p>
+              </th:block>
+            </div>
+            <div class="col-xl-9 col-lg-9">
+              <div class="main-menu">
+                <nav>
+                  <ul id="navigation">
+                    <li><a th:href="@{/home}">Inicio</a></li>
 
-  <!-- según rol -->
-  <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
-      <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
-    </ul>
-  </li>
+                    <!-- según rol -->
+                    <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+                        <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+                      </ul>
+                    </li>
 
-  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
-      <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
-    </ul>
-  </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+                        <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+                      </ul>
+                    </li>
 
-  <li th:if="${session.rol} == 'PRESIDENTE'">
-    <a th:href="@{/eventos}">Eventos</a>
-  </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE'">
+                      <a th:href="@{/eventos}">Eventos</a>
+                    </li>
 
-  <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
-    <a th:href="@{/donaciones}">Donaciones</a>
-  </li>
+                    <li th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'VOCAL'">
+                      <a th:href="@{/donaciones}">Donaciones</a>
+                    </li>
 
 
-  <!-- INFORMES - boton dropdown con enlaces -->
-  <li>
-    <a href="#">Informes<i class="ti-angle-down"></i></a>
-    <ul class="submenu">
-      <li><a th:href="@{/informes/donaciones}">Informes de Donaciones</a></li>
-      <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
-    </ul>
-  </li>
-  <!-- ====================================================== -->
+                    <!-- INFORMES - boton dropdown con enlaces -->
+                    <li>
+                      <a href="#">Informes<i class="ti-angle-down"></i></a>
+                      <ul class="submenu">
+                        <!-- visible solo para PRESIDENTE o VOCAL -->
+                        <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'VOCAL'}">
+                          <a th:href="@{/informes/donaciones}">Informe de donaciones</a>
+                        </li>
 
-  <!-- login/logout -->
-  <li th:if="${session.username} == null">
-    <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
-  </li>
-  <li th:if="${session.username} != null">
-    <a th:href="@{/auth/logout}">Salir</a>
-  </li>
-</ul>
+                        <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
+                      </ul>
+                    </li>
+                    <!-- ====================================================== -->
 
-              </nav>
+                    <!-- login/logout -->
+                    <li th:if="${session.username} == null">
+                      <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                    </li>
+                    <li th:if="${session.username} != null">
+                      <a th:href="@{/auth/logout}">Salir</a>
+                    </li>
+                  </ul>
+
+                </nav>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mobile_menu d-block d-lg-none"></div>
             </div>
           </div>
-          <div class="col-12">
-            <div class="mobile_menu d-block d-lg-none"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- header-end -->
+
+  <!-- Hero “ABM De Donaciones” -->
+  <div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-12">
+          <div class="bradcam_text text-center">
+            <h3>Inventario de Donaciones</h3>
           </div>
         </div>
       </div>
     </div>
   </div>
-</header>
-<!-- header-end -->
 
-<!-- Hero “ABM De Donaciones” -->
-<div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-12">
-                    <div class="bradcam_text text-center">
-                        <h3>Inventario de Donaciones</h3>
-                    </div>
+  <!-- Contenido -->
+  <div class="container" style="margin-top: 40px; margin-bottom: 60px;">
+
+    <div class="row mb-3">
+      <div class="col">
+        <a class="boxed-btn3 btn-new-item" th:href="@{/donaciones/nuevo}">+ Nueva Donación</a>
+        <a class="boxed-btn" th:href="@{/home}" style="margin-left:8px;">Volver</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Estado</th>
+              <th style="width:220px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${items}">
+              <td th:text="${d.categoria}">ROPA</td>
+              <td th:text="${d.descripcion}">remeras</td>
+              <td th:text="${d.cantidad}">0</td>
+              <td>
+                <span th:classappend="${d.eliminado} ? 'badge-state badge-deleted' : 'badge-state badge-active'"
+                  th:text="${d.eliminado} ? 'ELIMINADO' : 'ACTIVO'">ACTIVO</span>
+              </td>
+              <td class="actions-cell">
+                <div class="btn-group" role="group" aria-label="acciones">
+                  <a th:if="${!d.eliminado}" class="genric-btn info-border radius small"
+                    th:href="@{|/donaciones/${d.id}/edit|}">Editar</a>
+                  <form th:if="${!d.eliminado}" th:action="@{|/donaciones/${d.id}/delete|}" method="post"
+                    onsubmit="return confirm('¿Confirmás la baja lógica de este ítem?');">
+                    <button class="genric-btn danger-border radius small" type="submit">Eliminar</button>
+                  </form>
                 </div>
-            </div>
-        </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-<!-- Contenido -->
-<div class="container" style="margin-top: 40px; margin-bottom: 60px;">
-
-  <div class="row mb-3">
-    <div class="col">
-      <a class="boxed-btn3 btn-new-item" th:href="@{/donaciones/nuevo}">+ Nueva Donación</a>
-      <a class="boxed-btn" th:href="@{/home}" style="margin-left:8px;">Volver</a>
-    </div>
   </div>
 
-  <div class="row">
-    <div class="col">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Categoría</th>
-            <th>Descripción</th>
-            <th>Cantidad</th>
-            <th>Estado</th>
-            <th style="width:220px;">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="d : ${items}">
-            <td th:text="${d.categoria}">ROPA</td>
-            <td th:text="${d.descripcion}">remeras</td>
-            <td th:text="${d.cantidad}">0</td>
-            <td>
-              <span th:classappend="${d.eliminado} ? 'badge-state badge-deleted' : 'badge-state badge-active'"
-                    th:text="${d.eliminado} ? 'ELIMINADO' : 'ACTIVO'">ACTIVO</span>
-            </td>
-            <td class="actions-cell">
-              <div class="btn-group" role="group" aria-label="acciones">
-                <a th:if="${!d.eliminado}" class="genric-btn info-border radius small"
-                   th:href="@{|/donaciones/${d.id}/edit|}">Editar</a>
-                <form th:if="${!d.eliminado}" th:action="@{|/donaciones/${d.id}/delete|}"
-                      method="post" onsubmit="return confirm('¿Confirmás la baja lógica de este ítem?');">
-                  <button class="genric-btn danger-border radius small" type="submit">Eliminar</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
-</div>
+  <!-- JS -->
+  <script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
+  <script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
 
-<!-- JS -->
-<script th:src="@{/charifit/js/vendor/modernizr-3.5.0.min.js}"></script>
-<script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
-<script th:src="@{/charifit/js/bootstrap.min.js}"></script>
-<script th:src="@{/charifit/js/main.js}"></script>
+  <script th:src="@{/charifit/js/bootstrap.min.js}"></script>
+
+  <script th:src="@{/charifit/js/main.js}"></script>
 </body>
+
 </html>
