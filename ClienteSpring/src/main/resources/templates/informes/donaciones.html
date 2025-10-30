@@ -345,21 +345,48 @@
   </main>
 
   <script>
-    function descargarExcel() {
+    // Helpers para leer parámetros
+    function getManualParams() {
       const form = document.getElementById('formDon');
       const params = Object.fromEntries(new FormData(form).entries());
-      const categoria = (params.categoria && params.categoria !== 'Todas') ? params.categoria : "";
-      const from = params.dateFrom || "";
-      const to = params.dateTo || "";
-      const eliminado = params.eliminado || "AMBOS";
+      return {
+        categoria: (params.categoria && params.categoria !== 'Todas') ? params.categoria : "",
+        from: params.dateFrom || "",
+        to: params.dateTo || "",
+        eliminado: params.eliminado || "AMBOS"
+      };
+    }
+
+    function getSavedParams() {
+      const sel = document.querySelector('#filtrosGuardados');
+      const opt = sel?.selectedOptions?.[0];
+      if (!opt) return getManualParams(); // fallback
+      return {
+        categoria: opt.dataset.categoria || "",
+        from: opt.dataset.from || "",
+        to: opt.dataset.to || "",
+        eliminado: opt.dataset.eliminado || "AMBOS"
+      };
+    }
+
+    // Excel: usa el ÚLTIMO ORIGEN aplicado
+    function descargarExcel() {
+      // exportSource está definido en el otro bloque <script>
+      const sel = document.querySelector('#filtrosGuardados');
+      const useSaved = (typeof exportSource !== 'undefined') && exportSource === 'saved' && sel && sel.value;
+      const p = useSaved ? getSavedParams() : getManualParams();
+
       const url = new URL(window.location.origin + "/api/informes/donaciones/excel");
-      if (categoria) url.searchParams.set("categoria", categoria);
-      if (from) url.searchParams.set("from", from);
-      if (to) url.searchParams.set("to", to);
-      url.searchParams.set("eliminado", eliminado);
+      if (p.categoria) url.searchParams.set("categoria", p.categoria);
+      if (p.from) url.searchParams.set("from", p.from);
+      if (p.to) url.searchParams.set("to", p.to);
+      url.searchParams.set("eliminado", p.eliminado || "AMBOS");
+
       window.location = url.toString();
     }
   </script>
+
+
 
   <script>
     function formatISODateToEs(s) {
@@ -407,7 +434,7 @@
       <tr>
         <td>${(catLabel?.trim() || '-')}</td>
         <td>${(d.descripcion?.trim() || '-')}</td>
-        <td style="text-align:right;">${d.cantidad ?? 0}</td>
+        <td>${d.cantidad ?? 0}</td>
         <td>${fecha}</td>
       </tr>`;
       }).join("");
@@ -430,6 +457,8 @@
 
   <script>
     async function buscar() {
+      exportSource = 'manual'; //si el usuario buscó manual, Excel usa inputs
+
       const form = document.getElementById('formDon');
       const params = Object.fromEntries(new FormData(form).entries());
       const categoria = norm(params.categoria && params.categoria !== 'Todas' ? params.categoria : '');
@@ -523,6 +552,8 @@
       const inEliminado = $('#eliminado');
       let filtros = [];
       let editId = null;
+      let exportSource = 'manual'; // 'manual' = usar inputs; 'saved' = usar filtro guardado aplicado
+
 
       function gqlFetch(query, variables) {
         return fetch(FILTERS_ENDPOINT, {
@@ -580,6 +611,8 @@
         if (inDesde) inDesde.value = opt.dataset.from || '';
         if (inHasta) inHasta.value = opt.dataset.to || '';
         if (inEliminado) inEliminado.value = opt.dataset.eliminado || 'AMBOS';
+        exportSource = 'saved'; //quedó aplicado un filtro guardado
+
         if (typeof window.buscar === 'function') buscar();
       });
 
@@ -651,7 +684,7 @@
 
       btnBorrar?.addEventListener('click', async () => {
         if (!sel.value) return;
-        if (!confirm('¿Borrar el filtro seleccionado?')) return;
+        if (!confirm('¿Desea borrar el filtro seleccionado?')) return;
         try {
           await gqlFetch(`mutation($id:ID!){ deleteFilter(id:$id) }`, { id: sel.value });
           sel.value = '';
