@@ -129,12 +129,12 @@ message ListDonationsResponse {
   repeated DonationItem items = 1;
 }
 
-// -- Eventos --
+// ------------ Eventos ------------------
 message Event {
   int32 id = 1;
   string nombre = 2;
   string descripcion = 3;
-  string fecha_hora = 4;       // ISO8601 UTC, debe ser a futuro en alta
+  string fecha_hora = 4;       
   repeated int32 miembros = 5; // ids de usuarios
   int32 creador_id = 6;
 }
@@ -143,7 +143,7 @@ message CreateEventRequest {
   AuthContext auth = 1;
   string nombre = 2;
   string descripcion = 3;
-  string fecha_hora = 4; // ISO8601 UTC
+  string fecha_hora = 4; 
 }
 
 message UpdateEventRequest {
@@ -151,12 +151,12 @@ message UpdateEventRequest {
   int32 id = 2;
   string nombre = 3;
   string descripcion = 4;
-  string fecha_hora = 5; // puede cambiar a otra futura
+  string fecha_hora = 5; 
 }
 
 message DeleteEventRequest {
   AuthContext auth = 1;
-  int32 id = 2; // solo eventos a futuro se eliminan físicamente
+  int32 id = 2; 
 }
 
 message AssignMemberRequest {
