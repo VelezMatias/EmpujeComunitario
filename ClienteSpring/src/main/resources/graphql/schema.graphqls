@@ -48,6 +48,30 @@ input FilterInput {
   eliminado: String
 }
 
+# =========================
+# Ranking de Voluntarios
+# =========================
+
+enum EventoTipo {
+  INTERNOS
+  EXTERNOS
+  AMBOS
+}
+
+type VolunteerRankItem {
+  usuarioId: Int!
+  nombre: String!
+  apellido: String!
+  participaciones: Int!
+}
+
+input VolunteerRankFilterInput {
+  from: String!            # YYYY-MM-DD (obligatorio, si viene vacío se asume 2000-01-01)
+  to: String!              # YYYY-MM-DD (obligatorio, si viene vacío se asume HOY)
+  tipo: EventoTipo!        # internos / externos / ambos
+  topN: Int!               # mínimo 3
+}
+
 # =============================================================
 #   Consultas
 # =============================================================
@@ -88,6 +112,13 @@ type Query {
   La UI (donaciones.html) usa esta query para poblar el <select>.
   """
   myFilters: [DonationSavedFilter!]!
+
+
+ """
+  filtro ranking voluntarios.
+  """
+  volunteerRanking(filtro: VolunteerRankFilterInput!): [VolunteerRankItem!]!
+
 }
 
 # =============================================================

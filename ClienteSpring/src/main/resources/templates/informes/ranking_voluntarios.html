@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Ranking de Voluntarios</title>
+
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{/charifit/img/favicon.png}">
+    <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/charifit/css/animate.css}" />
+    <link rel="stylesheet" th:href="@{/charifit/css/style.css}" />
+
+    <style>
+        .card { margin-top: 16px; }
+        .w-110 { width: 110px; }
+        .table td, .table th { vertical-align: middle; }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h3 class="mb-3">Ranking de Voluntarios</h3>
+
+    <!-- Filtros -->
+    <form id="formFiltros" class="row g-3">
+        <div class="col-md-3">
+            <label for="from" class="form-label">Desde</label>
+            <input type="date" class="form-control" id="from" name="from" />
+        </div>
+        <div class="col-md-3">
+            <label for="to" class="form-label">Hasta</label>
+            <input type="date" class="form-control" id="to" name="to" />
+        </div>
+        <div class="col-md-3">
+            <label for="tipo" class="form-label">Tipo de eventos</label>
+            <select id="tipo" name="tipo" class="form-select">
+                <option value="INTERNOS" selected>Internos</option>
+                <option value="EXTERNOS">Externos</option>
+                <option value="AMBOS">Ambos</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="topN" class="form-label">Top N (mín. 3)</label>
+            <input type="number" class="form-control" id="topN" name="topN" min="3" value="5" />
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+            <button type="button" id="btnAplicar" class="btn btn-primary">Aplicar</button>
+            <!-- Botones de filtros guardados, commit 2 (persistencia) los maneja otro resolver/servicio -->
+            <!-- <button type="button" id="btnGuardar" class="btn btn-success">Guardar filtro</button> -->
+        </div>
+    </form>
+
+    <!-- Resultados -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tablaRanking" class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th class="w-110">#</th>
+                        <th>Usuario</th>
+                        <th class="text-end">Participaciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbodyRanking">
+                    <tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function hoyISO() {
+        const d = new Date();
+        // Ajuste a medianoche local y a ISO corto
+        const off = d.getTimezoneOffset();
+        const local = new Date(d.getTime() - off*60*1000);
+        return local.toISOString().slice(0,10);
+    }
+
+    function valoresFiltro() {
+        const fromInp = document.getElementById('from').value;
+        const toInp   = document.getElementById('to').value;
+        const tipo    = document.getElementById('tipo').value || 'INTERNOS';
+        const topNRaw = parseInt(document.getElementById('topN').value || '5', 10);
+
+        const f = fromInp && fromInp.trim().length > 0 ? fromInp.trim() : '2000-01-01';
+        const t = toInp   && toInp.trim().length   > 0 ? toInp.trim()   : hoyISO();
+        const n = isNaN(topNRaw) || topNRaw < 3 ? 3 : topNRaw;
+
+        return { from: f, to: t, tipo: tipo, topN: n };
+    }
+
+    async function cargarRanking() {
+        const filtro = valoresFiltro(); // SIEMPRE enviamos filtro -> schema lo exige (!)
+
+        const query = `
+          query($f: VolunteerRankFilterInput!){
+            volunteerRanking(filtro: $f){
+              usuarioId
+              nombre
+              apellido
+              participaciones
+            }
+          }`;
+
+        const resp = await fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, variables: { f: filtro } })
+        });
+
+        const data = await resp.json();
+
+        const tbody = document.getElementById('tbodyRanking');
+        tbody.innerHTML = '';
+
+        if (data.errors) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 3;
+            td.className = 'text-danger';
+            td.textContent = data.errors.map(e => e.message).join(' | ');
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            return;
+        }
+
+        const items = data.data?.volunteerRanking || [];
+        if (items.length === 0) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 3;
+            td.className = 'text-center text-muted';
+            td.textContent = 'Sin datos';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            return;
+        }
+
+        items.forEach((it, idx) => {
+            const tr = document.createElement('tr');
+
+            const tdIdx = document.createElement('td');
+            tdIdx.textContent = String(idx + 1);
+            const tdUser = document.createElement('td');
+            tdUser.textContent = `${it.nombre} ${it.apellido} (ID ${it.usuarioId})`;
+
+            const tdCnt = document.createElement('td');
+            tdCnt.className = 'text-end';
+            tdCnt.textContent = it.participaciones;
+
+            tr.appendChild(tdIdx);
+            tr.appendChild(tdUser);
+            tr.appendChild(tdCnt);
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.getElementById('btnAplicar').addEventListener('click', cargarRanking);
+
+    // Primera carga con defaults (from=2000-01-01, to=hoy, tipo=INTERNOS, topN=5)
+    window.addEventListener('DOMContentLoaded', () => {
+         document.getElementById('from').value = '2000-01-01';
+         document.getElementById('to').value = hoyISO();
+        cargarRanking();
+    });
+</script>
+</body>
+</html>
