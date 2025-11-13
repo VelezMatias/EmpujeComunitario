@@ -1,171 +1,526 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>Ranking de Voluntarios</title>
+  <meta charset="UTF-8" />
+  <title>Ranking de Voluntarios</title>
 
-    <link rel="shortcut icon" type="image/x-icon" th:href="@{/charifit/img/favicon.png}">
-    <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
-    <link rel="stylesheet" th:href="@{/charifit/css/animate.css}" />
-    <link rel="stylesheet" th:href="@{/charifit/css/style.css}" />
+  <link rel="shortcut icon" type="image/x-icon" th:href="@{/charifit/img/favicon.png}">
+  <link rel="stylesheet" th:href="@{/charifit/css/bootstrap.min.css}" />
+  <link rel="stylesheet" th:href="@{/charifit/css/animate.css}" />
+  <link rel="stylesheet" th:href="@{/charifit/css/style.css}" />
 
-    <style>
-        .card { margin-top: 16px; }
-        .w-110 { width: 110px; }
-        .table td, .table th { vertical-align: middle; }
-    </style>
+  <style>
+    .saludo{color:white;margin:0;font-weight:500}.saludo b{color:white}
+    body{background:white;color:black;font-family:'Inter',system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+    .w-110{width:110px}
+    .saved-filters .form-select{min-width:260px;flex:1 1 auto}
+    .saved-filters .btn{white-space:nowrap}
+
+    /* Modal centrado (sin depender de JS de Bootstrap) */
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1055;background:rgba(0,0,0,.45);align-items:center;justify-content:center}
+    .modal.show{display:flex}
+    .modal .modal-dialog{max-width:620px;width:92%}
+
+    /* Banner inferior centrado */
+    #bannerAviso{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:18px;
+      z-index:1060;
+      min-width:320px;
+      max-width:90vw;
+      padding:10px 16px;
+      border-radius:10px;
+      box-shadow:0 8px 20px rgba(0,0,0,.25);
+      display:none;           /* oculto por defecto */
+      text-align:center;
+      font-weight:600;
+      font-size:14px;
+    }
+    #bannerAviso.mostrar{display:block}
+    #bannerAviso.ok{
+      background:#ecfdf5;
+      border:1px solid #059669;
+      color:#065f46;
+    }
+    #bannerAviso.err{
+      background:#fef2f2;
+      border:1px solid #b91c1c;
+      color:#7f1d1d;
+    }
+  </style>
 </head>
 <body>
-<div class="container mt-4">
+
+<header>
+  <div class="header-area">
+    <div id="sticky-header" class="main-header-area">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-xl-3 col-lg-3">
+            <th:block th:if="${session.username} != null">
+              <p class="saludo">¡Hola <b th:text="${session.username}"></b>!
+                (rol: <span th:text="${session.rol}"></span>)</p>
+            </th:block>
+          </div>
+          <div class="col-xl-9 col-lg-9">
+            <div class="main-menu">
+              <nav>
+                <ul id="navigation">
+                  <li><a th:href="@{/home}">Inicio</a></li>
+
+                  <li><a href="#">Solicitudes<i class="ti-angle-down"></i></a>
+                    <ul class="submenu">
+                      <li><a th:href="@{/ui/solicitudes}">Ver solicitudes</a></li>
+                      <li><a th:href="@{/ui/solicitudes/nueva}">Nueva solicitud</a></li>
+                    </ul>
+                  </li>
+
+                  <li th:if="${session.rol} == 'PRESIDENTE'"><a href="#">Usuarios<i class="ti-angle-down"></i></a>
+                    <ul class="submenu">
+                      <li><a th:href="@{/auth/register}">Registrar usuario</a></li>
+                      <li><a th:href="@{/admin/users}">Administrar Usuarios</a></li>
+                    </ul>
+                  </li>
+
+                  <li th:if="${session.rol} == 'PRESIDENTE'">
+                    <a th:href="@{/eventos}">Eventos</a>
+                  </li>
+
+                  <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'VOCAL'}">
+                    <a th:href="@{/donaciones}">Donaciones</a>
+                  </li>
+
+                  <li>
+                    <a href="#">Informes<i class="ti-angle-down"></i></a>
+                    <ul class="submenu">
+                      <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'VOCAL'}">
+                        <a th:href="@{/informes/donaciones}">Informe de donaciones</a>
+                      </li>
+                      <li>
+                        <a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a>
+                      </li>
+                      <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'COORDINADOR'}">
+                        <a th:href="@{/informes/ranking_voluntarios}">Informe Ranking de Voluntarios</a>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li th:if="${session.username} == null">
+                    <a class="login-btn" th:href="@{/auth/login}">Ingresar</a>
+                  </li>
+                  <li th:if="${session.username} != null">
+                    <a th:href="@{/auth/logout}">Salir</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="mobile_menu d-block d-lg-none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main style="margin-top: 150px; margin-bottom: 60px; padding-left: 100px; padding-right: 100px;">
+  <div class="container mt-4">
     <h3 class="mb-3">Ranking de Voluntarios</h3>
 
     <!-- Filtros -->
     <form id="formFiltros" class="row g-3">
-        <div class="col-md-3">
-            <label for="from" class="form-label">Desde</label>
-            <input type="date" class="form-control" id="from" name="from" />
-        </div>
-        <div class="col-md-3">
-            <label for="to" class="form-label">Hasta</label>
-            <input type="date" class="form-control" id="to" name="to" />
-        </div>
-        <div class="col-md-3">
-            <label for="tipo" class="form-label">Tipo de eventos</label>
-            <select id="tipo" name="tipo" class="form-select">
-                <option value="INTERNOS" selected>Internos</option>
-                <option value="EXTERNOS">Externos</option>
-                <option value="AMBOS">Ambos</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label for="topN" class="form-label">Top N (mín. 3)</label>
-            <input type="number" class="form-control" id="topN" name="topN" min="3" value="5" />
-        </div>
+      <div class="col-md-3">
+        <label for="desde" class="form-label">Desde</label>
+        <input type="date" class="form-control" id="desde" name="desde"/>
+      </div>
+      <div class="col-md-3">
+        <label for="hasta" class="form-label">Hasta</label>
+        <input type="date" class="form-control" id="hasta" name="hasta"/>
+      </div>
+      <div class="col-md-3">
+        <label for="tipo" class="form-label">Tipo de eventos</label>
+        <select id="tipo" name="tipo" class="form-select">
+          <option value="INTERNOS" selected>Internos</option>
+          <option value="EXTERNOS">Externos</option>
+          <option value="AMBOS">Ambos</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="topN" class="form-label">Top N (mín. 3)</label>
+        <input type="number" class="form-control" id="topN" name="topN" min="3" value="5"/>
+      </div>
 
-        <div class="col-12 d-flex gap-2">
-            <button type="button" id="btnAplicar" class="btn btn-primary">Aplicar</button>
-            <!-- Botones de filtros guardados, commit 2 (persistencia) los maneja otro resolver/servicio -->
-            <!-- <button type="button" id="btnGuardar" class="btn btn-success">Guardar filtro</button> -->
+      <div class="col-12 d-flex gap-2">
+        <button type="button" id="btnAplicar" class="btn btn-primary">Aplicar</button>
+      </div>
+
+      <!-- ====== Filtros guardados (Persistencia) ====== -->
+      <div class="col-12">
+        <div class="card mt-2">
+          <div class="card-body d-flex gap-2 align-items-center flex-wrap saved-filters">
+            <div class="fw-semibold me-2">Filtros guardados:</div>
+            <select id="ddlFiltrosGuardados" class="form-select flex-fill">
+              <option value="">-- Seleccioná un filtro --</option>
+            </select>
+            <button type="button" id="btnAplicarGuardado" class="btn btn-primary">Aplicar</button>
+            <button type="button" id="btnGuardarActual" class="btn btn-success">Guardar actual…</button>
+            <button type="button" id="btnEditarGuardado" class="btn btn-outline-secondary" disabled>Editar…</button>
+            <button type="button" id="btnBorrarGuardado" class="btn btn-outline-danger" disabled>Eliminar</button>
+          </div>
         </div>
+      </div>
     </form>
 
     <!-- Resultados -->
     <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="tablaRanking" class="table table-striped table-hover">
-                    <thead>
-                    <tr>
-                        <th class="w-110">#</th>
-                        <th>Usuario</th>
-                        <th class="text-end">Participaciones</th>
-                    </tr>
-                    </thead>
-                    <tbody id="tbodyRanking">
-                    <tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>
-                    </tbody>
-                </table>
-            </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table id="tablaRanking" class="table table-striped table-hover">
+            <thead>
+            <tr>
+              <th class="w-110">#</th>
+              <th>Usuario</th>
+              <th class="text-end">Participaciones</th>
+            </tr>
+            </thead>
+            <tbody id="tbodyRanking">
+            <tr>
+              <td colspan="3" class="text-center text-muted">Sin datos</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
-</div>
+  </div>
+
+  <!-- Modal para crear/editar filtro guardado -->
+  <div class="modal" id="modalFiltro" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="modalFiltroTitle" class="modal-title">Guardar filtro</h5>
+          <button type="button" class="btn-close" id="btnCerrarModal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label class="form-label">Nombre</label>
+            <input id="mf_nombre" class="form-control" maxlength="120" required/>
+          </div>
+          <div class="row">
+            <div class="col">
+              <label class="form-label">Desde</label>
+              <input id="mf_desde" type="date" class="form-control"/>
+            </div>
+            <div class="col">
+              <label class="form-label">Hasta</label>
+              <input id="mf_hasta" type="date" class="form-control"/>
+            </div>
+          </div>
+          <div class="mt-2">
+            <label class="form-label">Tipo de eventos</label>
+            <select id="mf_tipo" class="form-select">
+              <option value="INTERNOS">Internos</option>
+              <option value="EXTERNOS">Externos</option>
+              <option value="AMBOS">Ambos</option>
+            </select>
+          </div>
+          <div class="mt-2">
+            <label class="form-label">Top N (mín. 3)</label>
+            <input id="mf_topn" type="number" min="3" class="form-control" value="3"/>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="mf_guardar" class="btn btn-primary">Guardar</button>
+          <button class="btn btn-secondary" id="mf_cancelar">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Banner inferior centrado -->
+<div id="bannerAviso" role="status" aria-live="polite"></div>
+
+<!-- JS -->
+<script th:src="@{/charifit/js/vendor/jquery-1.12.4.min.js}"></script>
+<script th:src="@{/charifit/js/bootstrap.bundle.min.js}"></script>
 
 <script>
-    function hoyISO() {
-        const d = new Date();
-        // Ajuste a medianoche local y a ISO corto
-        const off = d.getTimezoneOffset();
-        const local = new Date(d.getTime() - off*60*1000);
-        return local.toISOString().slice(0,10);
-    }
+  // -------- utilidades UI --------
+  const $ = (id) => document.getElementById(id);
+  function hoyISO() {
+    const d = new Date();
+    const off = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - off * 60000);
+    return local.toISOString().slice(0, 10);
+  }
 
-    function valoresFiltro() {
-        const fromInp = document.getElementById('from').value;
-        const toInp   = document.getElementById('to').value;
-        const tipo    = document.getElementById('tipo').value || 'INTERNOS';
-        const topNRaw = parseInt(document.getElementById('topN').value || '5', 10);
+  // Banner inferior centrado
+  let bannerTimeout = null;
+  function mostrarBanner(ok, mensaje, duracionMs = 2800){
+    const el = $('bannerAviso');
+    if(!el) return;
+    el.textContent = mensaje || (ok ? 'Operación exitosa.' : 'Ocurrió un error.');
+    el.classList.remove('ok','err','mostrar');
+    el.classList.add(ok ? 'ok' : 'err');
+    // forzar reflow para reiniciar transición de display si hubiera
+    void el.offsetWidth;
+    el.classList.add('mostrar');
+    if(bannerTimeout) clearTimeout(bannerTimeout);
+    bannerTimeout = setTimeout(()=>{ el.classList.remove('mostrar'); }, duracionMs);
+  }
 
-        const f = fromInp && fromInp.trim().length > 0 ? fromInp.trim() : '2000-01-01';
-        const t = toInp   && toInp.trim().length   > 0 ? toInp.trim()   : hoyISO();
-        const n = isNaN(topNRaw) || topNRaw < 3 ? 3 : topNRaw;
-
-        return { from: f, to: t, tipo: tipo, topN: n };
-    }
-
-    async function cargarRanking() {
-        const filtro = valoresFiltro(); // SIEMPRE enviamos filtro -> schema lo exige (!)
-
-        const query = `
-          query($f: VolunteerRankFilterInput!){
-            volunteerRanking(filtro: $f){
-              usuarioId
-              nombre
-              apellido
-              participaciones
-            }
-          }`;
-
-        const resp = await fetch('/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, variables: { f: filtro } })
-        });
-
-        const data = await resp.json();
-
-        const tbody = document.getElementById('tbodyRanking');
-        tbody.innerHTML = '';
-
-        if (data.errors) {
-            const tr = document.createElement('tr');
-            const td = document.createElement('td');
-            td.colSpan = 3;
-            td.className = 'text-danger';
-            td.textContent = data.errors.map(e => e.message).join(' | ');
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-            return;
-        }
-
-        const items = data.data?.volunteerRanking || [];
-        if (items.length === 0) {
-            const tr = document.createElement('tr');
-            const td = document.createElement('td');
-            td.colSpan = 3;
-            td.className = 'text-center text-muted';
-            td.textContent = 'Sin datos';
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-            return;
-        }
-
-        items.forEach((it, idx) => {
-            const tr = document.createElement('tr');
-
-            const tdIdx = document.createElement('td');
-            tdIdx.textContent = String(idx + 1);
-            const tdUser = document.createElement('td');
-            tdUser.textContent = `${it.nombre} ${it.apellido} (ID ${it.usuarioId})`;
-
-            const tdCnt = document.createElement('td');
-            tdCnt.className = 'text-end';
-            tdCnt.textContent = it.participaciones;
-
-            tr.appendChild(tdIdx);
-            tr.appendChild(tdUser);
-            tr.appendChild(tdCnt);
-            tbody.appendChild(tr);
-        });
-    }
-
-    document.getElementById('btnAplicar').addEventListener('click', cargarRanking);
-
-    // Primera carga con defaults (from=2000-01-01, to=hoy, tipo=INTERNOS, topN=5)
-    window.addEventListener('DOMContentLoaded', () => {
-         document.getElementById('from').value = '2000-01-01';
-         document.getElementById('to').value = hoyISO();
-        cargarRanking();
+  // -------- GraphQL helper --------
+  async function gql(query, variables) {
+    const res = await fetch('/graphql', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query, variables})
     });
+    const json = await res.json();
+    if (json.errors?.length) throw new Error(json.errors.map(e => e.message).join(' | '));
+    return json.data;
+  }
+
+  // -------- filtros actuales (form principal) --------
+  function valoresFiltroActual() {
+    const desdeRaw = $('desde').value?.trim();
+    const hastaRaw = $('hasta').value?.trim();
+    let tipo = $('tipo').value?.trim() || 'INTERNOS';
+    tipo = tipo.toUpperCase();
+    const n = parseInt($('topN').value || '5', 10);
+    const topN = isNaN(n) || n < 3 ? 3 : n;
+
+    const desde = (desdeRaw && desdeRaw.length) ? desdeRaw : '2000-01-01';
+    const hasta = (hastaRaw && hastaRaw.length) ? hastaRaw : hoyISO();
+
+    return {from: desde, to: hasta, tipo, topN};
+  }
+
+  async function cargarRanking() {
+    try {
+      const filtro = valoresFiltroActual();
+      const query = `
+        query($f: VolunteerRankFilterInput!){
+          volunteerRanking(filtro: $f){
+            usuarioId
+            nombre
+            apellido
+            participaciones
+          }
+        }`;
+      const data = await gql(query, {f: filtro});
+      const items = data?.volunteerRanking || [];
+
+      const tbody = $('tbodyRanking');
+      tbody.innerHTML = '';
+
+      if (!items.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 3;
+        td.className = 'text-center text-muted';
+        td.textContent = 'Sin datos';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        mostrarBanner(true, 'Búsqueda realizada. No hay resultados para el filtro.');
+        return;
+      }
+
+      items.forEach((it, idx) => {
+        const tr = document.createElement('tr');
+
+        const tdIdx = document.createElement('td');
+        tdIdx.textContent = String(idx + 1);
+
+        const tdUser = document.createElement('td');
+        tdUser.textContent = `${it.nombre} ${it.apellido} (ID ${it.usuarioId})`;
+
+        const tdCnt = document.createElement('td');
+        tdCnt.className = 'text-end';
+        tdCnt.textContent = it.participaciones;
+
+        tr.appendChild(tdIdx);
+        tr.appendChild(tdUser);
+        tr.appendChild(tdCnt);
+        tbody.appendChild(tr);
+      });
+
+      mostrarBanner(true, 'Ranking actualizado.');
+    } catch (e) {
+      console.error(e);
+      const tbody = $('tbodyRanking');
+      tbody.innerHTML = '<tr><td colspan="3" class="text-danger">Error al cargar ranking</td></tr>';
+      mostrarBanner(false, e.message || 'Error al cargar ranking.');
+    }
+  }
+
+  // -------- filtros guardados (persistencia) --------
+  let idEdicion = null;
+
+  function abrirModal(titulo) {
+    $('modalFiltroTitle').innerText = titulo || 'Guardar filtro';
+    $('modalFiltro').classList.add('show');
+    $('modalFiltro').setAttribute('aria-hidden', 'false');
+  }
+  function cerrarModal() {
+    $('modalFiltro').classList.remove('show');
+    $('modalFiltro').setAttribute('aria-hidden', 'true');
+  }
+
+  async function cargarGuardados() {
+    try {
+      const data = await gql(`query { volunteerSavedFilters { id nombre from to tipo topN } }`);
+      const arr = data?.volunteerSavedFilters || [];
+      const ddl = $('ddlFiltrosGuardados');
+      ddl.innerHTML = '<option value="">-- Seleccioná un filtro --</option>';
+      for (const f of arr) {
+        const opt = document.createElement('option');
+        opt.value = String(f.id);
+        opt.textContent = `${f.nombre} (${f.tipo} ${f.from}..${f.to} top:${f.topN})`;
+        ddl.appendChild(opt);
+      }
+      $('btnEditarGuardado').disabled = !ddl.value;
+      $('btnBorrarGuardado').disabled = !ddl.value;
+    } catch (e) {
+      console.error(e);
+      mostrarBanner(false, e.message || 'Error al cargar filtros guardados.');
+    }
+  }
+
+  // eventos UI
+  $('ddlFiltrosGuardados').addEventListener('change', () => {
+    const has = !!$('ddlFiltrosGuardados').value;
+    $('btnEditarGuardado').disabled = !has;
+    $('btnBorrarGuardado').disabled = !has;
+  });
+
+  $('btnAplicarGuardado').addEventListener('click', async () => {
+    const id = Number($('ddlFiltrosGuardados').value);
+    if (!id) return;
+    try {
+      const data = await gql(`query { volunteerSavedFilters { id nombre from to tipo topN } }`);
+      const f = (data.volunteerSavedFilters || []).find(x => Number(x.id) === id);
+      if (!f) return;
+
+      $('desde').value = f.from;
+      $('hasta').value = f.to;
+      $('tipo').value = (f.tipo || 'INTERNOS').toUpperCase();
+      $('topN').value = f.topN;
+
+      await cargarRanking();
+      mostrarBanner(true, 'Filtro aplicado.');
+    } catch (e) {
+      console.error(e);
+      mostrarBanner(false, e.message || 'No se pudo aplicar el filtro.');
+    }
+  });
+
+  $('btnGuardarActual').addEventListener('click', () => {
+    idEdicion = null;
+    const f = valoresFiltroActual();
+    $('mf_nombre').value = '';
+    $('mf_desde').value = f.from;
+    $('mf_hasta').value = f.to;
+    $('mf_tipo').value = f.tipo; // enum
+    $('mf_topn').value = f.topN;
+    abrirModal('Guardar filtro');
+  });
+
+  $('btnEditarGuardado').addEventListener('click', async () => {
+    const id = Number($('ddlFiltrosGuardados').value);
+    if (!id) return;
+    try {
+      const data = await gql(`query { volunteerSavedFilters { id nombre from to tipo topN } }`);
+      const f = (data.volunteerSavedFilters || []).find(x => Number(x.id) === id);
+      if (!f) return;
+
+      idEdicion = id;
+      $('mf_nombre').value = f.nombre;
+      $('mf_desde').value = f.from;
+      $('mf_hasta').value = f.to;
+      $('mf_tipo').value = (f.tipo || 'INTERNOS').toUpperCase();
+      $('mf_topn').value = f.topN;
+      abrirModal('Editar filtro');
+    } catch (e) {
+      console.error(e);
+      mostrarBanner(false, e.message || 'No se pudo preparar la edición.');
+    }
+  });
+
+  $('btnBorrarGuardado').addEventListener('click', async () => {
+    const id = Number($('ddlFiltrosGuardados').value);
+    if (!id) return;
+    if (!confirm('¿Eliminar filtro guardado?')) return;
+    try {
+      await gql(`mutation($id: ID!){ deleteVolunteerFilter(id:$id) }`, {id});
+      await cargarGuardados();
+      mostrarBanner(true, 'Filtro eliminado.');
+    } catch (e) {
+      console.error(e);
+      mostrarBanner(false, e.message || 'No se pudo eliminar el filtro.');
+    }
+  });
+
+  $('mf_guardar').addEventListener('click', async () => {
+    const nombre = $('mf_nombre').value?.trim();
+    if (!nombre) {
+      $('mf_nombre').focus();
+      mostrarBanner(false, 'Ingresá un nombre para el filtro.');
+      return;
+    }
+    const input = {
+      nombre,
+      from: $('mf_desde').value || '2000-01-01',
+      to: $('mf_hasta').value || hoyISO(),
+      tipo: ($('mf_tipo').value || 'INTERNOS').toUpperCase(),
+      topN: Number($('mf_topn').value || 3)
+    };
+    try {
+      if (idEdicion) {
+        await gql(
+          `mutation($id: ID!, $input: VolunteerSavedFilterInput!){
+             updateVolunteerFilter(id:$id, input:$input){ id }
+           }`,
+          {id: idEdicion, input}
+        );
+        mostrarBanner(true, 'Filtro actualizado.');
+      } else {
+        await gql(
+          `mutation($input: VolunteerSavedFilterInput!){
+             saveVolunteerFilter(input:$input){ id }
+           }`,
+          {input}
+        );
+        mostrarBanner(true, 'Filtro guardado.');
+      }
+      cerrarModal();
+      await cargarGuardados();
+    } catch (e) {
+      console.error(e);
+      mostrarBanner(false, e.message || 'No se pudo guardar el filtro.');
+    }
+  });
+
+  $('mf_cancelar').addEventListener('click', cerrarModal);
+  $('btnCerrarModal').addEventListener('click', cerrarModal);
+
+  $('btnAplicar').addEventListener('click', cargarRanking);
+
+  // Recarga de Vista
+  window.addEventListener('DOMContentLoaded', async () => {
+    $('desde').value = '2000-01-01';
+    $('hasta').value = hoyISO();
+    $('tipo').value = 'INTERNOS';
+    $('topN').value = '5';
+    await cargarGuardados();
+    await cargarRanking();
+  });
 </script>
 </body>
 </html>

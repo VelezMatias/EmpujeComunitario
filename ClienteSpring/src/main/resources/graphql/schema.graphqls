@@ -72,6 +72,41 @@ input VolunteerRankFilterInput {
   topN: Int!               # mínimo 3
 }
 
+"Filtro guardado para ranking de voluntarios"
+type VolunteerSavedFilter {
+  id: ID!
+  nombre: String!
+  from: String!      # YYYY-MM-DD
+  to: String!        # YYYY-MM-DD
+  tipo: EventoTipo!  # INTERNOS/EXTERNOS/AMBOS
+  topN: Int!
+  createdAt: String
+  updatedAt: String
+}
+
+"Datos para crear/actualizar un filtro guardado"
+input VolunteerSavedFilterInput {
+  nombre: String!
+  from: String!     # YYYY-MM-DD
+  to: String!       # YYYY-MM-DD
+  tipo: EventoTipo!
+  topN: Int!        # mínimo 3
+}
+
+extend type Query {
+  "Lista los filtros guardados del usuario actual (ownership por sesión)"
+  volunteerSavedFilters: [VolunteerSavedFilter!]!
+}
+
+extend type Mutation {
+  "Crea un filtro guardado"
+  saveVolunteerFilter(input: VolunteerSavedFilterInput!): VolunteerSavedFilter!
+  "Actualiza un filtro guardado (solo si es dueño)"
+  updateVolunteerFilter(id: ID!, input: VolunteerSavedFilterInput!): VolunteerSavedFilter!
+  "Elimina un filtro guardado (solo si es dueño)"
+  deleteVolunteerFilter(id: ID!): Boolean!
+}
+
 # =============================================================
 #   Consultas
 # =============================================================
