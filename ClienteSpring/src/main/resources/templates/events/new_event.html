@@ -153,6 +153,11 @@
                         </li>
 
                         <li><a th:href="@{/informes/eventos-participacion}">Informe de Participación en eventos</a></li>
+
+                        <li th:if="${session.rol == 'PRESIDENTE' or session.rol == 'COORDINADOR'}">
+                        <a th:href="@{/informes/ranking_voluntarios}">Informe Ranking de Voluntarios</a>
+                      </li>
+                      
                       </ul>
                     </li>
                     <!-- ====================================================== -->
@@ -197,7 +202,7 @@
     <div class="wrapper wrapper--w790">
       <div class="card card-5">
         <div class="card-heading">
-          <h2 class="title">Ingrese los datos correspondientes al usuario nuevo</h2>
+          <h2 class="title">Ingrese los datos correspondientes al evento nuevo</h2>
         </div>
         <div class="card-body">
           <form th:if="${session.rol} == 'PRESIDENTE' or ${session.rol} == 'COORDINADOR'" th:action="@{/eventos/new}"
